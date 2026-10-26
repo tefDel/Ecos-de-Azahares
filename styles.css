@@ -1,0 +1,131 @@
+/* Ecos de Azahares — estilos
+   Cambia la paleta en :root para ajustarla al Visual DNA oficial. */
+:root {
+  --noche: #13111c;
+  --panel: #1e1a2d;
+  --linea: #3a3452;
+  --petalo: #ece7f4;
+  --apagado: #a69fba;
+  --oro: #dcb85f;
+  --savia: #7fa88b;
+  --glifo: #c98aa8;
+  --radio: 14px;
+  --serif: "Cormorant Garamond", Georgia, serif;
+  --sans: "Figtree", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--noche);
+  color: var(--petalo);
+  font-family: var(--sans);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+a { color: var(--oro); }
+:focus-visible { outline: 2px solid var(--oro); outline-offset: 3px; }
+
+.contenedor { width: min(1100px, 92%); margin-inline: auto; }
+
+/* Cabecera */
+.cabecera {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.2rem 0; border-bottom: 1px solid var(--linea);
+}
+.marca { font-family: var(--serif); font-size: 1.5rem; font-weight: 600; text-decoration: none; color: var(--petalo); }
+.cabecera nav { display: flex; gap: 1.5rem; }
+.cabecera nav a { color: var(--apagado); text-decoration: none; font-size: .95rem; }
+.cabecera nav a:hover { color: var(--petalo); }
+
+/* Portada */
+.portada { padding: 5rem 0 3rem; max-width: 46rem; }
+.portada h1 {
+  font-family: var(--serif); font-weight: 500;
+  font-size: clamp(3rem, 9vw, 6.5rem); line-height: .95; letter-spacing: -.01em;
+}
+.portada p { margin-top: 1.5rem; font-size: 1.15rem; color: var(--apagado); max-width: 38rem; }
+.boton {
+  display: inline-block; margin-top: 2rem; padding: .8rem 1.6rem;
+  background: var(--oro); color: var(--noche); font-weight: 600;
+  border-radius: 999px; text-decoration: none; border: 0; cursor: pointer; font-size: 1rem;
+}
+.boton:hover { background: #ebca72; }
+
+/* Archivo del museo */
+.archivo { padding: 3rem 0 4rem; }
+.archivo > .contenedor > h2, .seccion h2 {
+  font-family: var(--serif); font-size: 2.2rem; font-weight: 500; margin-bottom: .4rem;
+}
+.ayuda { color: var(--apagado); margin-bottom: 1.8rem; }
+
+.museo { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; align-items: start; }
+
+.episodios { list-style: none; padding: 0; display: grid; gap: .6rem; }
+.episodios button {
+  width: 100%; text-align: left; background: var(--panel); color: var(--petalo);
+  border: 1px solid var(--linea); border-radius: var(--radio); padding: 1rem; cursor: pointer;
+  font: inherit;
+}
+.episodios button strong { display: block; font-family: var(--serif); font-size: 1.25rem; font-weight: 600; }
+.episodios button span { color: var(--apagado); font-size: .85rem; }
+.episodios button[aria-current="true"] { border-color: var(--oro); background: #262038; }
+
+.escena { background: var(--panel); border: 1px solid var(--linea); border-radius: var(--radio); padding: 1.6rem; }
+.escena h3 { font-family: var(--serif); font-size: 1.8rem; font-weight: 500; }
+.escena .tipo { color: var(--savia); font-size: .9rem; }
+
+/* Reproductor */
+.reproductor { display: flex; align-items: center; gap: 1rem; margin: 1.4rem 0; }
+.reproductor button {
+  width: 3.2rem; height: 3.2rem; border-radius: 50%; border: 0; cursor: pointer;
+  background: var(--oro); color: var(--noche); font-size: 1.1rem; flex: none;
+}
+.barra { flex: 1; height: 8px; background: var(--linea); border-radius: 99px; overflow: hidden; }
+.barra div { height: 100%; width: 0; background: linear-gradient(90deg, var(--savia), var(--oro)); }
+#tiempo { color: var(--apagado); font-variant-numeric: tabular-nums; font-size: .9rem; min-width: 5.5rem; text-align: right; }
+
+/* Elementos desbloqueables */
+.desbloqueos { display: grid; grid-template-columns: repeat(3, 1fr); gap: .8rem; }
+.pieza {
+  min-height: 130px; border: 1px dashed var(--linea); border-radius: var(--radio);
+  display: grid; place-content: center; text-align: center; padding: .8rem;
+  color: var(--apagado); font-size: .85rem;
+}
+.pieza .icono { font-size: 2rem; display: block; filter: grayscale(1) opacity(.4); }
+.pieza.abierta { border: 1px solid var(--oro); color: var(--petalo); background: #2a2340; }
+.pieza.abierta .icono { filter: none; }
+
+/* Flor interactiva */
+.pregunta { margin-top: 1.6rem; padding-top: 1.4rem; border-top: 1px solid var(--linea); }
+.pregunta[hidden] { display: none; }
+.pregunta p { font-family: var(--serif); font-size: 1.35rem; }
+.flor { display: flex; gap: .8rem; margin-top: 1rem; flex-wrap: wrap; }
+.petalo {
+  width: 4.6rem; height: 4.6rem; border-radius: 60% 40% 60% 40%; border: 1px solid var(--petalo);
+  background: var(--petalo); color: var(--noche); cursor: pointer; font: inherit; font-size: .8rem; font-weight: 600;
+}
+.petalo:hover { background: var(--oro); }
+#rama { margin-top: 1rem; color: var(--savia); min-height: 1.6rem; }
+
+/* Secciones informativas */
+.seccion { padding: 3rem 0; border-top: 1px solid var(--linea); }
+.columnas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin-top: 1.4rem; }
+.columnas h3 { font-family: var(--serif); font-size: 1.4rem; font-weight: 600; margin-bottom: .3rem; }
+.columnas p { color: var(--apagado); }
+.equipo { list-style: none; padding: 0; margin-top: 1rem; display: flex; gap: 2rem; flex-wrap: wrap; font-family: var(--serif); font-size: 1.4rem; }
+
+.pie { padding: 2rem 0; border-top: 1px solid var(--linea); color: var(--apagado); font-size: .85rem; }
+
+/* Móvil */
+@media (max-width: 800px) {
+  .museo, .columnas { grid-template-columns: 1fr; }
+  .desbloqueos { grid-template-columns: 1fr; }
+  .portada { padding-top: 3rem; }
+  .cabecera nav { gap: .9rem; }
+}
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

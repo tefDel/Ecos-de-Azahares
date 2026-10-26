@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ecos de Azahares — Podcast interactivo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="contenedor cabecera">
+  <a class="marca" href="#inicio">Ecos de Azahares</a>
+  <nav aria-label="Principal">
+    <a href="#archivo">Archivo</a>
+    <a href="#historia">Historia</a>
+    <a href="#equipo">Equipo</a>
+  </nav>
+</header>
+
+<main id="inicio">
+  <section class="contenedor portada">
+    <h1>Un museo que guarda lo que no puedes soltar</h1>
+    <p>Un podcast de ficción interactivo. Escucha las cartas y grabaciones del museo, abre sus archivos y decide qué parte de tu historia estás listo para dejar atrás.</p>
+    <a class="boton" href="#archivo">Entrar al archivo</a>
+  </section>
+
+  <section class="archivo" id="archivo">
+    <div class="contenedor">
+      <h2>Archivo del Museo</h2>
+      <p class="ayuda">Elige una grabación y dale play. Mientras escuchas, se abren fotografías, expedientes y glifos.</p>
+
+      <div class="museo">
+        <ul class="episodios" id="lista"></ul>
+
+        <article class="escena" aria-live="polite">
+          <p class="tipo" id="tipo"></p>
+          <h3 id="titulo"></h3>
+
+          <div class="reproductor">
+            <!-- Para audio real: agrega <audio id="audio" src="episodio1.mp3"> y enlázalo en script.js -->
+            <button id="play" type="button" aria-label="Reproducir">▶</button>
+            <div class="barra" role="progressbar" aria-label="Progreso del episodio"><div id="progreso"></div></div>
+            <span id="tiempo">0:00 / 0:00</span>
+          </div>
+
+          <div class="desbloqueos" id="piezas"></div>
+
+          <div class="pregunta" id="pregunta" hidden>
+            <p>Una flor se abre frente a ti. ¿Qué pétalo tocas?</p>
+            <div class="flor">
+              <button class="petalo" type="button" data-rama="recordar">Recordar</button>
+              <button class="petalo" type="button" data-rama="guardar">Guardar</button>
+              <button class="petalo" type="button" data-rama="soltar">Soltar</button>
+            </div>
+            <p id="rama"></p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion" id="historia">
+    <div class="contenedor">
+      <h2>La experiencia</h2>
+      <div class="columnas">
+        <div>
+          <h3>Escucha sin orden</h3>
+          <p>Cada episodio es una carta o una grabación. Puedes empezar por cualquiera y seguir las pistas ocultas en el audio.</p>
+        </div>
+        <div>
+          <h3>Investiga</h3>
+          <p>Los archivos del museo revelan los secretos de La Fractura, la Resonancia y los glifos de Deileanna.</p>
+        </div>
+        <div>
+          <h3>Decide</h3>
+          <p>Toca una flor y el audio se ramifica. Lo que eliges cambia lo que descubres.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion" id="equipo">
+    <div class="contenedor">
+      <h2>Equipo</h2>
+      <ul class="equipo">
+        <li>Valentina Montero</li>
+        <li>Estefanía Del Amor Restrepo</li>
+        <li>Daniel Muñoz</li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer class="contenedor pie">Ecos de Azahares · Proyecto universitario · Podcast interactivo web</footer>
+
+<script>
+  // Episodios de ejemplo: reemplaza títulos, duraciones y piezas por el contenido real.
+  const episodios = [
+    { titulo: "Carta 1: La llave", tipo: "Carta", dur: 180,
+      piezas: [["📷", "Fotografía del salón de flores"], ["📁", "Expediente 001"], ["🔣", "Glifo de Deileanna"]] },
+    { titulo: "Grabación 2: Eco en Khaelos", tipo: "Grabación", dur: 240,
+      piezas: [["📷", "Fotografía del vitral"], ["📁", "Expediente 002"], ["🔣", "Glifo de la Resonancia"]] },
+    { titulo: "Carta 3: Después de La Fractura", tipo: "Carta", dur: 210,
+      piezas: [["📷", "Fotografía de la última sala"], ["📁", "Expediente 003"], ["🔣", "Glifo de La Fractura"]] }
+  ];
+  const ramas = {
+    recordar: "El audio se ramifica: la voz vuelve al día en que todo empezó.",
+    guardar: "El audio se ramifica: la voz decide llevar el objeto un poco más.",
+    soltar: "El audio se ramifica: la voz deja el objeto sobre la mesa del museo."
+  };
+
+  const $ = id => document.getElementById(id);
+  let actual = 0, seg = 0, timer = null;
+
+  const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
+
+  function pintarLista() {
+    $("lista").innerHTML = episodios.map((e, i) =>
+      `<li><button type="button" data-i="${i}" aria-current="${i === actual}"><strong>${e.titulo}</strong><span>${e.tipo} · ${fmt(e.dur)}</span></button></li>`
+    ).join("");
+  }
+
+  function cargar(i) {
+    pausar(); actual = i; seg = 0;
+    const e = episodios[i];
+    $("tipo").textContent = e.tipo;
+    $("titulo").textContent = e.titulo;
+    $("piezas").innerHTML = e.piezas.map(p =>
+      `<div class="pieza"><span class="icono">${p[0]}</span>${p[1]}</div>`).join("");
+    $("pregunta").hidden = true;
+    $("rama").textContent = "";
+    pintarLista(); actualizar();
+  }
+
+  function actualizar() {
+    const e = episodios[actual], p = seg / e.dur;
+    $("progreso").style.width = (p * 100) + "%";
+    $("tiempo").textContent = fmt(seg) + " / " + fmt(e.dur);
+    [...$("piezas").children].forEach((el, k) =>
+      el.classList.toggle("abierta", p >= (k + 1) * 0.25));
+    if (p >= 0.7) $("pregunta").hidden = false;
+  }
+
+  function pausar() { clearInterval(timer); timer = null; $("play").textContent = "▶"; $("play").setAttribute("aria-label", "Reproducir"); }
+
+  function reproducir() {
+    $("play").textContent = "❚❚"; $("play").setAttribute("aria-label", "Pausar");
+    timer = setInterval(() => {
+      seg += 1;
+      if (seg >= episodios[actual].dur) { seg = episodios[actual].dur; pausar(); }
+      actualizar();
+    }, 1000);
+  }
+
+  $("play").addEventListener("click", () => timer ? pausar() : reproducir());
+  $("lista").addEventListener("click", e => { const b = e.target.closest("button"); if (b) cargar(+b.dataset.i); });
+  document.querySelector(".flor").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (b) $("rama").textContent = ramas[b.dataset.rama];
+  });
+
+  cargar(0);
+</script>
+</body>
+</html>

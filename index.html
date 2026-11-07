@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ecos de Azahares</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="gl"></canvas><canvas id="fx"></canvas>
+
+<header id="hud">
+  <div class="pill"><span id="dots"><i></i><i></i><i></i><i></i></span><span id="ph">Detonante</span></div>
+  <span><button id="jb">Pistas (0)</button> <button id="stu">Estudio</button> <button id="snd" aria-pressed="true">Sonido activado</button></span>
+</header>
+<div id="say" class="ov pill"></div>
+
+<section id="intro" class="ov ctr on"><div>
+  <div class="dot"></div><h1>Ecos de Azahares</h1>
+  <p class="m" style="display:block;margin:0 0 20px">Daniel Muñoz Delgado · Valentina Montero Zapata · Estefanía del Amor Restrepo Campo</p>
+  <p>Una experiencia narrativa y un podcast interactivo: cada resonante se libera solo cuando escuchas su historia completa. Funciona mejor con audífonos.</p>
+  <button id="go">Comenzar con sonido</button>
+</div></section>
+
+<section id="letter" class="ov ctr"><div class="paper">
+  <p id="lt1"></p>
+  <p id="lt0"></p>
+  <p>En el centro de la ciudad hay un museo que no aparece en ningún mapa. Su puerta solo se abre para quien guarda una flor de azahar.</p>
+  <p id="lt2"></p>
+  <p id="lt3"></p>
+  <p>Ven antes de que olvides por qué.</p>
+  <button id="cross">Cruzar la puerta</button>
+</div></section>
+
+<aside id="dossier" class="ov card">
+  <p class="m"><span id="dm"></span><button id="dx" style="padding:2px 8px">Cerrar</button></p>
+  <p id="dg"></p><h2 id="dn"></h2><p class="m" id="de"></p>
+  <p class="t" id="dt"></p>
+  <canvas class="w" id="dw" width="360" height="56"></canvas>
+  <div class="bar"><i id="dbar" style="background:var(--gold)"></i></div>
+  <p class="m"><span id="dst"></span><span id="dtm">00:00</span></p>
+  <p style="margin:8px 0 0"><button id="dp">Pausar</button></p>
+</aside>
+
+<div id="arrows" class="ov"><button id="aL" aria-label="Girar a la izquierda">‹</button><button id="aR" aria-label="Girar a la derecha">›</button></div>
+<button id="adv" class="ov"></button>
+<section id="tracks" class="ov card"></section>
+<section id="wall" class="ov"><p class="s" id="w1"></p><p id="w2"></p></section>
+<section id="choices" class="ov"></section>
+<section id="final" class="ov card"><p id="fl"></p><canvas class="w" id="fw" width="360" height="56"></canvas><p class="m"><span id="fc"></span><button id="again">Volver a la ciudad</button></p></section>
+<aside id="studio" class="ov card"></aside>
+<aside id="journal" class="ov card"></aside>
+<div id="fade"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

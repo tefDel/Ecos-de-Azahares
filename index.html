@@ -1,119 +1,340 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-<script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.__ecos)document.documentElement.classList.add("nojs")},3500)</script>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ecos de Azahares · podcast interactivo</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/site.css">
+  <script>document.documentElement.classList.add("js"); setTimeout(function () { if (!window.__ecos) document.documentElement.classList.add("nojs") }, 3500)</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Ecos de Azahares · podcast interactivo</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/site.css">
 </head>
+
 <body>
-<div id="warn">La página no pudo iniciar el juego. Revisa tu conexión (se necesita internet para cargar Three.js) o ábrela con un servidor local: <code>python3 -m http.server 8000</code>.</div>
-<nav id="nav"><a class="logo" href="#game"><i id="n1" class="dot" data-note="n1" aria-label="Pétalo"></i><span>Ecos de Azahares</span></a>
-  <span class="lk"><a href="#universo">Universo</a><a href="#personajes">Personajes</a><a href="#capitulos">Capítulos</a><a href="#equipo">Equipo</a></span>
-  <a class="btn" id="play" href="#game">Jugar</a></nav>
-<div class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-<main id="game">
-<canvas id="gl"></canvas><canvas id="fx"></canvas>
+  <div id="warn">La página no pudo iniciar el juego. Revisa tu conexión (se necesita internet para cargar Three.js) o
+    ábrela con un servidor local: <code>python3 -m http.server 8000</code>.</div>
+  <nav id="nav"><a class="logo" href="#game"><i id="n1" class="dot" data-note="n1" aria-label="Pétalo"></i><span>Ecos de
+        Azahares</span></a>
+    <span class="lk"><a href="#universo">Universo</a><a href="#personajes">Personajes</a><a
+        href="#capitulos">Capítulos</a><a href="#equipo">Equipo</a></span>
+    <a class="btn" id="play" href="#game">Jugar</a>
+  </nav>
+  <div class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <main id="game">
+    <canvas id="gl"></canvas><canvas id="fx"></canvas>
 
-<header id="hud">
-  <div class="pill"><span id="dots"><i></i><i></i><i></i><i></i></span><span id="ph">Detonante</span></div>
-  <span><button id="jb">Pistas (0)</button> <button id="stu">Estudio</button> <button id="snd" aria-pressed="true">Sonido activado</button></span>
-</header>
-<div id="say" class="ov pill"></div>
+    <header id="hud">
+      <div class="pill"><span id="dots"><i></i><i></i><i></i><i></i></span><span id="ph">Detonante</span></div>
+      <span><button id="jb">Pistas (0)</button> <button id="stu">Estudio</button> <button id="snd"
+          aria-pressed="true">Sonido activado</button></span>
+    </header>
+    <div id="say" class="ov pill"></div>
 
-<section id="intro" class="ov ctr on"><div class="sc" aria-hidden="true"><div class="moon l" data-d="10"></div>
-<svg class="l hills" data-d="18" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice"><path d="M0 400V250Q120 190 250 240T520 220T780 250T1000 210V400Z" fill="#1a0a26"/></svg>
-<svg class="l museum" data-d="30" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax meet"><g fill="#07010d"><path d="M300 400V250h400v150z"/><path d="M280 250L500 150l220 100z"/><ellipse cx="500" cy="150" rx="70" ry="52"/><rect x="496" y="70" width="8" height="40"/><rect x="320" y="258" width="14" height="142"/><rect x="380" y="258" width="14" height="142"/><rect x="606" y="258" width="14" height="142"/><rect x="666" y="258" width="14" height="142"/><path d="M260 400v-20h480v20z"/></g><g fill="#8F3E6B" opacity=".75"><rect x="420" y="290" width="22" height="46"/><rect x="558" y="290" width="22" height="46"/><rect x="478" y="125" width="44" height="26" rx="22"/></g><rect x="472" y="300" width="56" height="100" fill="#3E1B3B"/><circle class="bud" cx="500" cy="360" r="5" fill="#d0609a"/></svg>
-<svg class="l fore" data-d="55" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice"><path d="M0 400V330Q80 300 160 335T330 350V400ZM1000 400V320Q900 290 820 330T660 350V400Z" fill="#05000a"/></svg>
-<div class="fog l" data-d="20"></div><div class="ff"></div></div><div>
-  <div class="dot"></div><h1>Ecos de Azahares</h1>
-  <p class="m" style="display:block;margin:0 0 20px">Daniel Muñoz Delgado · Valentina Montero Zapata · Estefanía del Amor Restrepo Campo</p>
-  <p>Una experiencia narrativa y un podcast interactivo: cada resonante se libera solo cuando escuchas su historia completa. Funciona mejor con audífonos.</p>
-  <button id="go">Comenzar con sonido</button>
-  <p class="cue">↓ el museo continúa abajo</p>
-</div></section>
+    <section id="intro" class="ov ctr on">
+      <div class="sc" aria-hidden="true">
+        <div class="moon l" data-d="10"></div>
+        <svg class="l hills" data-d="18" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
+          <path d="M0 400V250Q120 190 250 240T520 220T780 250T1000 210V400Z" fill="#204852" />
+        </svg>
+        <svg class="l museum" data-d="30" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax meet">
+          <g fill="#01121A">
+            <path d="M300 400V250h400v150z" />
+            <path d="M280 250L500 150l220 100z" />
+            <ellipse cx="500" cy="150" rx="70" ry="52" />
+            <rect x="496" y="70" width="8" height="40" />
+            <rect x="320" y="258" width="14" height="142" />
+            <rect x="380" y="258" width="14" height="142" />
+            <rect x="606" y="258" width="14" height="142" />
+            <rect x="666" y="258" width="14" height="142" />
+            <path d="M260 400v-20h480v20z" />
+          </g>
+          <g fill="#5E9E97" opacity=".75">
+            <rect x="420" y="290" width="22" height="46" />
+            <rect x="558" y="290" width="22" height="46" />
+            <rect x="478" y="125" width="44" height="26" rx="22" />
+          </g>
+          <rect x="472" y="300" width="56" height="100" fill="#204852" />
+          <circle class="bud" cx="500" cy="360" r="5" fill="#5E9E97" />
+        </svg>
+        <svg class="l fore" data-d="55" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
+          <path d="M0 400V330Q80 300 160 335T330 350V400ZM1000 400V320Q900 290 820 330T660 350V400Z" fill="#01121A" />
+        </svg>
+        <div class="fog l" data-d="20"></div>
+        <div class="ff"></div>
+      </div>
+      <div>
+        <div class="dot"></div>
+        <h1>Ecos de Azahares</h1>
+        <p>Una experiencia narrativa y un podcast interactivo: cada resonante se libera solo cuando escuchas su historia
+          completa. Funciona mejor con audífonos.</p>
+        <button id="go">Comenzar con sonido</button>
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+        <p class="cue">↓ el museo continúa abajo</p>
+      </div>
+    </section>
 
-<section id="letter" class="ov ctr"><div class="paper">
-  <p id="lt1"></p>
-  <p id="lt0"></p>
-  <p>En el centro de la ciudad hay un museo que no aparece en ningún mapa. Su puerta solo se abre para quien guarda una flor de azahar.</p>
-  <p id="lt2"></p>
-  <p id="lt3"></p>
-  <p>Ven antes de que olvides por qué.</p>
-  <button id="cross">Cruzar la puerta</button>
-</div></section>
+    <section id="letter" class="ov ctr">
+      <div class="paper">
+        <p id="lt1"></p>
+        <p id="lt0"></p>
+        <p>En el centro de la ciudad hay un museo que no aparece en ningún mapa. Su puerta solo se abre para quien
+          guarda una flor de azahar.</p>
+        <p id="lt2"></p>
+        <p id="lt3"></p>
+        <p>Ven antes de que olvides por qué.</p>
+        <button id="cross">Cruzar la puerta</button>
+      </div>
+    </section>
 
-<aside id="dossier" class="ov card">
-  <p class="m"><span id="dm"></span><button id="dx" style="padding:2px 8px">Cerrar</button></p>
-  <p id="dg"></p><h2 id="dn"></h2><p class="m" id="de"></p>
-  <p class="t" id="dt"></p>
-  <canvas class="w" id="dw" width="360" height="56"></canvas>
-  <div class="bar"><i id="dbar" style="background:var(--gold)"></i></div>
-  <p class="m"><span id="dst"></span><span id="dtm">00:00</span></p>
-  <p style="margin:8px 0 0"><button id="dp">Pausar</button></p>
-</aside>
+    <aside id="dossier" class="ov card">
+      <p class="m"><span id="dm"></span><button id="dx" style="padding:2px 8px">Cerrar</button></p>
+      <p id="dg"></p>
+      <h2 id="dn"></h2>
+      <p class="m" id="de"></p>
+      <p class="t" id="dt"></p>
+      <canvas class="w" id="dw" width="360" height="56"></canvas>
+      <div class="bar"><i id="dbar" style="background:var(--gold)"></i></div>
+      <p class="m"><span id="dst"></span><span id="dtm">00:00</span></p>
+      <p style="margin:8px 0 0"><button id="dp">Pausar</button></p>
+    </aside>
 
-<div id="arrows" class="ov"><button id="aL" aria-label="Girar a la izquierda">‹</button><button id="aR" aria-label="Girar a la derecha">›</button></div>
-<button id="adv" class="ov"></button>
-<section id="tracks" class="ov card"></section>
-<section id="wall" class="ov"><p class="s" id="w1"></p><p id="w2"></p></section>
-<section id="choices" class="ov"></section>
-<section id="final" class="ov card"><p id="fl"></p><canvas class="w" id="fw" width="360" height="56"></canvas><p class="m"><span id="fc"></span><button id="again">Volver a la ciudad</button></p></section>
-<aside id="studio" class="ov card"></aside>
-<aside id="journal" class="ov card"></aside>
-<div id="fade"></div>
-</main>
+    <div id="arrows" class="ov"><button id="aL" aria-label="Girar a la izquierda">‹</button><button id="aR"
+        aria-label="Girar a la derecha">›</button></div>
+    <button id="adv" class="ov"></button>
+    <section id="tracks" class="ov card"></section>
+    <section id="wall" class="ov">
+      <p class="s" id="w1"></p>
+      <p id="w2"></p>
+    </section>
+    <section id="choices" class="ov"></section>
+    <section id="final" class="ov card">
+      <p id="fl"></p><canvas class="w" id="fw" width="360" height="56"></canvas>
+      <p class="m"><span id="fc"></span><button id="again">Volver a la ciudad</button></p>
+    </section>
+    <aside id="studio" class="ov card"></aside>
+    <aside id="journal" class="ov card"></aside>
+    <div id="fade"></div>
+  </main>
 
-<section id="universo" class="sec">
-  <i class="rp" data-note="n2" aria-label="Pétalo"></i>
-  <p class="wh" style="left:62%;top:26%">Cada vitrina guarda a alguien.</p><p class="wh" data-note="n3" style="right:7%;bottom:9%">El archivo ya te cuenta como testigo.</p>
-  <div class="aura" data-speed=".15"></div>
-  <p class="eye rv">Sección 02 · El universo</p>
-  <h2 class="rv">Khaelos guarda<br>lo que olvidamos</h2>
-  <div class="ed">
-    <figure class="ph a rv" data-speed=".08"><span class="gl">ᛞᛟᚱ</span><figcaption>Ilustración · el museo central</figcaption></figure>
-    <figure class="ph b ph2 rv" id="pho" tabindex="0" role="button" data-speed="-.06"><span class="gl">ᚲᚱᚢ</span><figcaption>Ilustración · ruinas de Deileanna</figcaption><div class="cap">Una flor de azahar fucsia sobre una puerta cualquiera. Ninguna otra flor de la ciudad tiene ese color.</div></figure>
-    <article class="env rv" id="env" tabindex="0" role="button" aria-label="Carta cerrada" aria-expanded="false"><div class="flap"></div><div class="lt"><p>Adrián,</p><p>En el centro de la ciudad hay un museo que no aparece en ningún mapa. Su puerta solo se abre para quien guarda una flor de azahar.</p><p>Ven antes de que olvides por qué.</p></div></article>
-    <div class="txt rv"><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. En el centro de la ciudad hay un museo que no aparece en ningún mapa; solo se abre para quien guarda una flor de azahar. </p>
-    <div class="tabs" role="tablist"><button data-k="0" class="on">Deileanna</button><button data-k="1">Las semillas</button><button data-k="2">El Pulso</button></div>
-    <p id="tabtx" class="tabtx">Lorem ipsum: las ruinas de Deileanna, origen de los glifos que decoran cada expediente.</p></div>
+  <section id="universo" class="sec">
+    <i class="rp" data-note="n2" aria-label="Pétalo"></i>
+    <p class="wh" style="left:62%;top:26%">Cada vitrina guarda a alguien.</p>
+    <p class="wh" data-note="n3" style="right:7%;bottom:9%">El archivo ya te cuenta como testigo.</p>
+    <div class="aura" data-speed=".15"></div>
+    <p class="eye rv">Sección 02 · El universo</p>
+    <h2 class="rv">Khaelos guarda<br>lo que olvidamos</h2>
+    <div class="ed">
+      <figure class="ph a rv" data-speed=".08"><span class="gl">ᛞᛟᚱ</span>
+        <figcaption>Ilustración · el museo central</figcaption>
+      </figure>
+      <figure class="ph b ph2 rv" id="pho" tabindex="0" role="button" data-speed="-.06"><span class="gl">ᚲᚱᚢ</span>
+        <figcaption>Ilustración · ruinas de Deileanna</figcaption>
+        <div class="cap">Una flor de azahar fucsia sobre una puerta cualquiera. Ninguna otra flor de la ciudad tiene ese
+          color.</div>
+      </figure>
+      <article class="env rv" id="env" tabindex="0" role="button" aria-label="Carta cerrada" aria-expanded="false">
+        <div class="flap"></div>
+        <div class="lt">
+          <p>Adrián,</p>
+          <p>En el centro de la ciudad hay un museo que no aparece en ningún mapa. Su puerta solo se abre para quien
+            guarda una flor de azahar.</p>
+          <p>Ven antes de que olvides por qué.</p>
+        </div>
+      </article>
+      <div class="txt rv">
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. En el centro de la ciudad hay un museo que no
+          aparece en ningún mapa; solo se abre para quien guarda una flor de azahar. </p>
+        <div class="tabs" role="tablist"><button data-k="0" class="on">Deileanna</button><button data-k="1">Las
+            semillas</button><button data-k="2">El Pulso</button></div>
+        <p id="tabtx" class="tabtx">Lorem ipsum: las ruinas de Deileanna, origen de los glifos que decoran cada
+          expediente.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="personajes" class="sec dark">
+    <p class="wh" style="right:6%;top:9%">El museo es un anclaje, no una tumba.</p>
+    <p class="eye rv">Sección 03 · Personajes</p>
+    <h2 class="rv">Cinco voces,<br>una misma flor</h2>
+    <div id="chars" class="chars">
+      <div class="cc" tabindex="0" role="button" aria-label="Adrián">
+        <div class="in3">
+          <div class="cf"><span class="gl">ᚨᛞᚱ</span>
+            <h3>Adrián</h3>
+            <p class="m2">Quien recibe la flor</p>
+          </div>
+          <div class="cb">
+            <p class="m2">Quien recibe la flor</p>
+            <p>Vive atrapado en una rutina hasta que una flor fucsia y una carta lo llevan al museo.</p>
+            <p class="m2">Detalle: la carta que vuelve a aparecer</p>
+          </div>
+        </div>
+      </div>
+      <div class="cc" tabindex="0" role="button" aria-label="Rythden">
+        <div class="in3">
+          <div class="cf"><span class="gl">ᚱᚣᚦ</span>
+            <h3>Rythden</h3>
+            <p class="m2">Guía del anclaje</p>
+          </div>
+          <div class="cb">
+            <p class="m2">Guía del anclaje</p>
+            <p>Sabe más del museo de lo que Adrián imagina. Lorem ipsum dolor sit amet.</p>
+            <p class="m2">Detalle: provisional</p>
+          </div>
+        </div>
+      </div>
+      <div class="cc" tabindex="0" role="button" aria-label="Dra. Selene Marlowe">
+        <div class="in3">
+          <div class="cf"><span class="gl">ᛊᛖᛚ</span>
+            <h3>Dra. Selene Marlowe</h3>
+            <p class="m2">Guardiana de archivos</p>
+          </div>
+          <div class="cb">
+            <p class="m2">Guardiana de archivos</p>
+            <p>Junto a Rythden explica el anclaje que protege las semillas de Sael Vantorin.</p>
+            <p class="m2">Detalle: provisional</p>
+          </div>
+        </div>
+      </div>
+      <div class="cc" tabindex="0" role="button" aria-label="Nyxa">
+        <div class="in3">
+          <div class="cf"><span class="gl">ᚾᚣᛉᚨ</span>
+            <h3>Nyxa</h3>
+            <p class="m2">La que habita entre sombras</p>
+          </div>
+          <div class="cb">
+            <p class="m2">La que habita entre sombras</p>
+            <p>Resonante envuelta en sombras que se mueven por voluntad propia.</p>
+            <p class="m2">Detalle: susurros entre las sombras <i class="gl2" data-note="n4">ᛞᛟᚱ</i></p>
+          </div>
+        </div>
+      </div>
+      <div class="cc" tabindex="0" role="button" aria-label="Naxaly">
+        <div class="in3">
+          <div class="cf"><span class="gl">ᚾᚨᚲ</span>
+            <h3>Naxaly</h3>
+            <p class="m2">Recuerdo en una vitrina</p>
+          </div>
+          <div class="cb">
+            <p class="m2">Recuerdo en una vitrina</p>
+            <p>Su recuerdo guarda una vitrina del museo. Más adelante podrá manipular el tiempo.</p>
+            <p class="m2">Detalle: provisional</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="tes3">
+      <p class="rd" tabindex="0"><span class="m2">Nyxa</span>Aquí las sombras no persiguen: sostienen. Si me nombras, me
+        haces un poco más real.</p>
+      <p class="rd" tabindex="0"><span class="m2">Tala</span>Lo que ruge en mí no es mío. Son las bestias que otros
+        callaron, convertidas en voz.</p>
+      <p class="rd" tabindex="0"><span class="m2">Volt</span>Me llaman corriente, pero soy un deseo sin salida. La jaula
+        no me contiene: me recuerda.</p>
+    </div>
+    <p class="hint">Toca o pasa el cursor sobre una carta para voltearla</p>
+  </section>
+
+  <section id="capitulos" class="sec">
+    <p class="wh" style="left:46%;top:8%">Las semillas de Sael aún respiran.</p>
+    <p class="eye rv">Sección 04 · Capítulos</p>
+    <h2 class="rv">Expedientes<br>del podcast</h2>
+    <article class="typ rv">
+      <p class="m2">Grabación 01 · voz de Adrián</p>
+      <p id="typ"
+        data-t="Se levanta, hace el mismo recorrido, regresa a casa sin que nada cambie. Hasta que una mañana, en su puerta, hay un color que no existe en la ciudad.">
+      </p>
+    </article>
+    <div id="eps" class="eps">
+      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
+        <div class="n">01</div>
+        <h3>La flor y la carta</h3>
+        <div class="th">espacio para imagen</div>
+        <div class="meta"><span>Capítulo 1</span><span>--:--</span></div>
+        <div class="more">
+          <p>Adrián rompe su rutina y cruza las puertas del museo.</p>
+          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
+              próximamente</span></div>
+        </div>
+      </article>
+      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
+        <div class="n">02</div>
+        <h3>La Resonancia</h3>
+        <div class="th">espacio para imagen</div>
+        <div class="meta"><span>Capítulo 2</span><span>--:--</span></div>
+        <div class="more">
+          <p>Las vitrinas respiran: no guardan objetos, guardan personas.</p>
+          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
+              próximamente</span></div>
+        </div>
+      </article>
+      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
+        <div class="n">03</div>
+        <h3>Rythden y Selene</h3>
+        <div class="th">espacio para imagen</div>
+        <div class="meta"><span>Capítulo 3</span><span>--:--</span></div>
+        <div class="more">
+          <p>El museo es un anclaje. Nace un equipo con un mismo fin.</p>
+          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
+              próximamente</span></div>
+        </div>
+      </article>
+      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
+        <div class="n">04</div>
+        <h3>La Fractura</h3>
+        <div class="th">espacio para imagen</div>
+        <div class="meta"><span>Capítulo 4</span><span>--:--</span></div>
+        <div class="more">
+          <p>Absorbe las salas y borra la memoria. Hay que estabilizar las voces.</p>
+          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
+              próximamente</span></div>
+        </div>
+      </article>
+      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
+        <div class="n">05</div>
+        <h3>Un camino hacia la verdad</h3>
+        <div class="th">espacio para imagen</div>
+        <div class="meta"><span>Capítulo 5</span><span>--:--</span></div>
+        <div class="more">
+          <p>Sincronizar los archivos para ganar tiempo y descubrir qué es La Fractura.</p>
+          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
+              próximamente</span> <i class="gl2" data-note="n5">✦</i></div>
+        </div>
+      </article>
+      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
+        <div class="n">06</div>
+        <h3>La liberación</h3>
+        <div class="th">espacio para imagen</div>
+        <div class="meta"><span>Capítulo 6</span><span>--:--</span></div>
+        <div class="more">
+          <p>Elegir qué dejar atrás. Otra flor aparece en otra puerta.</p>
+          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
+              próximamente</span></div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <footer id="equipo" class="sec dark foot">
+    <p class="wh" style="left:8%;bottom:14%">Lo que sueltas, la flor lo recuerda.</p>
+    <p class="eye rv">Equipo</p>
+    <p class="team rv">Daniel Muñoz Delgado Valentina Montero Zapata Estefanía del Amor Restrepo Campo</p>
+    <p class="m2 rv">Podcast interactivo en sitio web <i class="fl" data-note="n6" aria-label="Flor">✿</i></p>
+  </footer>
+
+  <button id="chip" hidden>Notas <b id="cc">0</b>/7</button>
+  <div id="halo" aria-hidden="true"></div>
+  <div id="note" class="paper" role="dialog" aria-live="polite" hidden>
+    <p id="nt"></p>
+    <p class="m2" id="nf"></p><button id="nx">Guardar nota</button>
   </div>
-</section>
-
-<section id="personajes" class="sec dark">
-  <p class="wh" style="right:6%;top:9%">El museo es un anclaje, no una tumba.</p>
-  <p class="eye rv">Sección 03 · Personajes</p>
-  <h2 class="rv">Cinco voces,<br>una misma flor</h2>
-  <div id="chars" class="chars"><div class="cc" tabindex="0" role="button" aria-label="Adrián"><div class="in3"><div class="cf"><span class="gl">ᚨᛞᚱ</span><h3>Adrián</h3><p class="m2">Quien recibe la flor</p></div><div class="cb"><p class="m2">Quien recibe la flor</p><p>Vive atrapado en una rutina hasta que una flor fucsia y una carta lo llevan al museo.</p><p class="m2">Detalle: la carta que vuelve a aparecer</p></div></div></div><div class="cc" tabindex="0" role="button" aria-label="Rythden"><div class="in3"><div class="cf"><span class="gl">ᚱᚣᚦ</span><h3>Rythden</h3><p class="m2">Guía del anclaje</p></div><div class="cb"><p class="m2">Guía del anclaje</p><p>Sabe más del museo de lo que Adrián imagina. Lorem ipsum dolor sit amet.</p><p class="m2">Detalle: provisional</p></div></div></div><div class="cc" tabindex="0" role="button" aria-label="Dra. Selene Marlowe"><div class="in3"><div class="cf"><span class="gl">ᛊᛖᛚ</span><h3>Dra. Selene Marlowe</h3><p class="m2">Guardiana de archivos</p></div><div class="cb"><p class="m2">Guardiana de archivos</p><p>Junto a Rythden explica el anclaje que protege las semillas de Sael Vantorin.</p><p class="m2">Detalle: provisional</p></div></div></div><div class="cc" tabindex="0" role="button" aria-label="Nyxa"><div class="in3"><div class="cf"><span class="gl">ᚾᚣᛉᚨ</span><h3>Nyxa</h3><p class="m2">La que habita entre sombras</p></div><div class="cb"><p class="m2">La que habita entre sombras</p><p>Resonante envuelta en sombras que se mueven por voluntad propia.</p><p class="m2">Detalle: susurros entre las sombras <i class="gl2" data-note="n4">ᛞᛟᚱ</i></p></div></div></div><div class="cc" tabindex="0" role="button" aria-label="Naxaly"><div class="in3"><div class="cf"><span class="gl">ᚾᚨᚲ</span><h3>Naxaly</h3><p class="m2">Recuerdo en una vitrina</p></div><div class="cb"><p class="m2">Recuerdo en una vitrina</p><p>Su recuerdo guarda una vitrina del museo. Más adelante podrá manipular el tiempo.</p><p class="m2">Detalle: provisional</p></div></div></div></div>
-  <div class="tes3"><p class="rd" tabindex="0"><span class="m2">Nyxa</span>Aquí las sombras no persiguen: sostienen. Si me nombras, me haces un poco más real.</p><p class="rd" tabindex="0"><span class="m2">Tala</span>Lo que ruge en mí no es mío. Son las bestias que otros callaron, convertidas en voz.</p><p class="rd" tabindex="0"><span class="m2">Volt</span>Me llaman corriente, pero soy un deseo sin salida. La jaula no me contiene: me recuerda.</p></div>
-  <p class="hint">Toca o pasa el cursor sobre una carta para voltearla</p>
-</section>
-
-<section id="capitulos" class="sec">
-  <p class="wh" style="left:46%;top:8%">Las semillas de Sael aún respiran.</p>
-  <p class="eye rv">Sección 04 · Capítulos</p>
-  <h2 class="rv">Expedientes<br>del podcast</h2>
-  <article class="typ rv"><p class="m2">Grabación 01 · voz de Adrián</p><p id="typ" data-t="Se levanta, hace el mismo recorrido, regresa a casa sin que nada cambie. Hasta que una mañana, en su puerta, hay un color que no existe en la ciudad."></p></article>
-  <div id="eps" class="eps"><article class="ep rv" tabindex="0" role="button" aria-expanded="false"><div class="n">01</div><h3>La flor y la carta</h3><div class="th">espacio para imagen</div><div class="meta"><span>Capítulo 1</span><span>--:--</span></div><div class="more"><p>Adrián rompe su rutina y cruza las puertas del museo.</p><div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio próximamente</span></div></div></article><article class="ep rv" tabindex="0" role="button" aria-expanded="false"><div class="n">02</div><h3>La Resonancia</h3><div class="th">espacio para imagen</div><div class="meta"><span>Capítulo 2</span><span>--:--</span></div><div class="more"><p>Las vitrinas respiran: no guardan objetos, guardan personas.</p><div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio próximamente</span></div></div></article><article class="ep rv" tabindex="0" role="button" aria-expanded="false"><div class="n">03</div><h3>Rythden y Selene</h3><div class="th">espacio para imagen</div><div class="meta"><span>Capítulo 3</span><span>--:--</span></div><div class="more"><p>El museo es un anclaje. Nace un equipo con un mismo fin.</p><div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio próximamente</span></div></div></article><article class="ep rv" tabindex="0" role="button" aria-expanded="false"><div class="n">04</div><h3>La Fractura</h3><div class="th">espacio para imagen</div><div class="meta"><span>Capítulo 4</span><span>--:--</span></div><div class="more"><p>Absorbe las salas y borra la memoria. Hay que estabilizar las voces.</p><div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio próximamente</span></div></div></article><article class="ep rv" tabindex="0" role="button" aria-expanded="false"><div class="n">05</div><h3>Un camino hacia la verdad</h3><div class="th">espacio para imagen</div><div class="meta"><span>Capítulo 5</span><span>--:--</span></div><div class="more"><p>Sincronizar los archivos para ganar tiempo y descubrir qué es La Fractura.</p><div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio próximamente</span> <i class="gl2" data-note="n5">✦</i></div></div></article><article class="ep rv" tabindex="0" role="button" aria-expanded="false"><div class="n">06</div><h3>La liberación</h3><div class="th">espacio para imagen</div><div class="meta"><span>Capítulo 6</span><span>--:--</span></div><div class="more"><p>Elegir qué dejar atrás. Otra flor aparece en otra puerta.</p><div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio próximamente</span></div></div></article></div>
-</section>
-
-<footer id="equipo" class="sec dark foot">
-  <p class="wh" style="left:8%;bottom:14%">Lo que sueltas, la flor lo recuerda.</p>
-  <p class="eye rv">Equipo</p>
-  <p class="team rv">Daniel Muñoz Delgado · Valentina Montero Zapata · Estefanía del Amor Restrepo Campo</p>
-  <p class="m2 rv">Podcast interactivo en sitio web <i class="fl" data-note="n6" aria-label="Flor">✿</i></p>
-</footer>
-
-<button id="chip" hidden>Notas <b id="cc">0</b>/7</button>
-<div id="halo" aria-hidden="true"></div>
-<div id="note" class="paper" role="dialog" aria-live="polite" hidden><p id="nt"></p><p class="m2" id="nf"></p><button id="nx">Guardar nota</button></div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script>(function(){var s=document.createElement('script');if(location.protocol==='file:'){s.src='js/bundle.js'}else{s.type='module';s.src='js/main.js'}document.body.appendChild(s)})()</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <script>(function () { var s = document.createElement('script'); if (location.protocol === 'file:') { s.src = 'js/bundle.js' } else { s.type = 'module'; s.src = 'js/main.js' } document.body.appendChild(s) })()</script>
 </body>
+
 </html>

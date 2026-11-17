@@ -31,33 +31,26 @@
     <div id="say" class="ov pill"></div>
 
     <section id="intro" class="ov ctr on">
-      <div class="sc" aria-hidden="true">
+            <div class="sc" aria-hidden="true">
         <div class="moon l" data-d="10"></div>
+        <div class="wsp w1 l" data-d="14"></div>
+        <div class="wsp w2 l" data-d="22"></div>
+        <div class="runes l" data-d="26">
+          <i style="--x:8%;--y:34%;--t:0s">ᚾᚣᛉᚨ</i>
+          <i style="--x:15%;--y:62%;--t:-3s">ᛞᛟᚱ</i>
+          <i style="--x:84%;--y:48%;--t:-5s">ᚲᚱᚢ</i>
+          <i style="--x:91%;--y:70%;--t:-2s">ᛏᚨᛚᚨ</i>
+          <i style="--x:5%;--y:12%;--t:-6s">ᚱᚣᚦ</i>
+          <i style="--x:72%;--y:78%;--t:-4s">ᚾᚨᚲ</i>
+        </div>
         <svg class="l hills" data-d="18" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
-          <path d="M0 400V250Q120 190 250 240T520 220T780 250T1000 210V400Z" fill="#204852" />
+          <path d="M0 400V250Q120 190 250 240T520 220T780 250T1000 210V400Z" fill="#1A1331" />
         </svg>
-        <svg class="l museum" data-d="30" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax meet">
-          <g fill="#01121A">
-            <path d="M300 400V250h400v150z" />
-            <path d="M280 250L500 150l220 100z" />
-            <ellipse cx="500" cy="150" rx="70" ry="52" />
-            <rect x="496" y="70" width="8" height="40" />
-            <rect x="320" y="258" width="14" height="142" />
-            <rect x="380" y="258" width="14" height="142" />
-            <rect x="606" y="258" width="14" height="142" />
-            <rect x="666" y="258" width="14" height="142" />
-            <path d="M260 400v-20h480v20z" />
-          </g>
-          <g fill="#5E9E97" opacity=".75">
-            <rect x="420" y="290" width="22" height="46" />
-            <rect x="558" y="290" width="22" height="46" />
-            <rect x="478" y="125" width="44" height="26" rx="22" />
-          </g>
-          <rect x="472" y="300" width="56" height="100" fill="#204852" />
-          <circle class="bud" cx="500" cy="360" r="5" fill="#5E9E97" />
+        <svg class="l hills" data-d="34" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
+          <path d="M0 400V310Q200 265 400 300T800 290T1000 310V400Z" fill="#120E24" />
         </svg>
         <svg class="l fore" data-d="55" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
-          <path d="M0 400V330Q80 300 160 335T330 350V400ZM1000 400V320Q900 290 820 330T660 350V400Z" fill="#01121A" />
+          <path d="M0 400V360Q250 335 500 352T1000 345V400Z" fill="#0B0E1A" />
         </svg>
         <div class="fog l" data-d="20"></div>
         <div class="ff"></div>
@@ -92,6 +85,7 @@
     <aside id="dossier" class="ov card">
       <p class="m"><span id="dm"></span><button id="dx" style="padding:2px 8px">Cerrar</button></p>
       <p id="dg"></p>
+        <img id="di" alt="">
       <h2 id="dn"></h2>
       <p class="m" id="de"></p>
       <p class="t" id="dt"></p>
@@ -122,7 +116,7 @@
   <section id="universo" class="sec">
     <i class="rp" data-note="n2" aria-label="Pétalo"></i>
     <p class="wh" style="left:62%;top:26%">Cada vitrina guarda a alguien.</p>
-    <p class="wh" data-note="n3" style="right:7%;bottom:9%">El archivo ya te cuenta como testigo.</p>
+    <p class="wh"id="n3" data-note="n3" style="right:7%;bottom:9%">El archivo ya te cuenta como testigo.</p>
     <div class="aura" data-speed=".15"></div>
     <p class="eye rv">Sección 02 · El universo</p>
     <h2 class="rv">Khaelos guarda<br>lo que olvidamos</h2>
@@ -160,9 +154,19 @@
     <p class="eye rv">Sección 03 · Personajes</p>
     <h2 class="rv">Cinco voces,<br>una misma flor</h2>
     <div id="chars" class="chars">
-      <div class="cc" tabindex="0" role="button" aria-label="Adrián">
+      <div class="cc" tabindex="0" role="button" aria-label="Adrián" style="--ac:#FF4DA6">
         <div class="in3">
-          <div class="cf"><span class="gl">ᚨᛞᚱ</span>
+          <div class="cf">
+            <svg class="ad" viewBox="-50 -50 100 100" aria-hidden="true">
+              <g fill="#FF4DA6" fill-opacity=".85">
+                <ellipse cx="0" cy="-22" rx="11" ry="22" />
+                <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(72)" />
+                <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(144)" />
+                <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(216)" />
+                <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(288)" />
+              </g>
+              <circle r="7" fill="#FFE3F1" />
+            </svg>
             <h3>Adrián</h3>
             <p class="m2">Quien recibe la flor</p>
           </div>
@@ -170,12 +174,14 @@
             <p class="m2">Quien recibe la flor</p>
             <p>Vive atrapado en una rutina hasta que una flor fucsia y una carta lo llevan al museo.</p>
             <p class="m2">Detalle: la carta que vuelve a aparecer</p>
+            <button class="pl" data-audio="audios/Damian.mp3">▶ Escuchar</button>
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Rythden">
+      <div class="cc" tabindex="0" role="button" aria-label="Rythden" style="--ac:#8472AC">
         <div class="in3">
-          <div class="cf"><span class="gl">ᚱᚣᚦ</span>
+          <div class="cf">
+            <img class="pf" src="assets/imgs/IMGs_Trasmedia/Rythden.jpeg" alt="Rythden">
             <h3>Rythden</h3>
             <p class="m2">Guía del anclaje</p>
           </div>
@@ -183,12 +189,14 @@
             <p class="m2">Guía del anclaje</p>
             <p>Sabe más del museo de lo que Adrián imagina. Lorem ipsum dolor sit amet.</p>
             <p class="m2">Detalle: provisional</p>
+            <button class="pl" data-audio="audios/Rythden.mp3">▶ Escuchar</button>
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Dra. Selene Marlowe">
+      <div class="cc" tabindex="0" role="button" aria-label="Dra. Selene Marlowe" style="--ac:#6F86C9">
         <div class="in3">
-          <div class="cf"><span class="gl">ᛊᛖᛚ</span>
+          <div class="cf">
+            <img class="pf" src="assets/imgs/IMGs_Trasmedia/Dra.jpeg" alt="Dra. Selene Marlowe">
             <h3>Dra. Selene Marlowe</h3>
             <p class="m2">Guardiana de archivos</p>
           </div>
@@ -196,12 +204,14 @@
             <p class="m2">Guardiana de archivos</p>
             <p>Junto a Rythden explica el anclaje que protege las semillas de Sael Vantorin.</p>
             <p class="m2">Detalle: provisional</p>
+            <button class="pl" data-audio="audios/Dra Selene.mp3">▶ Escuchar</button>
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Nyxa">
+      <div class="cc" tabindex="0" role="button" aria-label="Nyxa" style="--ac:#8A6FD0">
         <div class="in3">
-          <div class="cf"><span class="gl">ᚾᚣᛉᚨ</span>
+          <div class="cf">
+            <img class="pf" src="assets/imgs/IMGs_Trasmedia/Nyxa.jpeg" alt="Nyxa">
             <h3>Nyxa</h3>
             <p class="m2">La que habita entre sombras</p>
           </div>
@@ -209,12 +219,14 @@
             <p class="m2">La que habita entre sombras</p>
             <p>Resonante envuelta en sombras que se mueven por voluntad propia.</p>
             <p class="m2">Detalle: susurros entre las sombras <i class="gl2" data-note="n4">ᛞᛟᚱ</i></p>
+            <button class="pl" data-audio="audios/Nyxa preview 1.mp3">▶ Escuchar</button>
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Naxaly">
+      <div class="cc" tabindex="0" role="button" aria-label="Naxaly" style="--ac:#C28894">
         <div class="in3">
-          <div class="cf"><span class="gl">ᚾᚨᚲ</span>
+          <div class="cf">
+            <img class="pf" src="assets/imgs/IMGs_Trasmedia/Naxaly.jpeg" alt="Naxaly">
             <h3>Naxaly</h3>
             <p class="m2">Recuerdo en una vitrina</p>
           </div>
@@ -222,17 +234,18 @@
             <p class="m2">Recuerdo en una vitrina</p>
             <p>Su recuerdo guarda una vitrina del museo. Más adelante podrá manipular el tiempo.</p>
             <p class="m2">Detalle: provisional</p>
+            <button class="pl" data-audio="audios/Naxaly.mp3">▶ Escuchar</button>
           </div>
         </div>
       </div>
     </div>
-    <div class="tes3">
-      <p class="rd" tabindex="0"><span class="m2">Nyxa</span>Aquí las sombras no persiguen: sostienen. Si me nombras, me
-        haces un poco más real.</p>
-      <p class="rd" tabindex="0"><span class="m2">Tala</span>Lo que ruge en mí no es mío. Son las bestias que otros
-        callaron, convertidas en voz.</p>
-      <p class="rd" tabindex="0"><span class="m2">Volt</span>Me llaman corriente, pero soy un deseo sin salida. La jaula
-        no me contiene: me recuerda.</p>
+      <div class="tes3">
+      <p class="rd" tabindex="0"><img class="av" src="assets/imgs/IMGs_Trasmedia/Nyxa.jpeg" alt="Nyxa"><span class="m2">Nyxa</span>Aquí las sombras no persiguen: sostienen. Si me nombras, me
+        haces un poco más real.<button class="pl" data-audio="audios/Nyxa preview 2.mp3">▶ Escuchar</button></p>
+      <p class="rd" tabindex="0"><img class="av" src="assets/imgs/IMGs_Trasmedia/Tala.jpeg" alt="Tala"><span class="m2">Tala</span>Lo que ruge en mí no es mío. Son las bestias que otros
+        callaron, convertidas en voz.<button class="pl" data-audio="audios/Tala Preview.mp3">▶ Escuchar</button></p>
+      <p class="rd" tabindex="0"><img class="av" src="assets/imgs/IMGs_Trasmedia/Volt.jpeg" alt="Volt"><span class="m2">Volt</span>Me llaman corriente, pero soy un deseo sin salida. La jaula
+        no me contiene: me recuerda.<button class="pl" data-audio="audios/Volt preview.mp3">▶ Escuchar</button></p>
     </div>
     <p class="hint">Toca o pasa el cursor sobre una carta para voltearla</p>
   </section>
@@ -317,11 +330,69 @@
     </div>
   </section>
 
-  <footer id="equipo" class="sec dark foot">
-    <p class="wh" style="left:8%;bottom:14%">Lo que sueltas, la flor lo recuerda.</p>
-    <p class="eye rv">Equipo</p>
-    <p class="team rv">Daniel Muñoz Delgado Valentina Montero Zapata Estefanía del Amor Restrepo Campo</p>
-    <p class="m2 rv">Podcast interactivo en sitio web <i class="fl" data-note="n6" aria-label="Flor">✿</i></p>
+    <section id="equipo" class="sec dark">
+    <p class="eye rv">Sección 05 · Equipo</p>
+    <h2 class="rv">Quienes le dieron<br>vida a Ecos</h2>
+    <div class="tgrid">
+      <div class="tmw rv">
+        <article class="tm" tabindex="0" role="button" aria-label="Daniel Muñoz Delgado">
+          <div class="ph">
+            <img src="assets/imgs/equipo/DaniFoto.jpeg" alt="Foto de Daniel Muñoz Delgado" loading="lazy" style="object-position:50% 42%">
+          </div>
+          <div class="ov"></div>
+          <div class="inf">
+            <h3>Daniel Muñoz Delgado <i class="vf">✿</i></h3>
+            <p>Equipo de desarrollo · Ecos de Azahares</p>
+            <a class="tb" href="https://www.linkedin.com/in/daniel-mu%C3%B1oz-delgado-04b90a362/" target="_blank" rel="noopener">LinkedIn ↗</a>
+          </div>
+        </article>
+      </div>
+      <div class="tmw rv" style="transition-delay:.12s">
+        <article class="tm" tabindex="0" role="button" aria-label="Valentina Montero Zapata">
+          <div class="ph"><img src="assets/imgs/equipo/PhotoLinkedIn0.JPG" alt="Foto de Valentina Montero Zapata" loading="lazy" style="object-position:51% 35%"></div>
+          <div class="ov"></div>
+          <div class="inf">
+            <h3>Valentina Montero Zapata <i class="vf">✿</i></h3>
+            <p>Equipo de desarrollo · Ecos de Azahares</p>
+            <a class="tb" href="https://www.linkedin.com/in/valentina-montero-zapata-vmz2212/" target="_blank" rel="noopener">LinkedIn ↗</a>
+          </div>
+        </article>
+      </div>
+      <div class="tmw rv" style="transition-delay:.24s">
+        <article class="tm" tabindex="0" role="button" aria-label="Estefanía del Amor Restrepo Campo">
+          <div class="ph"><img src="assets/imgs/equipo/Tefa.jpg.jpeg" alt="Foto de Estefanía del Amor Restrepo Campo" loading="lazy" style="object-position:50% 25%"></div>
+          <div class="ov"></div>
+          <div class="inf">
+            <h3>Estefanía del Amor Restrepo Campo <i class="vf">✿</i></h3>
+            <p>Equipo de desarrollo · Ecos de Azahares</p>
+            <a class="tb" href="https://www.linkedin.com/in/estefan%C3%ADa-del-amor-restrepo-campo-11ba6339a/" target="_blank" rel="noopener">LinkedIn ↗</a>
+          </div>
+        </article>
+      </div>
+    </div>
+    <p class="hint">Pasa el cursor o toca una tarjeta para ver su foto completa</p>
+  </section>
+
+  <footer class="ft">
+    <div class="ft-in">
+      <div>
+        <a class="ft-logo" href="#game">Ecos de Azahares</a>
+        <p>Una experiencia narrativa y un podcast interactivo. Funciona mejor con audífonos.</p>
+      </div>
+      <div>
+        <p class="m2">Explora</p>
+        <a href="#universo">Universo</a><a href="#personajes">Personajes</a><a href="#capitulos">Capítulos</a><a href="#equipo">Equipo</a>
+      </div>
+      <div>
+        <p class="m2">Equipo</p>
+        <span>Daniel Muñoz Delgado</span><span>Valentina Montero Zapata</span><span>Estefanía del Amor Restrepo Campo</span>
+      </div>
+    </div>
+    <p class="wh ft-wh">Lo que sueltas, la flor lo recuerda.</p>
+    <div class="ft-bot">
+      <span>© 2026 Ecos de Azahares · Podcast interactivo en sitio web <i class="fl" data-note="n6" aria-label="Flor">✿</i></span>
+      <a href="#game">Volver al juego ↑</a>
+    </div>
   </footer>
 
   <button id="chip" hidden>Notas <b id="cc">0</b>/7</button>

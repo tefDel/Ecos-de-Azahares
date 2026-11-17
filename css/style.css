@@ -1,12 +1,12 @@
 /* ===== 1. ESTILOS: tokens, capas y paneles ===== */
 :root {
-    --accent: #5E9E97;
-    --neon: #5E9E97;
-    --gold: #B0CEC4;
-    --ink: #E3D4E9;
-    --panel: rgba(1, 18, 26, .88);
+    --accent: #9A78A6;
+    --neon: #9A78A6;
+    --gold: #D8C8E6;
+    --ink: #F3E6EE;
+    --panel: rgba(11, 14, 26, .88);
     --serif: 'Aesthetic', Georgia, 'Times New Roman', serif;
-    --mono: 'BarlowCondensed', ui-monospace, Menlo, Consolas, monospace
+    --mono: 'BarlowCondensed', ui-monospace, Menlo, Consolas, monospace;
 }
 
 * {
@@ -21,15 +21,15 @@ html {
 body {
     margin: 0;
     overflow-x: hidden;
-    background: #01121A;
+    background: #0B0E1A;
     color: var(--ink);
     font: 19px/1.5 var(--mono);
     color-scheme: dark;
-    -webkit-tap-highlight-color: transparent
+    -webkit-tap-highlight-color: transparent;
 }
 
 body.broken {
-    --accent: #5E9E97
+    --accent: #9A78A6;
 }
 
 canvas#gl {
@@ -37,7 +37,7 @@ canvas#gl {
     inset: 0;
     width: 100%;
     height: 100%;
-    display: block
+    display: block;
 }
 
 canvas#fx {
@@ -49,7 +49,7 @@ canvas#fx {
     image-rendering: pixelated;
     opacity: 0;
     mix-blend-mode: screen;
-    z-index: 5
+    z-index: 5;
 }
 
 .m,
@@ -57,14 +57,14 @@ canvas#fx {
 button {
     font-family: var(--mono);
     font-size: 12px;
-    letter-spacing: .02em
+    letter-spacing: .02em;
 }
 
 .m {
     color: var(--t2);
     display: flex;
     justify-content: space-between;
-    gap: 10px
+    gap: 10px;
 }
 
 .pill {

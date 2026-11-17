@@ -25,13 +25,13 @@
 }
 
 :root {
-    --bg0: #01121A;
-    --bg1: #204852;
-    --ac: #5E9E97;
-    --t2: #B0CEC4;
-    --t1: #E3D4E9;
+    --bg0: #0B0E1A;
+    --bg1: #1A1331;
+    --ac: #9A78A6;
+    --t2: #D8C8E6;
+    --t1: #F3E6EE;
     --serif: 'Aesthetic', Georgia, 'Times New Roman', serif;
-    --mono: 'BarlowCondensed', ui-monospace, Menlo, Consolas, monospace
+    --mono: 'BarlowCondensed', ui-monospace, Menlo, Consolas, monospace;
 }
 
 #game {
@@ -1082,4 +1082,448 @@ p.team {
     50% {
         opacity: .4
     }
+}
+
+/* ===== Portada Nyxa ===== */
+.moon {
+    background: radial-gradient(circle at 70% 28%, #F3E6EE 0 3.2%, rgba(216, 200, 230, .33) 3.4%, rgba(154, 120, 166, .22) 14%, transparent 34%)
+}
+
+.fog {
+    background: linear-gradient(transparent 50%, rgba(154, 120, 166, .19) 82%, transparent);
+    animation: drift 14s ease-in-out infinite alternate
+}
+
+.sh {
+    animation: sway 9s ease-in-out infinite alternate;
+    transform-box: fill-box;
+    transform-origin: 0 100%
+}
+
+.sh.s2 {
+    animation-duration: 12s;
+    animation-direction: alternate-reverse
+}
+
+@keyframes sway {
+    to {
+        transform: translateY(-10px) skewX(-2deg)
+    }
+}
+
+.sh .fl {
+    animation: flow 6s linear infinite
+}
+
+@keyframes flow {
+    to {
+        stroke-dashoffset: -136
+    }
+}
+
+.wd {
+    animation: tw 4s ease-in-out infinite alternate
+}
+
+@keyframes tw {
+    from {
+        opacity: .3
+    }
+
+    to {
+        opacity: .95
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+
+    .sh,
+    .sh .fl,
+    .wd {
+        animation: none
+    }
+}
+
+/* ===== Cartas de personajes con imagen ===== */
+.cf {
+    background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--ac) 40%, transparent), transparent 60%), linear-gradient(170deg, var(--bg1), var(--bg0));
+    overflow: hidden
+}
+
+.cf::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(transparent 50%, rgba(11, 14, 26, .92))
+}
+
+.cf>* {
+    position: relative;
+    z-index: 2
+}
+
+.cf>.pf {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 15%;
+    z-index: 0
+}
+
+.cf>.ad {
+    position: absolute;
+    top: 10%;
+    left: 50%;
+    width: 64%;
+    height: auto;
+    transform: translateX(-50%);
+    filter: drop-shadow(0 0 14px #FF4DA6)
+}
+
+.pl {
+    margin-top: 10px;
+    align-self: center;
+    font: 13px var(--mono);
+    letter-spacing: .08em;
+    color: var(--t1);
+    background: transparent;
+    border: 1px solid var(--ac);
+    padding: 6px 14px;
+    cursor: pointer;
+    text-shadow: none
+}
+
+.pl:hover {
+    background: color-mix(in srgb, var(--ac) 25%, transparent)
+}
+
+.tes3 .av {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: 50% 20%;
+    border: 1px solid var(--ac);
+    display: block;
+    margin-bottom: 10px
+}
+
+/* Foto en el expediente del juego */
+#di {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    object-position: 50% 20%;
+    border: 1px solid var(--accent);
+    margin: 8px 0;
+    display: block
+}
+
+/* ===== Equipo (tarjetas) ===== */
+.tgrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+    max-width: 1020px;
+    margin: 20px auto 0
+}
+
+.tmw:nth-child(2) {
+    margin-top: 34px
+}
+
+.tm {
+    position: relative;
+    aspect-ratio: 4/5.4;
+    border-radius: 30px;
+    overflow: hidden;
+    cursor: pointer;
+    outline: none;
+    background: linear-gradient(170deg, var(--bg1), var(--bg0));
+    border: 1px solid color-mix(in srgb, var(--ac) 35%, transparent);
+    box-shadow: 0 24px 50px rgba(0, 0, 0, .45);
+    transition: box-shadow .5s, transform .5s
+}
+
+.tm:focus-visible,
+.tm.on {
+    box-shadow: 0 0 30px color-mix(in srgb, var(--ac) 50%, transparent), 0 24px 50px rgba(0, 0, 0, .45)
+}
+
+.tm .ph {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    height: 58%;
+    border-radius: 24px;
+    overflow: hidden;
+    transition: height .7s cubic-bezier(.2, .8, .2, 1)
+}
+
+.tm .ph img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .9s
+}
+
+.tm .ov {
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    height: 55%;
+    border-radius: 0 0 24px 24px;
+    background: linear-gradient(transparent, rgba(11, 14, 26, .92));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    -webkit-mask-image: linear-gradient(transparent, #000 55%);
+    mask-image: linear-gradient(transparent, #000 55%);
+    opacity: 0;
+    transition: opacity .6s;
+    pointer-events: none
+}
+
+.tm .inf {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 16px 22px 22px;
+    z-index: 2
+}
+
+.tm h3 {
+    font: 400 22px/1.15 var(--serif);
+    margin: 0 0 6px;
+    color: var(--t1)
+}
+
+.tm .vf {
+    font-style: normal;
+    color: var(--ac);
+    font-size: 16px
+}
+
+.tm p {
+    margin: 0 0 12px;
+    font-size: 15px;
+    line-height: 1.3;
+    color: var(--t2)
+}
+
+.tm .tb {
+    display: inline-block;
+    padding: 7px 18px;
+    border-radius: 99px;
+    background: var(--t1);
+    color: var(--bg0);
+    font: 600 13px var(--mono);
+    letter-spacing: .06em;
+    text-decoration: none;
+    transition: transform .3s
+}
+
+.tm .tb:hover {
+    transform: scale(1.06)
+}
+
+.tm.on .ph {
+    height: calc(100% - 16px)
+}
+
+.tm.on .ov {
+    opacity: 1
+}
+
+.tm.on .ph img {
+    transform: scale(1.04)
+}
+
+@media(hover:hover) {
+    .tm:hover .ph {
+        height: calc(100% - 16px)
+    }
+
+    .tm:hover .ov {
+        opacity: 1
+    }
+
+    .tm:hover .ph img {
+        transform: scale(1.04)
+    }
+}
+
+@media(max-width:700px) {
+    .tmw:nth-child(2) {
+        margin-top: 0
+    }
+
+    .tm {
+        max-width: 340px;
+        margin: 0 auto
+    }
+}
+
+/* ===== Footer ===== */
+.ft {
+    position: relative;
+    z-index: 2;
+    overflow: hidden;
+    background: var(--bg0);
+    border-top: 1px solid color-mix(in srgb, var(--ac) 30%, transparent);
+    padding: 70px clamp(20px, 7vw, 110px) 26px;
+    font: 16px/1.5 var(--mono);
+    color: var(--t2)
+}
+
+.ft-in {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1.2fr;
+    gap: 40px
+}
+
+.ft-in>div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px
+}
+
+.ft-in p {
+    margin: 0
+}
+
+.ft a,
+.ft span {
+    color: var(--t2);
+    text-decoration: none
+}
+
+.ft a:hover {
+    color: var(--ac)
+}
+
+.ft-logo {
+    font: 400 30px var(--serif);
+    color: var(--t1) !important
+}
+
+.ft-bot {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-top: 46px;
+    padding-top: 18px;
+    border-top: 1px solid color-mix(in srgb, var(--t2) 20%, transparent);
+    font-size: 13px;
+    letter-spacing: .06em
+}
+
+@media(max-width:760px) {
+    .ft-in {
+        grid-template-columns: 1fr
+    }
+}
+
+/* Equipo: foto más alta en reposo */
+.tm {
+    aspect-ratio: 4/5.9
+}
+
+.tm .ph {
+    height: 64%
+}
+
+/* Footer: la frase ya no se monta sobre el logo */
+.ft .ft-wh {
+    position: relative;
+    left: auto;
+    top: auto;
+    display: block;
+    text-align: center;
+    margin: 34px 0 0
+}
+
+/* ===== Portada: luna arriba a la derecha, humo, runas ===== */
+.moon {
+    background: radial-gradient(circle at 90% 17%, #F3E6EE 0 2.6%, rgba(216, 200, 230, .4) 2.8%, rgba(154, 120, 166, .22) 9%, transparent 24%)
+}
+
+.wsp {
+    filter: blur(30px);
+    animation: drift 16s ease-in-out infinite alternate
+}
+
+.wsp.w1 {
+    background: radial-gradient(ellipse 40% 28% at 22% 72%, rgba(106, 63, 124, .45), transparent 70%)
+}
+
+.wsp.w2 {
+    background: radial-gradient(ellipse 38% 26% at 78% 62%, rgba(138, 111, 208, .35), transparent 70%);
+    animation-direction: alternate-reverse
+}
+
+.runes i {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+    font: normal 24px var(--serif);
+    color: var(--t2);
+    opacity: .25;
+    animation: rise2 9s ease-in-out infinite alternate;
+    animation-delay: var(--t)
+}
+
+@keyframes rise2 {
+    to {
+        transform: translateY(-26px);
+        opacity: .08
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+
+    .wsp,
+    .runes i {
+        animation: none
+    }
+}
+
+/* ===== Notas escondidas: brillo suave para encontrarlas ===== */
+[data-note] {
+    animation: nhint 3s ease-in-out infinite
+}
+
+@keyframes nhint {
+    50% {
+        filter: drop-shadow(0 0 6px var(--ac)) brightness(1.4)
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+    [data-note] {
+        animation: none
+    }
+}
+
+/* Botón Escuchar: un poco más a la derecha y tenue hasta pasar el cursor */
+.rd .pl {
+    margin-left: 14px;
+    color: var(--t1);
+    text-shadow: none;
+    opacity: .25;
+    transition: opacity .8s
+}
+
+.rd:hover .pl,
+.rd.on .pl,
+.rd:focus .pl,
+.rd:focus-within .pl {
+    opacity: 1
 }

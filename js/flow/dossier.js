@@ -44,6 +44,7 @@ export function openDoss(u) {
   S.dossier = u.id;
   $('#dm').textContent = `Expediente R-0${r.n} · lengua de Deileanna`;
   $('#dg').textContent = r.glyph;
+  $('#di').src = r.img;
   $('#dn').textContent = r.name;
   $('#de').textContent = r.epi;
   $('#dt').textContent = r.txt;

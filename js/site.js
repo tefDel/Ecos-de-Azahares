@@ -47,6 +47,12 @@ function closeNote() {
 }
 
 export function initSite() {
+    /* Botón Jugar: lleva al juego y, si está en la portada, lo inicia */
+  $('#play').addEventListener('click', e => {
+    e.preventDefault();
+    $('#game').scrollIntoView({ behavior: 'smooth' });
+    if ($('#intro').classList.contains('on')) $('#go').click();
+  });
   /* Portada: luciérnagas y parallax con el mouse / giroscopio táctil */
   $('.ff').innerHTML = Array.from({ length: 16 }, () => `<i style="--x:${Math.random() * 100}%;--y:${40 + Math.random() * 55}%;--d:${4 + Math.random() * 6}s;--dx:${Math.random() * 60 - 30}px"></i>`).join('');
   const layers = $$('.sc .l');
@@ -105,7 +111,36 @@ export function initSite() {
   new IntersectionObserver(([e]) => { W.visible = e.isIntersecting; Aud.mute(!e.isIntersecting || S.muted); }, { threshold: .05 }).observe($('#game'));
 
   window.__ecos = 1;
-  $('#play').onclick = e => { e.preventDefault(); $('#game').scrollIntoView({ behavior: 'smooth' }); if ($('#intro').classList.contains('on')) setTimeout(() => $('#go').click(), 450); };
+
+    /* Audios de los personajes: suena el de la carta tocada, uno a la vez */
+  let cur = null, curBtn = null;
+  const stopAud = () => { if (cur) { cur.pause(); curBtn.textContent = '▶ Escuchar'; cur = curBtn = null; } };
+  document.addEventListener('click', e => {
+    const b = e.target.closest('.pl'); if (!b) return;
+    e.stopPropagation();
+    const same = curBtn === b; stopAud(); if (same) return;
+    cur = new Audio(encodeURI(b.dataset.audio)); curBtn = b;
+    cur.onended = stopAud;
+    cur.onerror = () => { b.textContent = 'Audio no disponible'; cur = curBtn = null; };
+    cur.play().then(() => { b.textContent = '❚❚ Pausar'; }).catch(() => { b.textContent = 'Audio no disponible'; cur = curBtn = null; });
+  }, true);
+  document.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('.pl')) e.stopPropagation(); }, true);
+
+    /* Título: reinicia la página y vuelve a la portada */
+  $('#nav .logo').title = 'Volver a la portada';
+  $('#nav .logo').addEventListener('click', e => {
+    e.preventDefault();
+    history.replaceState(null, '', location.pathname);
+    scrollTo(0, 0);
+    location.reload();
+  });
+
+  /* Equipo: tocar o Enter muestra la foto completa (en móvil) */
+  $$('.tm').forEach(c => {
+    const t = () => c.classList.toggle('on');
+    c.onclick = e => { if (!e.target.closest('a')) t(); };
+    c.onkeydown = e => { if (e.key === 'Enter') t(); };
+  });
 
   /* Notas escondidas */
   document.addEventListener('click', e => { const t = e.target.closest('[data-note]'); if (t) { e.preventDefault(); openNote(t.dataset.note); } });

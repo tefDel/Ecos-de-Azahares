@@ -601,6 +601,7 @@
       glyph: "\u16BE\u16A3\u16C9\u16A8 \u16DE\u16DF\u16B1",
       dur: 30,
       angle: 0,
+      img: "assets/imgs/IMGs_Trasmedia/Nyxa.jpeg",
       txt: "Aqu\xED las sombras no persiguen: sostienen. Aprend\xED a vivir en el borde de lo que nadie mira. Si me nombras, me haces un poco m\xE1s real. N\xF3mbrame despacio."
     },
     tala: {
@@ -610,6 +611,7 @@
       glyph: "\u16CF\u16A8\u16DA\u16A8 \u16B2\u16B1\u16A2",
       dur: 30,
       angle: 2 * Math.PI / 3,
+      img: "assets/imgs/IMGs_Trasmedia/Tala.jpeg",
       txt: "Lo que ruge en m\xED no es m\xEDo. Son las bestias que otros callaron, convertidas en voz. Cuando el pasillo tiembla, soy yo recordando que alguna vez corr\xED libre."
     },
     volt: {
@@ -619,6 +621,7 @@
       glyph: "\u16A1\u16DF\u16DA\u16CF \u16D6\u16BE\u16C9",
       dur: 30,
       angle: 4 * Math.PI / 3,
+      img: "assets/imgs/IMGs_Trasmedia/Volt.jpeg",
       txt: 'Me llaman corriente, pero soy un deseo sin salida. Cada barrote es una vez que dije "despu\xE9s". La jaula no me contiene: me recuerda.'
     }
   };
@@ -1063,6 +1066,7 @@
     S.dossier = u.id;
     $("#dm").textContent = `Expediente R-0${r.n} \xB7 lengua de Deileanna`;
     $("#dg").textContent = r.glyph;
+    $("#di").src = r.img;
     $("#dn").textContent = r.name;
     $("#de").textContent = r.epi;
     $("#dt").textContent = r.txt;
@@ -1139,7 +1143,17 @@
 
   // js/config.js
   var CONFIG = {
-    audio: { urban: null, doors: null, nyxa: null, tala: null, volt: null, bit0: null, bit1: null, bit2: null, core: null },
+    audio: {
+      urban: null,
+      doors: null,
+      nyxa: "audios/Nyxa.mp3",
+      tala: "audios/Tala.mp3",
+      volt: "audios/Volt entero.mp3",
+      bit0: "audios/Rythden.mp3",
+      bit1: "audios/Rythden2.mp3",
+      bit2: "audios/Dra Selene.mp3",
+      core: "audios/Naxaly.mp3"
+    },
     models: { city: null, gal: null, core: null, flor: null }
   };
 
@@ -1739,6 +1753,28 @@
       $("#game").scrollIntoView({ behavior: "smooth" });
       if ($("#intro").classList.contains("on")) setTimeout(() => $("#go").click(), 450);
     };
+    let cur = null, curBtn = null;
+    $$(".pl").forEach((b) => {
+      b.addEventListener("keydown", (e) => e.stopPropagation());
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const same = curBtn === b;
+        if (cur) {
+          cur.pause();
+          curBtn.textContent = "\u25B6 Escuchar";
+          cur = curBtn = null;
+        }
+        if (same) return;
+        cur = new Audio(b.dataset.audio);
+        curBtn = b;
+        cur.play();
+        b.textContent = "\u275A\u275A Pausar";
+        cur.onended = () => {
+          b.textContent = "\u25B6 Escuchar";
+          cur = curBtn = null;
+        };
+      });
+    });
     document.addEventListener("click", (e) => {
       const t = e.target.closest("[data-note]");
       if (t) {

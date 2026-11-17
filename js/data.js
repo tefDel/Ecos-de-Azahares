@@ -7,14 +7,17 @@ export const IDS = ['nyxa', 'tala', 'volt'];
 export const RES = {
   nyxa: {
     n: 1, name: 'Nyxa', epi: 'La que habita entre sombras', glyph: 'ᚾᚣᛉᚨ ᛞᛟᚱ', dur: 30, angle: 0,
+    img: 'assets/imgs/IMGs_Trasmedia/Nyxa.jpeg',
     txt: 'Aquí las sombras no persiguen: sostienen. Aprendí a vivir en el borde de lo que nadie mira. Si me nombras, me haces un poco más real. Nómbrame despacio.'
   },
   tala: {
     n: 2, name: 'Tala', epi: 'La de los ecos de bestias', glyph: 'ᛏᚨᛚᚨ ᚲᚱᚢ', dur: 30, angle: 2 * Math.PI / 3,
+    img: 'assets/imgs/IMGs_Trasmedia/Tala.jpeg',
     txt: 'Lo que ruge en mí no es mío. Son las bestias que otros callaron, convertidas en voz. Cuando el pasillo tiembla, soy yo recordando que alguna vez corrí libre.'
   },
   volt: {
     n: 3, name: 'Volt', epi: 'El de la jaula de energía', glyph: 'ᚡᛟᛚᛏ ᛖᚾᛉ', dur: 30, angle: 4 * Math.PI / 3,
+    img: 'assets/imgs/IMGs_Trasmedia/Volt.jpeg',
     txt: 'Me llaman corriente, pero soy un deseo sin salida. Cada barrote es una vez que dije "después". La jaula no me contiene: me recuerda.'
   }
 };

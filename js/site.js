@@ -14,13 +14,13 @@ const NOTES = {
   n6: ['Cada ciclo, otra puerta. Cada puerta, otra flor. Esta vez, ¿para quién?', 'Al final de la página'],
   n7: ['Adrián: las encontraste todas. No sé quién eres, pero la flor ya sabe tu nombre. Sube y cruza la puerta.', 'La séptima nota']
 };
-/* Contenido provisional: edítalo aquí */
+/* Contenido de referencia (las cartas se escriben en index.html): edítalo aquí */
 const CHARS = [
   ['Adrián', 'Quien recibe la flor', 'ᚨᛞᚱ', 'Vive atrapado en una rutina hasta que una flor fucsia y una carta lo llevan al museo.', 'Detalle: la carta que vuelve a aparecer'],
-  ['Rythden', 'Guía del anclaje', 'ᚱᚣᚦ', 'Sabe más del museo de lo que Adrián imagina. Lorem ipsum dolor sit amet.', 'Detalle: provisional'],
-  ['Dra. Selene Marlowe', 'Guardiana de archivos', 'ᛊᛖᛚ', 'Junto a Rythden explica el anclaje que protege las semillas de Sael Vantorin.', 'Detalle: provisional'],
+  ['Rythden', 'Guía del anclaje', 'ᚱᚣᚦ', 'Sabe más del museo de lo que Adrián imagina: es una de las ocho semillas de Sael Vantorin y busca liberar a sus compañeros.', 'Detalle: busca liberar a los resonantes'],
+  ['Dra. Selene Marlowe', 'Guardiana de archivos', 'ᛊᛖᛚ', 'Junto a Rythden explica el anclaje que protege las semillas de Sael Vantorin.', 'Detalle: investiga los archivos ancestrales'],
   ['Nyxa', 'La que habita entre sombras', 'ᚾᚣᛉᚨ', 'Resonante envuelta en sombras que se mueven por voluntad propia.', 'Detalle: susurros entre las sombras'],
-  ['Naxaly', 'Recuerdo en una vitrina', 'ᚾᚨᚲ', 'Su recuerdo guarda una vitrina del museo. Más adelante podrá manipular el tiempo.', 'Detalle: provisional']
+  ['Naxaly', 'Recuerdo en una vitrina', 'ᚾᚨᚲ', 'Su recuerdo guarda una vitrina del museo. Más adelante podrá manipular el tiempo.', 'Detalle: una de las ocho semillas de Sael']
 ];
 const EPS = [
   ['La flor y la carta', 'Adrián rompe su rutina y cruza las puertas del museo.'],
@@ -30,7 +30,11 @@ const EPS = [
   ['Un camino hacia la verdad', 'Sincronizar los archivos para ganar tiempo y descubrir qué es La Fractura.'],
   ['La liberación', 'Elegir qué dejar atrás. Otra flor aparece en otra puerta.']
 ];
-const TABS = ['Lorem ipsum: las ruinas de Deileanna, origen de los glifos que decoran cada expediente.', 'Lorem ipsum: las semillas de Sael Vantorin, protegidas por el anclaje que es el museo.', 'Lorem ipsum: el Pulso, lo que late bajo la Resonancia y une a todos los resonantes.'];
+const TABS = [
+  'Deileanna es la civilización milenaria que canalizaba la Resonancia Primordial. De sus ruinas vienen los glifos que decoran cada expediente.',
+  'Sael Vantorin se fragmentó en ocho semillas: Rythden, Nyxa, Tala, Volt, Kael, Lyra, Virena y Naxaly. El museo es el anclaje que las protege.',
+  'El Pulso es el evento que fracturó Khaelos. Dejó los archivos de audio incompletos, las líneas temporales distorsionadas y una energía fucsia que corrompe los recuerdos.'
+];
 
 let found = [];
 try { found = JSON.parse(localStorage.getItem('ecos-notas') || '[]'); } catch (e) {}
@@ -46,8 +50,15 @@ function closeNote() {
   if (found.filter(n => n !== 'n7').length === 6 && !found.includes('n7')) setTimeout(() => openNote('n7'), 500);
 }
 
+/* Botón de audio (.pl) sobre el que empezó la pulsación actual.
+   Si la tarjeta se mueve entre pulsar y soltar, el clic llega al padre; con esto se sigue atribuyendo al botón. */
+let plDown = null;
+
+/* Controles internos de una tarjeta: nunca deben voltearla */
+const CTRL = '.pl,[data-note],a,button';
+
 export function initSite() {
-    /* Botón Jugar: lleva al juego y, si está en la portada, lo inicia */
+  /* Botón Jugar: lleva al juego y, si está en la portada, lo inicia */
   $('#play').addEventListener('click', e => {
     e.preventDefault();
     $('#game').scrollIntoView({ behavior: 'smooth' });
@@ -70,14 +81,18 @@ export function initSite() {
   const tab = k => { $$('.tabs button').forEach((b, i) => b.classList.toggle('on', i === k)); $('#tabtx').style.opacity = 0; setTimeout(() => { $('#tabtx').textContent = TABS[k]; $('#tabtx').style.opacity = 1; }, 200); };
   $$('.tabs button').forEach((b, i) => b.onclick = () => tab(i)); tab(0);
 
+  /* Los botones de audio llevan su propia acción: ninguna tarjeta ni testimonio reacciona a ellos */
+  addEventListener('pointerdown', e => { plDown = (e.target.closest && e.target.closest('.pl')) || null; }, true);
+
   /* 03 cartas: volteo (clic / toque / teclado) y brillo que sigue al puntero */
   $$('.cc').forEach(c => {
-    const flip = () => { $$('.cc').forEach(o => o !== c && o.classList.remove('sel2')); c.classList.toggle('fl'); c.classList.add('sel2'); };
-    c.onclick = e => { if (!e.target.closest('[data-note]')) flip(); }; c.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
+    const flip = () => { $$('.cc').forEach(o => o !== c && o.classList.remove('sel2')); c.classList.toggle('flipped'); c.classList.add('sel2'); c.style.transform = ''; };
+    c.onclick = e => { if (plDown || e.target.closest(CTRL)) return; flip(); };
+    c.onkeydown = e => { if (e.target.closest(CTRL)) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
     c.onpointermove = e => {
       const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
       c.style.setProperty('--mx', x * 100 + '%'); c.style.setProperty('--my', y * 100 + '%');
-      if (e.pointerType === 'mouse') c.style.transform = `rotateX(${(.5 - y) * 12}deg) rotateY(${(x - .5) * 14}deg)`;
+      if (e.pointerType === 'mouse' && !c.classList.contains('flipped')) c.style.transform = `rotateX(${(.5 - y) * 12}deg) rotateY(${(x - .5) * 14}deg)`;
     };
     c.onpointerleave = () => { c.style.transform = ''; };
   });
@@ -94,7 +109,10 @@ export function initSite() {
   const env = $('#env'), tg = () => env.setAttribute('aria-expanded', env.getAttribute('aria-expanded') !== 'true');
   env.onclick = tg; env.onkeydown = e => { if (e.key === 'Enter') tg(); };
   const ph = $('#pho'); ph.onclick = () => ph.classList.toggle('open'); ph.onkeydown = e => { if (e.key === 'Enter') ph.classList.toggle('open'); };
-  $$('.rd').forEach(r => { r.onclick = () => r.classList.toggle('on'); r.onkeydown = e => { if (e.key === 'Enter') r.classList.toggle('on'); }; });
+  $$('.rd').forEach(r => {
+    r.onclick = e => { if (plDown || e.target.closest('.pl')) return; r.classList.toggle('on'); };
+    r.onkeydown = e => { if (e.target.closest('.pl')) return; if (e.key === 'Enter') r.classList.toggle('on'); };
+  });
   const ty = $('#typ'); new IntersectionObserver(([e], o) => {
     if (!e.isIntersecting) return; o.disconnect(); let i = 0; const t = ty.dataset.t;
     const step = () => { ty.textContent = t.slice(0, ++i); if (i < t.length) setTimeout(step, 35); }; step();
@@ -112,21 +130,20 @@ export function initSite() {
 
   window.__ecos = 1;
 
-    /* Audios de los personajes: suena el de la carta tocada, uno a la vez */
+  /* Audios de los personajes: suena el del botón tocado, uno a la vez */
   let cur = null, curBtn = null;
-  const stopAud = () => { if (cur) { cur.pause(); curBtn.textContent = '▶ Escuchar'; cur = curBtn = null; } };
+  const stopAud = () => { if (cur) { cur.pause(); curBtn.textContent = curBtn.dataset.l || '▶ Escuchar'; cur = curBtn = null; } };
   document.addEventListener('click', e => {
-    const b = e.target.closest('.pl'); if (!b) return;
-    e.stopPropagation();
+    const b = (e.target.closest && e.target.closest('.pl')) || plDown; plDown = null;
+    if (!b) return;
     const same = curBtn === b; stopAud(); if (same) return;
     cur = new Audio(encodeURI(b.dataset.audio)); curBtn = b;
     cur.onended = stopAud;
     cur.onerror = () => { b.textContent = 'Audio no disponible'; cur = curBtn = null; };
     cur.play().then(() => { b.textContent = '❚❚ Pausar'; }).catch(() => { b.textContent = 'Audio no disponible'; cur = curBtn = null; });
-  }, true);
-  document.addEventListener('keydown', e => { if (e.target.closest && e.target.closest('.pl')) e.stopPropagation(); }, true);
+  });
 
-    /* Título: reinicia la página y vuelve a la portada */
+  /* Título: reinicia la página y vuelve a la portada */
   $('#nav .logo').title = 'Volver a la portada';
   $('#nav .logo').addEventListener('click', e => {
     e.preventDefault();
@@ -141,6 +158,45 @@ export function initSite() {
     c.onclick = e => { if (!e.target.closest('a')) t(); };
     c.onkeydown = e => { if (e.key === 'Enter') t(); };
   });
+
+  /* Partículas del cursor: pétalos y chispas que suben y se desvanecen.
+     Un solo canvas sin eventos; solo en mouse; se apaga con reducción de movimiento;
+     no se dibuja dentro del juego ya iniciado. */
+  (() => {
+    if (!matchMedia('(hover:hover) and (pointer:fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d');
+    cv.setAttribute('aria-hidden', 'true');
+    cv.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:100';
+    document.body.appendChild(cv);
+    const size = () => { const d = Math.min(devicePixelRatio || 1, 2); cv.width = innerWidth * d; cv.height = innerHeight * d; cx.setTransform(d, 0, 0, d, 0, 0); };
+    size(); addEventListener('resize', size);
+    const COL = ['154,120,166', '216,200,230', '216,200,230', '255,77,166'], P = [], MAX = 48;
+    let lx = -99, ly = -99, raf = 0, last = 0;
+    const loop = t => {
+      const dt = Math.min(48, t - last) / 16.7; last = t;
+      cx.clearRect(0, 0, innerWidth, innerHeight);
+      for (let i = P.length - 1; i >= 0; i--) {
+        const p = P[i]; p.l -= dt;
+        if (p.l <= 0) { P.splice(i, 1); continue; }
+        p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= .985;
+        cx.fillStyle = `rgba(${p.c},${(Math.min(1, p.l / p.m) * .7).toFixed(2)})`;
+        cx.beginPath();
+        if (p.pt) cx.ellipse(p.x, p.y, p.r * 1.6, p.r * .9, p.rot, 0, 6.283); else cx.arc(p.x, p.y, p.r, 0, 6.283);
+        cx.fill();
+      }
+      raf = P.length ? requestAnimationFrame(loop) : 0;
+    };
+    addEventListener('pointermove', e => {
+      if (e.pointerType !== 'mouse' || document.hidden) return;
+      if (document.body.classList.contains('ingame') && !$('#intro').classList.contains('on')) return;
+      if (Math.hypot(e.clientX - lx, e.clientY - ly) < 26) return;
+      lx = e.clientX; ly = e.clientY;
+      if (P.length >= MAX) P.shift();
+      const l = 55 + Math.random() * 40;
+      P.push({ x: lx + Math.random() * 10 - 5, y: ly + Math.random() * 10 - 5, vx: Math.random() * .6 - .3, vy: -(.25 + Math.random() * .45), r: 1 + Math.random() * 1.6, c: COL[Math.random() * COL.length | 0], l, m: l, pt: Math.random() < .3, rot: Math.random() * 3 });
+      if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); }
+    }, { passive: true });
+  })();
 
   /* Notas escondidas */
   document.addEventListener('click', e => { const t = e.target.closest('[data-note]'); if (t) { e.preventDefault(); openNote(t.dataset.note); } });

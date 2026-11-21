@@ -423,7 +423,7 @@
     transition: transform .7s cubic-bezier(.2, .8, .2, 1)
 }
 
-.cc.fl .in3 {
+.cc.flipped .in3 {
     transform: rotateY(180deg)
 }
 
@@ -490,6 +490,16 @@
 .cc:hover::after,
 .cc:focus-visible::after {
     opacity: 1
+}
+
+.cf::before {
+    pointer-events: none
+}
+
+/* Solo la cara visible recibe punteros */
+.cc.flipped .cf,
+.cc:not(.flipped) .cb {
+    pointer-events: none
 }
 
 .cc.sel2 {
@@ -1526,4 +1536,329 @@ p.team {
 .rd:focus .pl,
 .rd:focus-within .pl {
     opacity: 1
+}
+
+/* ===== Portada: sala de resonancia ===== */
+#intro {
+    background: radial-gradient(120% 85% at 50% 36%, #2A1750 0%, #17102F 42%, #0B0E1A 82%)
+}
+
+#intro.ctr {
+    padding-top: 64px;
+    padding-bottom: clamp(130px, 28vh, 300px)
+}
+
+/* Velo oscuro detrás del texto: el título manda sobre los anillos */
+#intro>div:not(.sc)::before {
+    content: "";
+    position: absolute;
+    inset: -60px -12vw;
+    z-index: -1;
+    background: radial-gradient(ellipse at center, rgba(11, 14, 26, .78), transparent 68%)
+}
+
+#intro h1 {
+    text-shadow: 0 0 36px rgba(154, 120, 166, .75), 0 0 90px rgba(255, 77, 166, .28), 0 2px 0 rgba(11, 14, 26, .6)
+}
+
+#intro .dot {
+    background: #FF4DA6;
+    box-shadow: 0 0 22px 6px rgba(255, 77, 166, .6), 0 0 0 8px rgba(255, 77, 166, .14);
+    animation: pulse 3s ease-in-out infinite
+}
+
+#go {
+    padding: 12px 30px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    border-color: rgba(255, 77, 166, .75);
+    background: rgba(11, 14, 26, .55);
+    box-shadow: 0 0 26px rgba(255, 77, 166, .22), inset 0 0 18px rgba(255, 77, 166, .12);
+    transition: box-shadow .4s, background .4s
+}
+
+#go:hover {
+    background: rgba(255, 77, 166, .16);
+    box-shadow: 0 0 40px rgba(255, 77, 166, .42), inset 0 0 22px rgba(255, 77, 166, .2)
+}
+
+#intro .cue {
+    margin-top: 34px
+}
+
+/* Capas, de atrás hacia delante */
+.sc .moon,
+.sc .wsp,
+.sc .res {
+    z-index: 1
+}
+
+.sc .crack,
+.sc .floor {
+    z-index: 2
+}
+
+.sc .fog {
+    z-index: 4
+}
+
+.sc .vits {
+    z-index: 5
+}
+
+.sc .ff {
+    position: absolute;
+    inset: 0;
+    z-index: 6
+}
+
+.sc .moon {
+    background: radial-gradient(circle at 50% 37%, rgba(255, 77, 166, .16), rgba(138, 111, 208, .16) 22%, transparent 46%)
+}
+
+/* Anillos de resonancia */
+.res circle {
+    fill: none;
+    transform-box: view-box;
+    transform-origin: 50% 37%
+}
+
+.res .r0 {
+    stroke: rgba(216, 200, 230, .5);
+    stroke-width: 2;
+    stroke-dasharray: 1 16;
+    stroke-linecap: round;
+    animation: spin 90s linear infinite
+}
+
+.res .r1 {
+    stroke: rgba(138, 111, 208, .45);
+    stroke-width: 1;
+    stroke-dasharray: 60 14 6 14;
+    animation: spin 140s linear infinite reverse
+}
+
+.res .r2 {
+    stroke: rgba(255, 77, 166, .4);
+    stroke-width: 1;
+    animation: breathe 5s ease-in-out infinite
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg)
+    }
+}
+
+@keyframes breathe {
+    50% {
+        stroke: rgba(255, 77, 166, .12);
+        transform: scale(1.03)
+    }
+}
+
+/* Grieta fucsia: cae desde lo alto hasta la vitrina de Naxaly */
+.crack path {
+    fill: none;
+    stroke: #FF4DA6;
+    stroke-width: 1.5;
+    vector-effect: non-scaling-stroke;
+    stroke-linejoin: bevel;
+    opacity: .5;
+    filter: drop-shadow(0 0 5px #FF4DA6);
+    animation: pulse 4s ease-in-out infinite
+}
+
+/* Suelo del museo en perspectiva */
+.sc .floor {
+    top: auto;
+    height: 44%;
+    -webkit-mask-image: linear-gradient(transparent, #000 38%);
+    mask-image: linear-gradient(transparent, #000 38%)
+}
+
+/* La niebla se desplaza: se ensancha para no dejar una franja sin cubrir */
+.sc .fog {
+    width: 106%
+}
+
+.floor i {
+    position: absolute;
+    left: -60%;
+    right: -60%;
+    bottom: -30%;
+    height: 150%;
+    transform-origin: 50% 100%;
+    transform: perspective(620px) rotateX(64deg);
+    background:
+        repeating-linear-gradient(90deg, rgba(176, 140, 200, .5) 0 1px, transparent 1px 96px),
+        repeating-linear-gradient(0deg, rgba(176, 140, 200, .38) 0 1px, transparent 1px 96px),
+        radial-gradient(ellipse at 50% 0%, rgba(255, 77, 166, .14), transparent 60%)
+}
+
+/* Vitrinas: arcos ancestrales en distintas profundidades */
+.vits figure {
+    --w: clamp(84px, min(11.5vw, 19vh), 188px);
+    position: absolute;
+    margin: 0;
+    width: var(--w);
+    aspect-ratio: 3/4.5;
+    padding: 6px;
+    border-radius: 999px 999px 6px 6px;
+    background: linear-gradient(160deg, rgba(243, 230, 238, .4), color-mix(in srgb, var(--ac) 35%, transparent) 40%, rgba(255, 77, 166, .22));
+    box-shadow: 0 0 38px color-mix(in srgb, var(--ac) 42%, transparent), 0 30px 40px -18px rgba(0, 0, 0, .8);
+    animation: vin 1.4s cubic-bezier(.2, .8, .2, 1) both, vfloat 7s ease-in-out infinite alternate;
+    animation-delay: var(--di, .2s), var(--t)
+}
+
+.vits img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 18%;
+    display: block;
+    border-radius: 999px 999px 2px 2px;
+    filter: saturate(1.05) brightness(.92)
+}
+
+/* Reflejo del cristal */
+.vits figure::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 999px 999px 2px 2px;
+    background: linear-gradient(115deg, rgba(255, 255, 255, .22), transparent 30%, transparent 62%, rgba(255, 255, 255, .06));
+    pointer-events: none
+}
+
+/* Charco de luz en el suelo */
+.vits figure::after {
+    content: "";
+    position: absolute;
+    left: -20%;
+    right: -20%;
+    top: calc(100% - 8px);
+    height: 28px;
+    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--ac) 60%, transparent), transparent 70%);
+    filter: blur(3px);
+    pointer-events: none
+}
+
+/* Placa de la vitrina */
+.vits figcaption {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    padding-top: 6px;
+    border-top: 1px solid color-mix(in srgb, var(--ac) 65%, transparent);
+    font: 12px var(--mono);
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--t1)
+}
+
+/* Composición asimétrica: atrás (más alto, más suave) y delante */
+.vits .v1 {
+    --ac: #8A6FD0;
+    --di: .2s;
+    left: 4%;
+    bottom: 22%
+}
+
+.vits .v2 {
+    --ac: #7C8FD8;
+    --di: .4s;
+    --w: clamp(96px, min(13vw, 22vh), 214px);
+    left: 15%;
+    bottom: 8%
+}
+
+.vits .v3 {
+    --ac: #4FA3E8;
+    --di: .6s;
+    --w: clamp(96px, min(13vw, 22vh), 214px);
+    right: 21%;
+    bottom: 7%
+}
+
+.vits .v4 {
+    --ac: #FF4DA6;
+    --di: .8s;
+    --w: clamp(92px, min(12.5vw, 21vh), 202px);
+    right: 6%;
+    bottom: 21%
+}
+
+@keyframes vin {
+    from {
+        opacity: 0;
+        translate: 0 28px
+    }
+}
+
+@keyframes vfloat {
+    to {
+        transform: translateY(-8px)
+    }
+}
+
+/* Móvil: las cuatro vitrinas en diagonal ascendente */
+@media(max-width:700px) {
+    #intro.ctr {
+        padding-top: 56px;
+        padding-bottom: clamp(190px, 33vh, 260px)
+    }
+
+    .vits figure,
+    .vits .v2,
+    .vits .v3,
+    .vits .v4 {
+        --w: 22vw
+    }
+
+    .vits figcaption {
+        font-size: 10px;
+        letter-spacing: .14em
+    }
+
+    .vits .v1 {
+        left: 3%;
+        bottom: 9%
+    }
+
+    .vits .v2 {
+        left: 28%;
+        bottom: 6%
+    }
+
+    .vits .v3 {
+        right: 28%;
+        bottom: 9.5%
+    }
+
+    .vits .v4 {
+        right: 3%;
+        bottom: 13%
+    }
+
+    .sc .floor {
+        height: 38%
+    }
+}
+
+@media(prefers-reduced-motion:reduce) {
+
+    .vits figure,
+    .res circle,
+    .crack path,
+    #intro .dot {
+        animation: none
+    }
+}
+
+/* Reverso de las tarjetas: altura mínima para que quepan texto y botones en pantallas estrechas */
+.cc {
+    min-height: 340px
 }

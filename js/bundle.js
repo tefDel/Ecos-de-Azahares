@@ -1588,7 +1588,11 @@
     n6: ["Cada ciclo, otra puerta. Cada puerta, otra flor. Esta vez, \xBFpara qui\xE9n?", "Al final de la p\xE1gina"],
     n7: ["Adri\xE1n: las encontraste todas. No s\xE9 qui\xE9n eres, pero la flor ya sabe tu nombre. Sube y cruza la puerta.", "La s\xE9ptima nota"]
   };
-  var TABS = ["Lorem ipsum: las ruinas de Deileanna, origen de los glifos que decoran cada expediente.", "Lorem ipsum: las semillas de Sael Vantorin, protegidas por el anclaje que es el museo.", "Lorem ipsum: el Pulso, lo que late bajo la Resonancia y une a todos los resonantes."];
+  var TABS = [
+    "Deileanna es la civilizaci\xF3n milenaria que canalizaba la Resonancia Primordial. De sus ruinas vienen los glifos que decoran cada expediente.",
+    "Sael Vantorin se fragment\xF3 en ocho semillas: Rythden, Nyxa, Tala, Volt, Kael, Lyra, Virena y Naxaly. El museo es el anclaje que las protege.",
+    "El Pulso es el evento que fractur\xF3 Khaelos. Dej\xF3 los archivos de audio incompletos, las l\xEDneas temporales distorsionadas y una energ\xEDa fucsia que corrompe los recuerdos."
+  ];
   var found = [];
   try {
     found = JSON.parse(localStorage.getItem("ecos-notas") || "[]");
@@ -1616,7 +1620,14 @@
     $("#note").hidden = true;
     if (found.filter((n) => n !== "n7").length === 6 && !found.includes("n7")) setTimeout(() => openNote("n7"), 500);
   }
+  var plDown = null;
+  var CTRL = ".pl,[data-note],a,button";
   function initSite() {
+    $("#play").addEventListener("click", (e) => {
+      e.preventDefault();
+      $("#game").scrollIntoView({ behavior: "smooth" });
+      if ($("#intro").classList.contains("on")) $("#go").click();
+    });
     $(".ff").innerHTML = Array.from({ length: 16 }, () => `<i style="--x:${Math.random() * 100}%;--y:${40 + Math.random() * 55}%;--d:${4 + Math.random() * 6}s;--dx:${Math.random() * 60 - 30}px"></i>`).join("");
     const layers = $$(".sc .l");
     const move = (x, y) => layers.forEach((l) => {
@@ -1655,16 +1666,22 @@
     };
     $$(".tabs button").forEach((b, i) => b.onclick = () => tab(i));
     tab(0);
+    addEventListener("pointerdown", (e) => {
+      plDown = e.target.closest && e.target.closest(".pl") || null;
+    }, true);
     $$(".cc").forEach((c) => {
       const flip = () => {
         $$(".cc").forEach((o) => o !== c && o.classList.remove("sel2"));
-        c.classList.toggle("fl");
+        c.classList.toggle("flipped");
         c.classList.add("sel2");
+        c.style.transform = "";
       };
       c.onclick = (e) => {
-        if (!e.target.closest("[data-note]")) flip();
+        if (plDown || e.target.closest(CTRL)) return;
+        flip();
       };
       c.onkeydown = (e) => {
+        if (e.target.closest(CTRL)) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           flip();
@@ -1674,7 +1691,7 @@
         const r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
         c.style.setProperty("--mx", x * 100 + "%");
         c.style.setProperty("--my", y * 100 + "%");
-        if (e.pointerType === "mouse") c.style.transform = `rotateX(${(0.5 - y) * 12}deg) rotateY(${(x - 0.5) * 14}deg)`;
+        if (e.pointerType === "mouse" && !c.classList.contains("flipped")) c.style.transform = `rotateX(${(0.5 - y) * 12}deg) rotateY(${(x - 0.5) * 14}deg)`;
       };
       c.onpointerleave = () => {
         c.style.transform = "";
@@ -1709,8 +1726,12 @@
       if (e.key === "Enter") ph.classList.toggle("open");
     };
     $$(".rd").forEach((r) => {
-      r.onclick = () => r.classList.toggle("on");
+      r.onclick = (e) => {
+        if (plDown || e.target.closest(".pl")) return;
+        r.classList.toggle("on");
+      };
       r.onkeydown = (e) => {
+        if (e.target.closest(".pl")) return;
         if (e.key === "Enter") r.classList.toggle("on");
       };
     });
@@ -1748,33 +1769,104 @@
       Aud.mute(!e.isIntersecting || S.muted);
     }, { threshold: 0.05 }).observe($("#game"));
     window.__ecos = 1;
-    $("#play").onclick = (e) => {
-      e.preventDefault();
-      $("#game").scrollIntoView({ behavior: "smooth" });
-      if ($("#intro").classList.contains("on")) setTimeout(() => $("#go").click(), 450);
-    };
     let cur = null, curBtn = null;
-    $$(".pl").forEach((b) => {
-      b.addEventListener("keydown", (e) => e.stopPropagation());
-      b.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const same = curBtn === b;
-        if (cur) {
-          cur.pause();
-          curBtn.textContent = "\u25B6 Escuchar";
-          cur = curBtn = null;
-        }
-        if (same) return;
-        cur = new Audio(b.dataset.audio);
-        curBtn = b;
-        cur.play();
+    const stopAud = () => {
+      if (cur) {
+        cur.pause();
+        curBtn.textContent = curBtn.dataset.l || "\u25B6 Escuchar";
+        cur = curBtn = null;
+      }
+    };
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest && e.target.closest(".pl") || plDown;
+      plDown = null;
+      if (!b) return;
+      const same = curBtn === b;
+      stopAud();
+      if (same) return;
+      cur = new Audio(encodeURI(b.dataset.audio));
+      curBtn = b;
+      cur.onended = stopAud;
+      cur.onerror = () => {
+        b.textContent = "Audio no disponible";
+        cur = curBtn = null;
+      };
+      cur.play().then(() => {
         b.textContent = "\u275A\u275A Pausar";
-        cur.onended = () => {
-          b.textContent = "\u25B6 Escuchar";
-          cur = curBtn = null;
-        };
+      }).catch(() => {
+        b.textContent = "Audio no disponible";
+        cur = curBtn = null;
       });
     });
+    $("#nav .logo").title = "Volver a la portada";
+    $("#nav .logo").addEventListener("click", (e) => {
+      e.preventDefault();
+      history.replaceState(null, "", location.pathname);
+      scrollTo(0, 0);
+      location.reload();
+    });
+    $$(".tm").forEach((c) => {
+      const t = () => c.classList.toggle("on");
+      c.onclick = (e) => {
+        if (!e.target.closest("a")) t();
+      };
+      c.onkeydown = (e) => {
+        if (e.key === "Enter") t();
+      };
+    });
+    (() => {
+      if (!matchMedia("(hover:hover) and (pointer:fine)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const cv = document.createElement("canvas"), cx = cv.getContext("2d");
+      cv.setAttribute("aria-hidden", "true");
+      cv.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:100";
+      document.body.appendChild(cv);
+      const size = () => {
+        const d = Math.min(devicePixelRatio || 1, 2);
+        cv.width = innerWidth * d;
+        cv.height = innerHeight * d;
+        cx.setTransform(d, 0, 0, d, 0, 0);
+      };
+      size();
+      addEventListener("resize", size);
+      const COL = ["154,120,166", "216,200,230", "216,200,230", "255,77,166"], P = [], MAX = 48;
+      let lx = -99, ly = -99, raf = 0, last2 = 0;
+      const loop2 = (t) => {
+        const dt = Math.min(48, t - last2) / 16.7;
+        last2 = t;
+        cx.clearRect(0, 0, innerWidth, innerHeight);
+        for (let i = P.length - 1; i >= 0; i--) {
+          const p = P[i];
+          p.l -= dt;
+          if (p.l <= 0) {
+            P.splice(i, 1);
+            continue;
+          }
+          p.x += p.vx * dt;
+          p.y += p.vy * dt;
+          p.vx *= 0.985;
+          cx.fillStyle = `rgba(${p.c},${(Math.min(1, p.l / p.m) * 0.7).toFixed(2)})`;
+          cx.beginPath();
+          if (p.pt) cx.ellipse(p.x, p.y, p.r * 1.6, p.r * 0.9, p.rot, 0, 6.283);
+          else cx.arc(p.x, p.y, p.r, 0, 6.283);
+          cx.fill();
+        }
+        raf = P.length ? requestAnimationFrame(loop2) : 0;
+      };
+      addEventListener("pointermove", (e) => {
+        if (e.pointerType !== "mouse" || document.hidden) return;
+        if (document.body.classList.contains("ingame") && !$("#intro").classList.contains("on")) return;
+        if (Math.hypot(e.clientX - lx, e.clientY - ly) < 26) return;
+        lx = e.clientX;
+        ly = e.clientY;
+        if (P.length >= MAX) P.shift();
+        const l = 55 + Math.random() * 40;
+        P.push({ x: lx + Math.random() * 10 - 5, y: ly + Math.random() * 10 - 5, vx: Math.random() * 0.6 - 0.3, vy: -(0.25 + Math.random() * 0.45), r: 1 + Math.random() * 1.6, c: COL[Math.random() * COL.length | 0], l, m: l, pt: Math.random() < 0.3, rot: Math.random() * 3 });
+        if (!raf) {
+          last2 = performance.now();
+          raf = requestAnimationFrame(loop2);
+        }
+      }, { passive: true });
+    })();
     document.addEventListener("click", (e) => {
       const t = e.target.closest("[data-note]");
       if (t) {

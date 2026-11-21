@@ -30,29 +30,28 @@
     </header>
     <div id="say" class="ov pill"></div>
 
-    <section id="intro" class="ov ctr on">
-            <div class="sc" aria-hidden="true">
+        <section id="intro" class="ov ctr on">
+      <div class="sc" aria-hidden="true">
         <div class="moon l" data-d="10"></div>
         <div class="wsp w1 l" data-d="14"></div>
         <div class="wsp w2 l" data-d="22"></div>
-        <div class="runes l" data-d="26">
-          <i style="--x:8%;--y:34%;--t:0s">ᚾᚣᛉᚨ</i>
-          <i style="--x:15%;--y:62%;--t:-3s">ᛞᛟᚱ</i>
-          <i style="--x:84%;--y:48%;--t:-5s">ᚲᚱᚢ</i>
-          <i style="--x:91%;--y:70%;--t:-2s">ᛏᚨᛚᚨ</i>
-          <i style="--x:5%;--y:12%;--t:-6s">ᚱᚣᚦ</i>
-          <i style="--x:72%;--y:78%;--t:-4s">ᚾᚨᚲ</i>
-        </div>
-        <svg class="l hills" data-d="18" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
-          <path d="M0 400V250Q120 190 250 240T520 220T780 250T1000 210V400Z" fill="#1A1331" />
+        <svg class="l res" data-d="12">
+          <circle class="r0" cx="50%" cy="37%" r="33%" />
+          <circle class="r1" cx="50%" cy="37%" r="25%" />
+          <circle class="r2" cx="50%" cy="37%" r="17%" />
         </svg>
-        <svg class="l hills" data-d="34" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
-          <path d="M0 400V310Q200 265 400 300T800 290T1000 310V400Z" fill="#120E24" />
+        <svg class="l crack" data-d="30" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M88 0L86 8L89 14L84 24L86 30L80 40L82 47L77 58" />
+          <path d="M84 24L90 29L88 36" />
         </svg>
-        <svg class="l fore" data-d="55" viewBox="0 0 1000 400" preserveAspectRatio="xMidYMax slice">
-          <path d="M0 400V360Q250 335 500 352T1000 345V400Z" fill="#0B0E1A" />
-        </svg>
+        <div class="floor l" data-d="40"><i></i></div>
         <div class="fog l" data-d="20"></div>
+        <div class="vits l" data-d="26">
+          <figure class="v1" style="--t:0s"><img src="assets/imgs/IMGs_Trasmedia/Nyxa.jpeg" alt=""><figcaption>Nyxa</figcaption></figure>
+          <figure class="v2" style="--t:-3s"><img src="assets/imgs/IMGs_Trasmedia/Tala.jpeg" alt=""><figcaption>Tala</figcaption></figure>
+          <figure class="v3" style="--t:-5s"><img src="assets/imgs/IMGs_Trasmedia/Volt.jpeg" alt=""><figcaption>Volt</figcaption></figure>
+          <figure class="v4" style="--t:-2s"><img src="assets/imgs/IMGs_Trasmedia/Naxaly.jpeg" alt=""><figcaption>Naxaly</figcaption></figure>
+        </div>
         <div class="ff"></div>
       </div>
       <div>
@@ -61,10 +60,6 @@
         <p>Una experiencia narrativa y un podcast interactivo: cada resonante se libera solo cuando escuchas su historia
           completa. Funciona mejor con audífonos.</p>
         <button id="go">Comenzar con sonido</button>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
         <p class="cue">↓ el museo continúa abajo</p>
       </div>
     </section>
@@ -85,7 +80,7 @@
     <aside id="dossier" class="ov card">
       <p class="m"><span id="dm"></span><button id="dx" style="padding:2px 8px">Cerrar</button></p>
       <p id="dg"></p>
-        <img id="di" alt="">
+      <img id="di" alt="">
       <h2 id="dn"></h2>
       <p class="m" id="de"></p>
       <p class="t" id="dt"></p>
@@ -116,7 +111,7 @@
   <section id="universo" class="sec">
     <i class="rp" data-note="n2" aria-label="Pétalo"></i>
     <p class="wh" style="left:62%;top:26%">Cada vitrina guarda a alguien.</p>
-    <p class="wh"id="n3" data-note="n3" style="right:7%;bottom:9%">El archivo ya te cuenta como testigo.</p>
+    <p class="wh" id="n3" data-note="n3" style="right:7%;bottom:9%">El archivo ya te cuenta como testigo.</p>
     <div class="aura" data-speed=".15"></div>
     <p class="eye rv">Sección 02 · El universo</p>
     <h2 class="rv">Khaelos guarda<br>lo que olvidamos</h2>
@@ -139,12 +134,13 @@
         </div>
       </article>
       <div class="txt rv">
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. En el centro de la ciudad hay un museo que no
-          aparece en ningún mapa; solo se abre para quien guarda una flor de azahar. </p>
+        <p>En un continente fracturado por el Pulso, las ruinas de una civilización milenaria conviven con la leyenda
+          de un museo imposible, que aparece entre las grietas del tiempo y solo se abre para quien guarda una flor de
+          azahar.</p>
         <div class="tabs" role="tablist"><button data-k="0" class="on">Deileanna</button><button data-k="1">Las
             semillas</button><button data-k="2">El Pulso</button></div>
-        <p id="tabtx" class="tabtx">Lorem ipsum: las ruinas de Deileanna, origen de los glifos que decoran cada
-          expediente.</p>
+        <p id="tabtx" class="tabtx">Deileanna es la civilización milenaria que canalizaba la Resonancia Primordial. De
+          sus ruinas vienen los glifos que decoran cada expediente.</p>
       </div>
     </div>
   </section>
@@ -187,9 +183,11 @@
           </div>
           <div class="cb">
             <p class="m2">Guía del anclaje</p>
-            <p>Sabe más del museo de lo que Adrián imagina. Lorem ipsum dolor sit amet.</p>
-            <p class="m2">Detalle: provisional</p>
+            <p>Sabe más del museo de lo que Adrián imagina: es una de las ocho semillas de Sael Vantorin y busca liberar
+              a sus compañeros.</p>
+            <p class="m2">Detalle: busca liberar a los resonantes</p>
             <button class="pl" data-audio="audios/Rythden.mp3">▶ Escuchar</button>
+            <button class="pl" data-l="▶ Bitácora 2" data-audio="audios/Rythden2.mp3">▶ Bitácora 2</button>
           </div>
         </div>
       </div>
@@ -203,7 +201,7 @@
           <div class="cb">
             <p class="m2">Guardiana de archivos</p>
             <p>Junto a Rythden explica el anclaje que protege las semillas de Sael Vantorin.</p>
-            <p class="m2">Detalle: provisional</p>
+            <p class="m2">Detalle: investiga los archivos ancestrales</p>
             <button class="pl" data-audio="audios/Dra Selene.mp3">▶ Escuchar</button>
           </div>
         </div>
@@ -233,13 +231,13 @@
           <div class="cb">
             <p class="m2">Recuerdo en una vitrina</p>
             <p>Su recuerdo guarda una vitrina del museo. Más adelante podrá manipular el tiempo.</p>
-            <p class="m2">Detalle: provisional</p>
+            <p class="m2">Detalle: una de las ocho semillas de Sael</p>
             <button class="pl" data-audio="audios/Naxaly.mp3">▶ Escuchar</button>
           </div>
         </div>
       </div>
     </div>
-      <div class="tes3">
+        <div class="tes3">
       <p class="rd" tabindex="0"><img class="av" src="assets/imgs/IMGs_Trasmedia/Nyxa.jpeg" alt="Nyxa"><span class="m2">Nyxa</span>Aquí las sombras no persiguen: sostienen. Si me nombras, me
         haces un poco más real.<button class="pl" data-audio="audios/Nyxa preview 2.mp3">▶ Escuchar</button></p>
       <p class="rd" tabindex="0"><img class="av" src="assets/imgs/IMGs_Trasmedia/Tala.jpeg" alt="Tala"><span class="m2">Tala</span>Lo que ruge en mí no es mío. Son las bestias que otros
@@ -330,7 +328,7 @@
     </div>
   </section>
 
-    <section id="equipo" class="sec dark">
+  <section id="equipo" class="sec dark">
     <p class="eye rv">Sección 05 · Equipo</p>
     <h2 class="rv">Quienes le dieron<br>vida a Ecos</h2>
     <div class="tgrid">
@@ -349,7 +347,7 @@
       </div>
       <div class="tmw rv" style="transition-delay:.12s">
         <article class="tm" tabindex="0" role="button" aria-label="Valentina Montero Zapata">
-          <div class="ph"><img src="assets/imgs/equipo/PhotoLinkedIn0.JPG" alt="Foto de Valentina Montero Zapata" loading="lazy" style="object-position:51% 35%"></div>
+          <div class="ph"><img src="assets/imgs/equipo/PhotoLinkedIn0.jpg" alt="Foto de Valentina Montero Zapata" loading="lazy" style="object-position:51% 35%"></div>
           <div class="ov"></div>
           <div class="inf">
             <h3>Valentina Montero Zapata <i class="vf">✿</i></h3>

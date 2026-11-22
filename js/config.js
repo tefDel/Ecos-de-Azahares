@@ -15,6 +15,9 @@ export const CONFIG = {
     core: 'audios/Naxaly.mp3'
   },
   /* Imágenes que sustituyen elementos dibujados con código (se usan tal cual, con su transparencia y proporción) */
-  images: { florFucsia: 'assets/imgs/IMGs_Trasmedia/florFucsia.png' },
+  images: {
+    florFucsia: 'assets/imgs/IMGs_Trasmedia/florFucsia.png',
+    florColores: 'assets/imgs/IMGs_Trasmedia/florColores.png'
+  },
   models: { city: null, gal: null, core: null, flor: null }
 };

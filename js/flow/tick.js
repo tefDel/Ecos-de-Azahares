@@ -1,6 +1,7 @@
 /* Lógica que corre en cada fotograma (dt = segundos desde el anterior). */
 import { $, RM } from '../utils.js';
 import { S } from '../state.js';
+import { CHARACTER_COLORS } from '../data.js';
 import { W } from '../world/index.js';
 import { FX, wave } from '../fx.js';
 import { durOf, updDoss, liberate } from './dossier.js';
@@ -16,7 +17,7 @@ function updateAmbience(dt) {
 
   if (Math.abs(S.mood - lastAccent) > .01) {
     lastAccent = S.mood;
-    const c = new THREE.Color(0xb59ab2).lerp(new THREE.Color(0xe0b25a), S.mood);
+    const c = new THREE.Color(0x864269).lerp(new THREE.Color(0xb19baf), S.mood);
     document.documentElement.style.setProperty('--accent', '#' + c.getHexString());
   }
 }
@@ -37,9 +38,10 @@ function updateGalleryTurn(dt) {
 /* Reproductor del expediente (la onda siempre se ve sana) */
 function updateDossierPlayback(dt) {
   if (!S.dossier || !S.dv) return;
-  wave($('#dw'), S.dv.an, 0);
-  if (S.playing && !S.freed.has(S.dossier)) {
+  wave($('#dw'), S.dv.an, 0, CHARACTER_COLORS[S.dossier]);
+  if (S.playing && !S.seeking && !S.freed.has(S.dossier)) {
     S.heard[S.dossier] += dt;
+    S.maxHeard[S.dossier] = Math.max(S.maxHeard[S.dossier] || 0, S.heard[S.dossier]);
     updDoss();
     if (S.heard[S.dossier] >= durOf(S.dossier)) liberate(S.dossier);
   }
@@ -50,6 +52,6 @@ export function tick(dt) {
   updateGalleryTurn(dt);
   updateDossierPlayback(dt);
   if (S.p === 2 && S.tracks.length) tickTracks(dt);
-  if (S.step === 2 && S.cv) wave($('#fw'), S.cv.an, 0);
+  if (S.step === 2 && S.cv) wave($('#fw'), S.cv.an, 0, CHARACTER_COLORS.rythden);
   FX.draw(S.glitch);
 }

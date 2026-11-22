@@ -2,7 +2,7 @@
    Mantén presionado un registro para subir su integridad; cada pocos segundos un registro se degrada. */
 import { $, clamp, fmt } from '../utils.js';
 import { S } from '../state.js';
-import { RES, FRAG } from '../data.js';
+import { RES, FRAG, CHARACTER_COLORS } from '../data.js';
 import { Aud } from '../audio/index.js';
 import { wave } from '../fx.js';
 import { say, show, setPhase } from './ui.js';
@@ -76,8 +76,8 @@ function renderRow(el, t, i, c) {
     : fmt(((performance.now() - t.t0) / 1000) % 151) + ' / 02:31';
   const b = el.querySelector('.bar i');
   b.style.width = t.int * 100 + '%';
-  b.style.background = t.locked ? '#e0b25a' : '#FF007F';
-  wave(el.querySelector('canvas'), t.dead ? null : t.v.an, c);
+  b.style.background = t.locked ? 'var(--t2)' : 'var(--ac)';
+  wave(el.querySelector('canvas'), t.dead ? null : t.v.an, c, CHARACTER_COLORS[t.id]);
 }
 
 export function tickTracks(dt) {

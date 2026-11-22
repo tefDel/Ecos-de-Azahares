@@ -23,8 +23,11 @@ export const S = {
   letter: false,
   dossier: null,     // id del resonante abierto
   heard: {},         // segundos escuchados por resonante
+  maxHeard: {},      // punto más lejano escuchado por resonante
   freed: new Set(),  // resonantes liberados
   playing: false,
+  seeking: false,
+  resumeAfterSeek: false,
   dv: null,          // voz del expediente
   yawT: null,        // giro de cámara objetivo
   dir: 0,            // giro por teclado/botones (-1, 0, 1)

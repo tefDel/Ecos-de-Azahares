@@ -50,9 +50,13 @@
     // id del resonante abierto
     heard: {},
     // segundos escuchados por resonante
+    maxHeard: {},
+    // punto más lejano escuchado por resonante
     freed: /* @__PURE__ */ new Set(),
     // resonantes liberados
     playing: false,
+    seeking: false,
+    resumeAfterSeek: false,
     dv: null,
     // voz del expediente
     yawT: null,
@@ -78,6 +82,109 @@
     // distorsión actual / objetivo
   };
 
+  // js/data.js
+  var PHASES = ["Detonante", "Teseracto", "Fractura", "N\xFAcleo"];
+  var IDS = ["nyxa", "tala", "volt"];
+  var CHARACTER_COLORS = Object.freeze({
+    volt: "#FFD60A",
+    nyxa: "#9B59E0",
+    lyra: "#5CCBFF",
+    tala: "#A9713B",
+    naxaly: "#FF2E93",
+    kael: "#E32B2B",
+    rythden: "#3A5F8A",
+    selene: "#3A5F8A",
+    virena: "#8FE388",
+    adrian: "#6E8B3D",
+    fractura: "#6F36A3"
+  });
+  var RES = {
+    nyxa: {
+      n: 1,
+      name: "Nyxa",
+      epi: "La que habita entre sombras",
+      glyph: "\u16BE\u16A3\u16C9\u16A8 \u16DE\u16DF\u16B1",
+      dur: 30,
+      angle: 0,
+      img: "assets/imgs/IMGs_Trasmedia/Nyxa.jpeg",
+      txt: "Aqu\xED las sombras no persiguen: sostienen. Aprend\xED a vivir en el borde de lo que nadie mira. Si me nombras, me haces un poco m\xE1s real. N\xF3mbrame despacio."
+    },
+    tala: {
+      n: 2,
+      name: "Tala",
+      epi: "La de los ecos de bestias",
+      glyph: "\u16CF\u16A8\u16DA\u16A8 \u16B2\u16B1\u16A2",
+      dur: 30,
+      angle: 2 * Math.PI / 3,
+      img: "assets/imgs/IMGs_Trasmedia/Tala.jpeg",
+      txt: "Lo que ruge en m\xED no es m\xEDo. Son las bestias que otros callaron, convertidas en voz. Cuando el pasillo tiembla, soy yo recordando que alguna vez corr\xED libre."
+    },
+    volt: {
+      n: 3,
+      name: "Volt",
+      epi: "El de la jaula de energ\xEDa",
+      glyph: "\u16A1\u16DF\u16DA\u16CF \u16D6\u16BE\u16C9",
+      dur: 30,
+      angle: 4 * Math.PI / 3,
+      img: "assets/imgs/IMGs_Trasmedia/Volt.jpeg",
+      txt: 'Me llaman corriente, pero soy un deseo sin salida. Cada barrote es una vez que dije "despu\xE9s". La jaula no me contiene: me recuerda.'
+    }
+  };
+  var OPEN = [
+    "Cada ma\xF1ana suena el mismo despertador y cada noche vuelves por la misma calle. Esta vez no la tomes.",
+    "Alguien dej\xF3 una flor en una puerta que no era la tuya. Ven a ver por qu\xE9.",
+    "Hay un museo que guarda lo que ya no recuerdas. Hoy falta algo."
+  ];
+  var MYST = [
+    "\xBFQui\xE9n dej\xF3 la flor de azahar en la puerta?",
+    "\xBFQui\xE9n abri\xF3 la primera grieta en el museo?",
+    "\xBFQui\xE9n escribi\xF3 la carta que te trajo hasta aqu\xED?",
+    "\xBFQui\xE9n borr\xF3 un recuerdo del Teseracto?"
+  ];
+  var CLUES = {
+    nyxa: {
+      nyxa: "Yo no sal\xED de mi sombra... aunque ahora huele a azahar entre mis manos.",
+      tala: "Una bestia roz\xF3 mi sombra y dej\xF3 p\xE9talos en el suelo.",
+      volt: "Sent\xED un chispazo en la oscuridad: alguien con la jaula abierta."
+    },
+    tala: {
+      nyxa: "Entre mis ecos o\xED susurros que solo nacen de las sombras.",
+      tala: "No fui yo... pero mis ecos repiten un paso muy parecido al m\xEDo.",
+      volt: "El suelo ol\xEDa a ozono. Solo hay una jaula que huela as\xED."
+    },
+    volt: {
+      nyxa: "Todas las luces se apagaron un instante. Solo Nyxa apaga luces as\xED.",
+      tala: "Escuch\xE9 pasos de bestia sobre mis barrotes.",
+      volt: "Yo no abr\xED nada... y sin embargo mis barrotes est\xE1n tibios."
+    }
+  };
+  var FRAG = {
+    nyxa: [
+      "Nyxa, en la bit\xE1cora: \xABYo vigilaba la puerta; jam\xE1s la cruc\xE9\xBB.",
+      "Nyxa, en la bit\xE1cora: \xABLa puerta me eligi\xF3 a m\xED y yo dije que s\xED\xBB."
+    ],
+    tala: [
+      "Tala, en la bit\xE1cora: \xABMis ecos rug\xEDan afuera mientras todo ocurr\xEDa\xBB.",
+      "Tala, en la bit\xE1cora: \xABCorr\xED hacia la puerta antes de que nadie me viera\xBB."
+    ],
+    volt: [
+      "Volt, en la bit\xE1cora: \xABEstuve enjaulado toda la noche; los barrotes son testigos\xBB.",
+      "Volt, en la bit\xE1cora: \xABRomp\xED un barrote por un segundo; fue suficiente\xBB."
+    ]
+  };
+  var ENDS = {
+    A: "Acertaste y salvaste casi todo: la verdad se asienta sin dolor y el museo respira.",
+    B: "Acertaste, pero casi todos los registros quedaron mudos. Sabes qui\xE9n fue y nadie queda para recordarlo contigo.",
+    C: "Fallaste, pero los registros se salvaron: el museo guarda la verdad y esperar\xE1 a que vuelvas por ella.",
+    D: "Fallaste y los registros se perdieron. La verdad se qued\xF3 entre las grietas."
+  };
+  var RELEASE = [
+    "Una conversaci\xF3n que nunca tuve",
+    "Un lugar al que no volv\xED",
+    "Un nombre que a\xFAn pronuncio en voz baja",
+    "Una versi\xF3n de m\xED que ya no soy"
+  ];
+
   // js/world/materials.js
   var tint = [];
   var T = (mat, gray, gold) => {
@@ -97,7 +204,7 @@
     x.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(c);
   })();
-  function createFlower(imageUrl) {
+  function createFlower(imageUrl, imageMode = "always") {
     const g = new THREE.Group(), pets = [];
     const art = new THREE.Group();
     g.add(art);
@@ -125,7 +232,18 @@
     glow.scale.set(3.2, 3.2, 1);
     glow.renderOrder = 1;
     g.add(glow);
-    const f = { g, pets, cm, glow, s: 1 };
+    const f = {
+      g,
+      pets,
+      cm,
+      glow,
+      s: 1,
+      art,
+      imageUrl,
+      imageMode,
+      imageVisible: Boolean(imageUrl) && imageMode === "always",
+      imageLoaded: false
+    };
     if (imageUrl) {
       const addImage = (tex) => {
         const H = 2.3, { width, height } = tex.image;
@@ -135,8 +253,10 @@
         );
         img.renderOrder = 2;
         g.add(img);
-        art.visible = false;
         f.img = img;
+        f.imageLoaded = true;
+        img.visible = f.imageVisible;
+        art.visible = !f.imageVisible;
       };
       const onError = () => console.warn("No se pudo cargar", imageUrl, "\u2014 se usa la flor dibujada");
       if (location.protocol === "file:") {
@@ -148,9 +268,10 @@
         image.style.display = "none";
         $("#game").append(image);
         image.onload = () => {
-          art.visible = false;
           f.imageElement = image;
           f.imageHeight = 2.3;
+          f.imageLoaded = true;
+          art.visible = !f.imageVisible;
         };
         image.onerror = onError;
         image.src = imageUrl;
@@ -176,6 +297,10 @@
     f.cm.color.setHex(mode === "neon" ? 16770033 : mode === "none" ? 16777215 : 16774084);
     f.glow.material.color.setHex(mode === "neon" ? 16711807 : mode === "none" ? 16777215 : 16765562);
     f.mode = mode;
+    f.imageVisible = Boolean(f.imageUrl) && (f.imageMode === "always" || mode === f.imageMode);
+    const showImage = f.imageLoaded && f.imageVisible;
+    f.art.visible = !showImage;
+    if (f.img) f.img.visible = showImage;
   }
 
   // js/config.js
@@ -192,7 +317,10 @@
       core: "audios/Naxaly.mp3"
     },
     /* Imágenes que sustituyen elementos dibujados con código (se usan tal cual, con su transparencia y proporción) */
-    images: { florFucsia: "assets/imgs/IMGs_Trasmedia/florFucsia.png" },
+    images: {
+      florFucsia: "assets/imgs/IMGs_Trasmedia/florFucsia.png",
+      florColores: "assets/imgs/IMGs_Trasmedia/florColores.png"
+    },
     models: { city: null, gal: null, core: null, flor: null }
   };
 
@@ -238,6 +366,160 @@
     return { group, doors: doors3, dust: dust2, flower, decor };
   }
 
+  // js/world/vitrinas-extras.js
+  var animate = (mesh, fn) => {
+    mesh.onBeforeRender = () => fn(performance.now() / 1e3);
+  };
+  function fillTala(v) {
+    const R = 0.55;
+    const bump = (x, y, z) => 1 + 0.07 * Math.sin(x * 7.3 + y * 3.1) + 0.07 * Math.sin(y * 6.1 + z * 5.3) + 0.06 * Math.sin(z * 9.7 + x * 2.3);
+    const geo = new THREE.DodecahedronGeometry(R, 3);
+    const pos = geo.attributes.position, col = [];
+    for (let k = 0; k < pos.count; k++) {
+      const x = pos.getX(k), y = pos.getY(k), z = pos.getZ(k), d = new THREE.Vector3(x, y, z).normalize(), n = bump(d.x, d.y, d.z);
+      pos.setXYZ(k, x * n, y * n * 0.92, z * n);
+      const mud = y < -0.12 ? 0.5 : 0.78 + 0.22 * Math.sin(x * 11 + z * 9 + y * 4);
+      col.push(0.44 * mud, 0.3 * mud, 0.18 * mud);
+    }
+    geo.setAttribute("color", new THREE.Float32BufferAttribute(col, 3));
+    geo.computeVertexNormals();
+    v.inner.add(new THREE.Mesh(geo, basic(16777215, { vertexColors: true })));
+    const ochre = basic(16171610);
+    const onStone = (x, y, side) => {
+      const d = new THREE.Vector3(x, y, side).normalize(), r = R * bump(d.x, d.y, d.z) * 1.03;
+      return new THREE.Vector3(d.x * r, d.y * r * 0.92, d.z * r);
+    };
+    const tube = (pts, closed) => new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, closed, "catmullrom", 0.1), pts.length * 4, 0.016, 5, closed), ochre);
+    [1, -1].forEach((side) => {
+      const sx = side;
+      const ring = [], dot = [];
+      for (let k = 0; k < 28; k++) {
+        const a = k / 28 * Math.PI * 2;
+        ring.push(onStone(Math.cos(a) * 0.3 * sx, Math.sin(a) * 0.3 + 0.12, side));
+        if (k % 2 === 0) dot.push(onStone(Math.cos(a) * 0.07 * sx, Math.sin(a) * 0.07 + 0.12, side));
+      }
+      v.inner.add(tube(ring, true), tube(dot, true));
+      for (let k = 0; k < 8; k++) {
+        const a = k / 8 * Math.PI * 2 + 0.2;
+        v.inner.add(tube([onStone(Math.cos(a) * 0.38 * sx, Math.sin(a) * 0.38 + 0.12, side), onStone(Math.cos(a) * 0.52 * sx, Math.sin(a) * 0.52 + 0.12, side)], false));
+      }
+      const zig = [-0.3, -0.15, 0, 0.15, 0.3].map((x, k) => onStone(x * sx, -0.3 - k % 2 * 0.09, side));
+      v.inner.add(tube(zig, false));
+    });
+  }
+  function fillVirena(v) {
+    const sh = new THREE.Shape();
+    sh.moveTo(0, -0.7);
+    sh.bezierCurveTo(0.58, -0.35, 0.5, 0.35, 0, 0.78);
+    sh.bezierCurveTo(-0.5, 0.35, -0.58, -0.35, 0, -0.7);
+    const geo = new THREE.ShapeGeometry(sh, 24), p = geo.attributes.position;
+    for (let k = 0; k < p.count; k++) p.setZ(k, Math.abs(p.getX(k)) * 0.45 - p.getY(k) * p.getY(k) * 0.12);
+    geo.computeVertexNormals();
+    const leaf = new THREE.Mesh(geo, basic(11070362, { side: THREE.DoubleSide }));
+    const veins = [];
+    veins.push(0, -0.7, 0, 0, 0.72, 0);
+    [-0.45, -0.2, 0.05, 0.3].forEach((y) => {
+      const w = 0.38 * (1 - Math.abs(y - 0.05) * 0.9);
+      veins.push(0, y, 0, w, y + 0.2, w * 0.45, 0, y, 0, -w, y + 0.2, w * 0.45);
+    });
+    const vg = new THREE.BufferGeometry();
+    vg.setAttribute("position", new THREE.Float32BufferAttribute(veins, 3));
+    leaf.add(new THREE.LineSegments(vg, new THREE.LineBasicMaterial({ color: 5216842 })));
+    const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.03, 0.4, 8), basic(7323494));
+    stem.position.y = -0.88;
+    leaf.add(stem);
+    v.inner.add(leaf);
+    const spores = [];
+    for (let k = 0; k < 6; k++) {
+      const s = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), basic(15138777, { transparent: true, opacity: 0.85 }));
+      v.inner.add(s);
+      spores.push(s);
+    }
+    animate(leaf, (t) => {
+      leaf.rotation.z = Math.sin(t * 1.1) * 0.1;
+      leaf.rotation.x = Math.sin(t * 0.8) * 0.08;
+      spores.forEach((s, k) => {
+        const a = t * 0.6 + k * 1.05;
+        s.position.set(Math.cos(a) * 0.85, Math.sin(a * 1.4 + k) * 0.7, Math.sin(a) * 0.85);
+      });
+    });
+  }
+  function fillLyra(v) {
+    const cloud = new THREE.Group(), cm = basic(10476031, { transparent: true, opacity: 0.95 });
+    [[0, 0, 0, 0.34], [-0.3, -0.06, 0.04, 0.26], [0.3, -0.06, -0.03, 0.27], [-0.13, 0.2, 0, 0.24], [0.15, 0.22, 0.02, 0.22]].forEach(([x, y, z, r]) => {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 10), cm);
+      m.position.set(x, y, z);
+      cloud.add(m);
+    });
+    cloud.position.y = 0.3;
+    v.inner.add(cloud);
+    const bolt = new THREE.Shape();
+    [[0.05, 0.2], [-0.1, -0.02], [0, -0.02], [-0.08, -0.24], [0.12, 0], [0.02, 0]].forEach(([x, y], k) => k ? bolt.lineTo(x, y) : bolt.moveTo(x, y));
+    const el = [
+      new THREE.Mesh(new THREE.ConeGeometry(0.11, 0.3, 10), basic(16730652)),
+      // fuego
+      new THREE.Mesh(new THREE.SphereGeometry(0.12, 12, 10), basic(3114751)),
+      // agua
+      new THREE.Mesh(new THREE.DodecahedronGeometry(0.12), basic(9067059)),
+      // roca
+      new THREE.Mesh(new THREE.ShapeGeometry(bolt), basic(16769594, { side: THREE.DoubleSide }))
+      // trueno
+    ];
+    el[3].scale.setScalar(1.3);
+    el.forEach((m) => v.inner.add(m));
+    animate(cloud.children[0], (t) => {
+      cloud.position.y = 0.3 + Math.sin(t * 1.2) * 0.05;
+      el.forEach((m, k) => {
+        const a = t * 0.9 + k * Math.PI / 2;
+        m.position.set(Math.cos(a) * 0.85, -0.35 + Math.sin(a * 2) * 0.12, Math.sin(a) * 0.85);
+        m.rotation.y = a;
+        if (k === 3) m.rotation.set(0, 0, 0), m.rotation.y = -a;
+      });
+    });
+  }
+  function oniMask(color) {
+    const g = new THREE.Group(), red = basic(color), dark = basic(1705221), bone = basic(15918793), gold = basic(15249482);
+    const face = new THREE.Mesh(new THREE.SphereGeometry(0.42, 20, 16), red);
+    face.scale.set(0.82, 1, 0.42);
+    g.add(face);
+    [-1, 1].forEach((s) => {
+      const brow = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.05), dark);
+      brow.position.set(s * 0.16, 0.17, 0.14);
+      brow.rotation.z = -s * 0.45;
+      g.add(brow);
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), gold);
+      eye.scale.set(1.6, 0.6, 0.6);
+      eye.position.set(s * 0.15, 0.08, 0.15);
+      g.add(eye);
+      const horn = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.3, 8), bone);
+      horn.position.set(s * 0.2, 0.45, 0.02);
+      horn.rotation.z = -s * 0.35;
+      g.add(horn);
+      const tusk = new THREE.Mesh(new THREE.ConeGeometry(0.035, 0.14, 6), bone);
+      tusk.position.set(s * 0.12, -0.2, 0.14);
+      g.add(tusk);
+    });
+    const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.06, 0.05), dark);
+    mouth.position.set(0, -0.15, 0.16);
+    g.add(mouth);
+    return g;
+  }
+  function fillKael(v) {
+    const pair = new THREE.Group(), a = oniMask(13836320), b = oniMask(10228242);
+    a.position.set(-0.48, 0.05, 0);
+    a.rotation.y = 0.3;
+    b.position.set(0.48, -0.05, 0);
+    b.rotation.y = -0.3;
+    b.scale.setScalar(0.92);
+    pair.add(a, b);
+    v.inner.add(pair);
+    const toCenter = Math.atan2(-v.bx, -v.bz);
+    animate(a.children[0], (t) => {
+      pair.rotation.y = toCenter + Math.sin(t * 0.9) * 0.4 - v.inner.rotation.y;
+    });
+  }
+  var SKIN = { virena: fillVirena, lyra: fillLyra, kael: fillKael };
+
   // js/world/gallery.js
   function buildTesseract(edge) {
     const cube = (s) => new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(s, s, s)), edge);
@@ -258,15 +540,6 @@
       v.x.push(b);
     }
   }
-  function fillTala(v) {
-    v.inner.add(new THREE.Mesh(new THREE.IcosahedronGeometry(0.45, 1), basic(10910802, { wireframe: true })));
-    for (let k = 0; k < 3; k++) {
-      const r = new THREE.Mesh(new THREE.TorusGeometry(0.8, 0.02, 6, 40), basic(13213808, { transparent: true }));
-      r.rotation.x = Math.PI / 2;
-      v.g.add(r);
-      v.x.push(r);
-    }
-  }
   function fillVolt(v) {
     v.inner.add(new THREE.Mesh(new THREE.OctahedronGeometry(0.4), basic(15986608)));
     v.inner.add(new THREE.LineSegments(
@@ -278,7 +551,7 @@
     v.inner.add(new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 10), basic(8947848, { transparent: true, opacity: 0.18 })));
   }
   var FILL = { nyxa: fillNyxa, tala: fillTala, volt: fillVolt };
-  function buildShowcase(id, i, edge) {
+  function buildShowcase(id, i, edge, skin) {
     const a = i * Math.PI / 3, g = new THREE.Group();
     const bx = Math.sin(a) * 8, bz = -Math.cos(a) * 8;
     const glass = new THREE.Mesh(
@@ -289,9 +562,9 @@
     const base = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.2, 0.3, 24), T(basic(4070203), 4070203, 9202990));
     base.position.y = -1.75;
     g.add(glass, new THREE.LineSegments(new THREE.EdgesGeometry(glass.geometry), edge), base);
-    const v = { g, id, bx, bz, y0: Math.random() * 6, inner: new THREE.Group(), x: [], glass };
+    const v = { g, id, bx, bz, skin, y0: Math.random() * 6, inner: new THREE.Group(), x: [], glass };
     g.add(v.inner);
-    (FILL[id] || fillEmpty)(v);
+    (FILL[id] || SKIN[skin] || fillEmpty)(v);
     return v;
   }
   function buildGallery(scene2, pos) {
@@ -311,8 +584,8 @@
       group.add(m);
     });
     const vit = [], glass = [];
-    ["nyxa", null, "tala", null, "volt", null].forEach((id, i) => {
-      const v = buildShowcase(id, i, edge);
+    [["nyxa"], [null, "virena"], ["tala"], [null, "lyra"], ["volt"], [null, "kael"]].forEach(([id, skin], i) => {
+      const v = buildShowcase(id, i, edge, skin);
       group.add(v.g);
       vit.push(v);
       glass.push(v.glass);
@@ -340,7 +613,7 @@
       m.position.y = -2;
       group.add(m);
     });
-    const flower = createFlower();
+    const flower = createFlower(CONFIG.images.florColores, "warm");
     setFlower(flower, "none");
     flower.g.position.set(0, 0.1, 0);
     group.add(flower.g);
@@ -365,7 +638,7 @@
   var bgGray = new THREE.Color(852502);
   var bgGold = new THREE.Color(13214287);
   var bg = new THREE.Color();
-  var neon = new THREE.Color(16711807);
+  var neon = new THREE.Color(CHARACTER_COLORS.fractura);
   scene.background = bg;
   scene.fog = new THREE.Fog(852502, 4, 70);
   var look = new THREE.Vector3();
@@ -514,43 +787,46 @@
       const target = 1 + 0.06 * Math.sin(t * 3) + (hover ? 0.2 * (0.5 + 0.5 * Math.sin(t * 9)) : 0);
       f.s += (target - f.s) * 0.2;
       f.g.scale.setScalar(f.s);
-      if (f !== fl1) f.g.rotation.z += dt * (f.mode === "warm" ? 0.6 : 0.1);
+      if (f !== fl1 && !f.imageUrl) f.g.rotation.z += dt * (f.mode === "warm" ? 0.6 : 0.1);
       f.glow.material.opacity = (f.mode === "none" ? 0.18 : 0.4) + 0.2 * Math.sin(t * 3) + (hover ? 0.25 : 0);
     });
   }
   function updateFlowerImage() {
-    const image = fl1.imageElement;
-    if (!image) return;
-    if (S.p !== 0 || !W.visible || !image.naturalWidth) {
-      image.style.display = "none";
-      return;
-    }
+    const flowers = [[fl1, 0], [fl2, 3]].filter(([flower]) => flower.imageElement);
+    if (!flowers.length) return;
     scene.updateMatrixWorld(true);
     cam.updateMatrixWorld();
-    const center = fl1.g.getWorldPosition(new THREE.Vector3());
-    const halfHeight = fl1.imageHeight * fl1.g.scale.y / 2;
-    const halfWidth = halfHeight * image.naturalWidth / image.naturalHeight;
-    const points = [
-      new THREE.Vector3(center.x - halfWidth, center.y - halfHeight, center.z),
-      new THREE.Vector3(center.x - halfWidth, center.y + halfHeight, center.z),
-      new THREE.Vector3(center.x + halfWidth, center.y - halfHeight, center.z),
-      new THREE.Vector3(center.x + halfWidth, center.y + halfHeight, center.z)
-    ].map((point) => point.project(cam));
-    if (points.some((point) => point.z < -1 || point.z > 1)) {
-      image.style.display = "none";
-      return;
-    }
     const rect = renderer.domElement.getBoundingClientRect();
     const gameRect = $("#game").getBoundingClientRect();
-    const xs = points.map((point) => (point.x + 1) * rect.width / 2);
-    const ys = points.map((point) => (1 - point.y) * rect.height / 2);
-    const left = rect.left - gameRect.left + Math.min(...xs);
-    const top = rect.top - gameRect.top + Math.min(...ys);
-    image.style.left = `${left}px`;
-    image.style.top = `${top}px`;
-    image.style.width = `${Math.max(...xs) - Math.min(...xs)}px`;
-    image.style.height = `${Math.max(...ys) - Math.min(...ys)}px`;
-    image.style.display = "block";
+    flowers.forEach(([flower, phase]) => {
+      const image = flower.imageElement;
+      if (S.p !== phase || !W.visible || !flower.imageVisible || !image.naturalWidth) {
+        image.style.display = "none";
+        return;
+      }
+      const center = flower.g.getWorldPosition(new THREE.Vector3());
+      const halfHeight = flower.imageHeight * flower.g.scale.y / 2;
+      const halfWidth = halfHeight * image.naturalWidth / image.naturalHeight;
+      const points = [
+        new THREE.Vector3(center.x - halfWidth, center.y - halfHeight, center.z),
+        new THREE.Vector3(center.x - halfWidth, center.y + halfHeight, center.z),
+        new THREE.Vector3(center.x + halfWidth, center.y - halfHeight, center.z),
+        new THREE.Vector3(center.x + halfWidth, center.y + halfHeight, center.z)
+      ].map((point) => point.project(cam));
+      if (points.some((point) => point.z < -1 || point.z > 1)) {
+        image.style.display = "none";
+        return;
+      }
+      const xs = points.map((point) => (point.x + 1) * rect.width / 2);
+      const ys = points.map((point) => (1 - point.y) * rect.height / 2);
+      const left = rect.left - gameRect.left + Math.min(...xs);
+      const top = rect.top - gameRect.top + Math.min(...ys);
+      image.style.left = `${left}px`;
+      image.style.top = `${top}px`;
+      image.style.width = `${Math.max(...xs) - Math.min(...xs)}px`;
+      image.style.height = `${Math.max(...ys) - Math.min(...ys)}px`;
+      image.style.display = "block";
+    });
   }
   function animateDoors(dt) {
     doors.forEach((d, k) => {
@@ -639,6 +915,11 @@
   };
 
   // js/fx.js
+  var fracturaRgb = [
+    parseInt(CHARACTER_COLORS.fractura.slice(1, 3), 16),
+    parseInt(CHARACTER_COLORS.fractura.slice(3, 5), 16),
+    parseInt(CHARACTER_COLORS.fractura.slice(5, 7), 16)
+  ].join(",");
   var FX = (() => {
     const c = $("#fx"), x = c.getContext("2d"), gl = $("#gl");
     c.width = 320;
@@ -652,7 +933,7 @@
       }
       const n = Math.floor(6 + g * 30);
       for (let i = 0; i < n; i++) {
-        x.fillStyle = Math.random() < 0.7 ? `rgba(255,0,127,${Math.random() * 0.5 * g})` : `rgba(255,255,255,${Math.random() * 0.25 * g})`;
+        x.fillStyle = Math.random() < 0.7 ? `rgba(${fracturaRgb},${Math.random() * 0.5 * g})` : `rgba(255,255,255,${Math.random() * 0.25 * g})`;
         x.fillRect(Math.random() * 320, Math.random() * 180, Math.random() * 160 * g + 4, Math.random() * 5 + 1);
       }
       x.fillStyle = `rgba(0,0,0,${0.18 * g})`;
@@ -663,11 +944,11 @@
     }
     return { draw };
   })();
-  function wave(cv, an, c) {
+  function wave(cv, an, c, color = CHARACTER_COLORS.fractura) {
     const x = cv.getContext("2d"), w = cv.width, h = cv.height;
     x.clearRect(0, 0, w, h);
     x.lineWidth = 2;
-    x.strokeStyle = c > 0.05 ? "#FF007F" : "#e0b25a";
+    x.strokeStyle = color;
     x.beginPath();
     const d = new Uint8Array(an ? an.fftSize : 2);
     if (an) an.getByteTimeDomainData(d);
@@ -679,96 +960,6 @@
     }
     x.stroke();
   }
-
-  // js/data.js
-  var PHASES = ["Detonante", "Teseracto", "Fractura", "N\xFAcleo"];
-  var IDS = ["nyxa", "tala", "volt"];
-  var RES = {
-    nyxa: {
-      n: 1,
-      name: "Nyxa",
-      epi: "La que habita entre sombras",
-      glyph: "\u16BE\u16A3\u16C9\u16A8 \u16DE\u16DF\u16B1",
-      dur: 30,
-      angle: 0,
-      img: "assets/imgs/IMGs_Trasmedia/Nyxa.jpeg",
-      txt: "Aqu\xED las sombras no persiguen: sostienen. Aprend\xED a vivir en el borde de lo que nadie mira. Si me nombras, me haces un poco m\xE1s real. N\xF3mbrame despacio."
-    },
-    tala: {
-      n: 2,
-      name: "Tala",
-      epi: "La de los ecos de bestias",
-      glyph: "\u16CF\u16A8\u16DA\u16A8 \u16B2\u16B1\u16A2",
-      dur: 30,
-      angle: 2 * Math.PI / 3,
-      img: "assets/imgs/IMGs_Trasmedia/Tala.jpeg",
-      txt: "Lo que ruge en m\xED no es m\xEDo. Son las bestias que otros callaron, convertidas en voz. Cuando el pasillo tiembla, soy yo recordando que alguna vez corr\xED libre."
-    },
-    volt: {
-      n: 3,
-      name: "Volt",
-      epi: "El de la jaula de energ\xEDa",
-      glyph: "\u16A1\u16DF\u16DA\u16CF \u16D6\u16BE\u16C9",
-      dur: 30,
-      angle: 4 * Math.PI / 3,
-      img: "assets/imgs/IMGs_Trasmedia/Volt.jpeg",
-      txt: 'Me llaman corriente, pero soy un deseo sin salida. Cada barrote es una vez que dije "despu\xE9s". La jaula no me contiene: me recuerda.'
-    }
-  };
-  var OPEN = [
-    "Cada ma\xF1ana suena el mismo despertador y cada noche vuelves por la misma calle. Esta vez no la tomes.",
-    "Alguien dej\xF3 una flor en una puerta que no era la tuya. Ven a ver por qu\xE9.",
-    "Hay un museo que guarda lo que ya no recuerdas. Hoy falta algo."
-  ];
-  var MYST = [
-    "\xBFQui\xE9n dej\xF3 la flor de azahar en la puerta?",
-    "\xBFQui\xE9n abri\xF3 la primera grieta en el museo?",
-    "\xBFQui\xE9n escribi\xF3 la carta que te trajo hasta aqu\xED?",
-    "\xBFQui\xE9n borr\xF3 un recuerdo del Teseracto?"
-  ];
-  var CLUES = {
-    nyxa: {
-      nyxa: "Yo no sal\xED de mi sombra... aunque ahora huele a azahar entre mis manos.",
-      tala: "Una bestia roz\xF3 mi sombra y dej\xF3 p\xE9talos en el suelo.",
-      volt: "Sent\xED un chispazo en la oscuridad: alguien con la jaula abierta."
-    },
-    tala: {
-      nyxa: "Entre mis ecos o\xED susurros que solo nacen de las sombras.",
-      tala: "No fui yo... pero mis ecos repiten un paso muy parecido al m\xEDo.",
-      volt: "El suelo ol\xEDa a ozono. Solo hay una jaula que huela as\xED."
-    },
-    volt: {
-      nyxa: "Todas las luces se apagaron un instante. Solo Nyxa apaga luces as\xED.",
-      tala: "Escuch\xE9 pasos de bestia sobre mis barrotes.",
-      volt: "Yo no abr\xED nada... y sin embargo mis barrotes est\xE1n tibios."
-    }
-  };
-  var FRAG = {
-    nyxa: [
-      "Nyxa, en la bit\xE1cora: \xABYo vigilaba la puerta; jam\xE1s la cruc\xE9\xBB.",
-      "Nyxa, en la bit\xE1cora: \xABLa puerta me eligi\xF3 a m\xED y yo dije que s\xED\xBB."
-    ],
-    tala: [
-      "Tala, en la bit\xE1cora: \xABMis ecos rug\xEDan afuera mientras todo ocurr\xEDa\xBB.",
-      "Tala, en la bit\xE1cora: \xABCorr\xED hacia la puerta antes de que nadie me viera\xBB."
-    ],
-    volt: [
-      "Volt, en la bit\xE1cora: \xABEstuve enjaulado toda la noche; los barrotes son testigos\xBB.",
-      "Volt, en la bit\xE1cora: \xABRomp\xED un barrote por un segundo; fue suficiente\xBB."
-    ]
-  };
-  var ENDS = {
-    A: "Acertaste y salvaste casi todo: la verdad se asienta sin dolor y el museo respira.",
-    B: "Acertaste, pero casi todos los registros quedaron mudos. Sabes qui\xE9n fue y nadie queda para recordarlo contigo.",
-    C: "Fallaste, pero los registros se salvaron: el museo guarda la verdad y esperar\xE1 a que vuelvas por ella.",
-    D: "Fallaste y los registros se perdieron. La verdad se qued\xF3 entre las grietas."
-  };
-  var RELEASE = [
-    "Una conversaci\xF3n que nunca tuve",
-    "Un lugar al que no volv\xED",
-    "Un nombre que a\xFAn pronuncio en voz baja",
-    "Una versi\xF3n de m\xED que ya no soy"
-  ];
 
   // js/audio/engine.js
   var engine_exports = {};
@@ -1131,7 +1322,7 @@
     $("#jb").textContent = "Pistas (" + S.clues.length + ")";
     const header = '<p class="m"><span>Cuaderno del caso</span><button id="jx" style="padding:2px 8px">Cerrar</button></p><p>' + r.q + "</p>";
     const order = r.order ? '<p class="m" style="display:block">Orden de la carta: ' + r.order.map((i) => RES[i].epi.toLowerCase()).join(" \u2192 ") + "</p>" : "";
-    const clues = S.clues.length ? S.clues.map((c) => '<p style="margin:6px 0">' + c + "</p>").join("") : '<p class="m" style="display:block">Sin pistas todav\xEDa. Libera a los resonantes y mira bajo las vitrinas vac\xEDas.</p>';
+    const clues = S.clues.length ? S.clues.map((c) => '<p style="margin:6px 0">' + c + "</p>").join("") : '<p class="m" style="display:block">Sin pistas todav\xEDa. Libera a los resonantes y busca bajo las vitrinas sin resonante.</p>';
     $("#journal").innerHTML = header + order + clues;
     $("#jx").addEventListener("click", () => show("#journal", false));
   }
@@ -1146,7 +1337,7 @@
       addClue("Bajo una peana hay un glifo grabado: " + RES[r.culprit].glyph.split(" ")[0] + ". Busca d\xF3nde lo has visto.");
       say("Algo brilla bajo la peana: encontraste una pista.");
     } else {
-      say("Vitrina vac\xEDa: este eco a\xFAn no despierta.");
+      say("Vitrina sellada: este eco a\xFAn no despierta.");
     }
   }
   function openDoss(u) {
@@ -1168,6 +1359,8 @@
     }
     const r = RES[u.id];
     S.dossier = u.id;
+    $("#dossier").style.setProperty("--character-color", CHARACTER_COLORS[u.id]);
+    S.seeking = S.resumeAfterSeek = false;
     $("#dm").textContent = `Expediente R-0${r.n} \xB7 lengua de Deileanna`;
     $("#dg").textContent = r.glyph;
     $("#di").src = r.img;
@@ -1175,6 +1368,7 @@
     $("#de").textContent = r.epi;
     $("#dt").textContent = r.txt;
     S.heard[u.id] = S.heard[u.id] || 0;
+    S.maxHeard[u.id] = Math.max(S.maxHeard[u.id] || 0, S.heard[u.id]);
     S.playing = true;
     startVoice();
     updDoss();
@@ -1184,6 +1378,7 @@
   }
   function closeDoss() {
     if (!S.dossier) return;
+    S.seeking = S.resumeAfterSeek = false;
     S.dossier = null;
     S.playing = false;
     if (S.dv) S.dv.stop();
@@ -1191,6 +1386,7 @@
     show("#dossier", false);
     $("#dx").textContent = "Cerrar";
     $("#dp").style.visibility = "";
+    $("#dbar").disabled = true;
     S.moodT = 0.2 + 0.12 * S.freed.size;
     exploreHint();
     if (S.freed.size === 3) {
@@ -1213,6 +1409,7 @@
   }
   function togglePlayback() {
     if (!S.dossier) return;
+    if (S.seeking) endDossierSeek();
     S.playing = !S.playing;
     if (S.playing) {
       startVoice();
@@ -1222,15 +1419,46 @@
       $("#dp").textContent = "Reanudar";
     }
   }
+  function beginDossierSeek() {
+    if (!S.dossier || S.freed.has(S.dossier) || S.seeking) return;
+    S.seeking = true;
+    S.resumeAfterSeek = S.playing;
+    if (S.dv) S.dv.stop();
+    S.dv = null;
+  }
+  function seekDossier(value) {
+    const id = S.dossier;
+    if (!id || S.freed.has(id)) return;
+    if (!S.seeking) beginDossierSeek();
+    const target = Number(value), d = durOf(id);
+    if (!Number.isFinite(target)) return;
+    const furthest = Math.min(d, Math.max(S.maxHeard[id] || 0, S.heard[id] || 0));
+    S.heard[id] = Math.min(furthest, Math.max(0, target));
+    updDoss();
+  }
+  function endDossierSeek() {
+    if (!S.seeking) return;
+    S.seeking = false;
+    const resume = S.resumeAfterSeek;
+    S.resumeAfterSeek = false;
+    if (resume && S.dossier && S.playing && !S.freed.has(S.dossier)) startVoice();
+  }
   function updDoss() {
     const id = S.dossier, d = durOf(id), h = Math.min(S.heard[id], d);
-    $("#dbar").style.width = h / d * 100 + "%";
+    const bar = $("#dbar");
+    const furthest = Math.min(S.maxHeard[id] || 0, d);
+    bar.max = String(d);
+    bar.value = String(h);
+    bar.disabled = S.freed.has(id) || furthest <= 0;
+    bar.style.setProperty("--progress", `${h / d * 100}%`);
+    bar.setAttribute("aria-valuetext", `${fmt(h)} de ${fmt(d)}`);
     $("#dtm").textContent = fmt(h) + " / " + fmt(d);
     $("#dst").textContent = S.freed.has(id) ? RES[id].name + " qued\xF3 liberado" : (S.lost.has(id) ? "da\xF1ado" : "sano") + " \xB7 escucha hasta el final para liberarlo";
   }
   function liberate(id) {
     S.freed.add(id);
     S.playing = false;
+    S.seeking = S.resumeAfterSeek = false;
     if (S.dv) S.dv.stop();
     S.dv = null;
     W.freeVit(id);
@@ -1332,6 +1560,8 @@
       Aud.shuffle();
       newRun();
       S.heard = {};
+      S.maxHeard = {};
+      S.seeking = S.resumeAfterSeek = false;
       S.freed.clear();
       S.playing = false;
       S.mood = S.moodT = 0;
@@ -1491,8 +1721,8 @@
     el.querySelector(".tm").textContent = t.dead ? "--:-- / 02:31" : fmt((performance.now() - t.t0) / 1e3 % 151) + " / 02:31";
     const b = el.querySelector(".bar i");
     b.style.width = t.int * 100 + "%";
-    b.style.background = t.locked ? "#e0b25a" : "#FF007F";
-    wave(el.querySelector("canvas"), t.dead ? null : t.v.an, c);
+    b.style.background = t.locked ? "var(--t2)" : "var(--ac)";
+    wave(el.querySelector("canvas"), t.dead ? null : t.v.an, c, CHARACTER_COLORS[t.id]);
   }
   function tickTracks(dt) {
     S.tleft -= dt;
@@ -1520,7 +1750,7 @@
     document.body.classList.toggle("broken", S.glitch > 0.2);
     if (Math.abs(S.mood - lastAccent) > 0.01) {
       lastAccent = S.mood;
-      const c = new THREE.Color(11901618).lerp(new THREE.Color(14725722), S.mood);
+      const c = new THREE.Color(8798825).lerp(new THREE.Color(11639727), S.mood);
       document.documentElement.style.setProperty("--accent", "#" + c.getHexString());
     }
   }
@@ -1537,9 +1767,10 @@
   }
   function updateDossierPlayback(dt) {
     if (!S.dossier || !S.dv) return;
-    wave($("#dw"), S.dv.an, 0);
-    if (S.playing && !S.freed.has(S.dossier)) {
+    wave($("#dw"), S.dv.an, 0, CHARACTER_COLORS[S.dossier]);
+    if (S.playing && !S.seeking && !S.freed.has(S.dossier)) {
       S.heard[S.dossier] += dt;
+      S.maxHeard[S.dossier] = Math.max(S.maxHeard[S.dossier] || 0, S.heard[S.dossier]);
       updDoss();
       if (S.heard[S.dossier] >= durOf(S.dossier)) liberate(S.dossier);
     }
@@ -1549,7 +1780,7 @@
     updateGalleryTurn(dt);
     updateDossierPlayback(dt);
     if (S.p === 2 && S.tracks.length) tickTracks(dt);
-    if (S.step === 2 && S.cv) wave($("#fw"), S.cv.an, 0);
+    if (S.step === 2 && S.cv) wave($("#fw"), S.cv.an, 0, CHARACTER_COLORS.rythden);
     FX.draw(S.glitch);
   }
 
@@ -1585,9 +1816,13 @@
     cv.addEventListener("click", onCanvasClick);
     addEventListener("keydown", (e) => {
       if (!W.visible) return;
+      if (e.key === "Escape") {
+        closeDoss();
+        return;
+      }
+      if (e.target.closest && e.target.closest('input,button,select,textarea,[contenteditable="true"]')) return;
       if (e.key === "ArrowLeft") S.dir = -1;
       if (e.key === "ArrowRight") S.dir = 1;
-      if (e.key === "Escape") closeDoss();
     });
     addEventListener("keyup", (e) => {
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") S.dir = 0;
@@ -1611,6 +1846,19 @@
     $("#cross").addEventListener("click", cross);
     $("#dx").addEventListener("click", closeDoss);
     $("#dp").addEventListener("click", togglePlayback);
+    const dossierSeek = $("#dbar");
+    dossierSeek.addEventListener("pointerdown", beginDossierSeek);
+    dossierSeek.addEventListener("input", () => seekDossier(dossierSeek.value));
+    dossierSeek.addEventListener("change", endDossierSeek);
+    dossierSeek.addEventListener("blur", endDossierSeek);
+    dossierSeek.addEventListener("keydown", (e) => {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(e.key)) beginDossierSeek();
+    });
+    dossierSeek.addEventListener("keyup", (e) => {
+      if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(e.key)) endDossierSeek();
+    });
+    addEventListener("pointerup", endDossierSeek);
+    addEventListener("pointercancel", endDossierSeek);
     $("#adv").addEventListener("click", fracture);
     $("#again").addEventListener("click", restart);
     $("#jb").addEventListener("click", () => show("#journal", !$("#journal").classList.contains("on")));
@@ -1631,6 +1879,381 @@
     updateGameVolume();
   }
 
+  // js/memoria.js
+  var SEEDS = [
+    // orden de liberación; el color de cada resonante
+    ["Nyxa", CHARACTER_COLORS.nyxa],
+    ["Tala", CHARACTER_COLORS.tala],
+    ["Lyra", CHARACTER_COLORS.lyra],
+    ["Kael", CHARACTER_COLORS.kael],
+    ["Virena", CHARACTER_COLORS.virena],
+    ["Volt", CHARACTER_COLORS.volt],
+    ["Naxaly", CHARACTER_COLORS.naxaly],
+    ["Rythden", CHARACTER_COLORS.rythden]
+  ];
+  var FLAG = "ecos-memoria-vista";
+  var T_APPEAR = (i) => 0.6 + i * 0.45;
+  var T_GATHER = 4.4;
+  var T_BLOOM = 6.4;
+  var THEME = getComputedStyle(document.documentElement);
+  var THEME_ACCENT = THEME.getPropertyValue("--ac").trim();
+  var THEME_LIGHT = THEME.getPropertyValue("--t1").trim();
+  var THEME_ACCENT_RGB = [1, 3, 5].map((i) => parseInt(THEME_ACCENT.slice(i, i + 2), 16)).join(",");
+  var THEME_LIGHT_RGB = [1, 3, 5].map((i) => parseInt(THEME_LIGHT.slice(i, i + 2), 16)).join(",");
+  var clamp2 = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  var easeOutBack = (k) => {
+    const c = 1.9;
+    return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2);
+  };
+  var easeInOut = (k) => k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  var memoriaCompletada = false;
+  try {
+    memoriaCompletada = localStorage.getItem(FLAG) === "1";
+  } catch (error) {
+    console.error("No se pudo leer el estado de la memoria completa:", error);
+  }
+  var memoriaVista = () => memoriaCompletada;
+  function marcarMemoriaCompletada() {
+    memoriaCompletada = true;
+    try {
+      localStorage.setItem(FLAG, "1");
+    } catch (error) {
+      console.error("No se pudo guardar que la secuencia ya se mostr\xF3:", error);
+    }
+  }
+  var CSS = `
+#memoria{position:fixed;inset:0;z-index:9999;display:block;background:radial-gradient(circle at 50% 42%,var(--bg1) 0,var(--bg0) 62%,color-mix(in srgb,var(--bg0) 65%,#000) 100%);opacity:0;transition:opacity .9s}
+#memoria.on{opacity:1}
+#memoria canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#memoria .mm-x{position:absolute;top:max(14px,env(safe-area-inset-top));right:max(14px,env(safe-area-inset-right));width:42px;height:42px;border-radius:50%;border:1px solid color-mix(in srgb,var(--t2) 35%,transparent);background:color-mix(in srgb,var(--bg0) 55%,transparent);color:var(--t1);font-size:18px;cursor:pointer;z-index:3}
+#memoria .mm-x:hover{background:color-mix(in srgb,var(--t1) 15%,transparent)}
+#memoria .mm-text{position:absolute;left:0;right:0;bottom:max(26px,6vh);padding:0 22px;text-align:center;color:var(--t1);z-index:2;pointer-events:none}
+#memoria .mm-text>*{opacity:0;transform:translateY(16px);transition:opacity 1s,transform 1s}
+#memoria.show .mm-text>*{opacity:1;transform:none;pointer-events:auto}
+#memoria.show .mm-text>:nth-child(2){transition-delay:.25s}
+#memoria.show .mm-text>:nth-child(3){transition-delay:.5s}
+#memoria.show .mm-text>:nth-child(4){transition-delay:.75s}
+#memoria.show .mm-text>:nth-child(5){transition-delay:1s}
+#memoria .mm-eye{font:12px/1.4 var(--mono,monospace);letter-spacing:.32em;text-transform:uppercase;color:var(--t2);margin:0 0 8px}
+#memoria h2{font:400 clamp(30px,6vw,60px)/1.05 var(--serif,serif);margin:0 0 10px;text-shadow:0 0 40px var(--ac),0 0 90px var(--bg1)}
+#memoria .mm-sub{max-width:560px;margin:0 auto 14px;font:16px/1.55 var(--sans,sans-serif);color:var(--t1)}
+#memoria .mm-names{display:flex;flex-wrap:wrap;gap:8px 14px;justify-content:center;margin:0 auto 16px;max-width:780px}
+#memoria .mm-names span{font:12px var(--mono,monospace);letter-spacing:.14em;text-transform:uppercase;padding:4px 10px;border:1px solid var(--c);border-radius:99px;color:var(--c);box-shadow:0 0 14px color-mix(in srgb,var(--c) 45%,transparent)}
+#memoria .mm-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+#memoria .mm-btns button{font:13px var(--mono,monospace);letter-spacing:.1em;padding:11px 22px;color:var(--t1);background:color-mix(in srgb,var(--ac) 18%,transparent);border:1px solid var(--ac);border-radius:99px;cursor:pointer;box-shadow:0 0 24px color-mix(in srgb,var(--ac) 45%,transparent)}
+#memoria .mm-btns button:hover{background:color-mix(in srgb,var(--ac) 40%,transparent)}
+#memoria .mm-btns button.alt{background:transparent;border-color:color-mix(in srgb,var(--t2) 40%,transparent);box-shadow:none}
+/* Recompensa que se queda en la p\xE1gina */
+#chip.done{box-shadow:0 0 22px var(--ac),0 0 44px color-mix(in srgb,var(--t2) 50%,transparent);animation:mmChip 2.6s ease-in-out infinite;cursor:pointer}
+@keyframes mmChip{50%{box-shadow:0 0 30px var(--t2),0 0 60px color-mix(in srgb,var(--ac) 70%,transparent)}}
+body.memoria .cc .cf{animation:mmCard 4.5s ease-in-out infinite}
+@keyframes mmCard{50%{box-shadow:0 0 30px color-mix(in srgb,var(--ac) 60%,transparent)}}
+@media(prefers-reduced-motion:reduce){body.memoria .cc .cf,#chip.done{animation:none}}
+`;
+  function injectCss() {
+    if (document.getElementById("memoria-css")) return;
+    const st = document.createElement("style");
+    st.id = "memoria-css";
+    st.textContent = CSS;
+    document.head.appendChild(st);
+  }
+  injectCss();
+  function chime2(vol) {
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext, ac = new AC();
+      const master = ac.createGain();
+      master.gain.value = clamp2(vol, 0, 1) * 0.17;
+      master.connect(ac.destination);
+      const note = (f, at, dur, type, g) => {
+        const o = ac.createOscillator(), e = ac.createGain(), t0 = ac.currentTime + at;
+        o.type = type;
+        o.frequency.value = f;
+        e.gain.setValueAtTime(0, t0);
+        e.gain.linearRampToValueAtTime(g, t0 + 0.03);
+        e.gain.exponentialRampToValueAtTime(1e-4, t0 + dur);
+        o.connect(e);
+        e.connect(master);
+        o.start(t0);
+        o.stop(t0 + dur + 0.1);
+      };
+      [261.63, 293.66, 329.63, 392, 440, 523.25, 587.33, 659.25].forEach((f, i) => note(f, T_APPEAR(i), 1.8, "sine", 0.9));
+      [261.63, 329.63, 392, 523.25, 659.25].forEach((f) => note(f, T_BLOOM, 3.4, "triangle", 0.55));
+      note(130.81, T_BLOOM, 3.8, "sine", 1);
+      return ac;
+    } catch (e) {
+      return null;
+    }
+  }
+  function playMemoria(opts = {}) {
+    if (memoriaVista() || document.getElementById("memoria")) return;
+    marcarMemoriaCompletada();
+    injectCss();
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const root = document.createElement("div");
+    root.id = "memoria";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-label", "Memoria completa");
+    root.innerHTML = `<canvas></canvas><button class="mm-x" aria-label="Cerrar">\u2715</button>
+    <div class="mm-text">
+      <p class="mm-eye">Memoria completa \xB7 7 / 7 notas</p>
+      <h2>Las ocho semillas despiertan</h2>
+      <p class="mm-sub">Reuniste cada recuerdo que el museo hab\xEDa olvidado. La Fractura te reconoce, y la flor ya sabe tu nombre.</p>
+      <div class="mm-names">${SEEDS.map(([n, c]) => `<span style="--c:${c}">${n}</span>`).join("")}</div>
+      <div class="mm-btns"><button data-go>Cruzar la puerta \u2726</button><button class="alt" data-close>Seguir explorando</button></div>
+    </div>`;
+    document.body.appendChild(root);
+    requestAnimationFrame(() => root.classList.add("on"));
+    const cv = root.querySelector("canvas"), ctx = cv.getContext("2d");
+    let W2 = 0, H = 0, u = 1, fu = 1, CY = 0;
+    const resize2 = () => {
+      const d = Math.min(2, devicePixelRatio || 1);
+      W2 = innerWidth;
+      H = innerHeight;
+      u = clamp2(Math.min(W2, H * 1.15) / 700, 0.55, 1.3);
+      const th = root.querySelector(".mm-text").offsetHeight + Math.max(26, H * 0.06) + 16;
+      CY = Math.max(110, (H - th) / 2);
+      fu = clamp2(Math.min(u, (CY - 24) / 170), 0.35, 1.3);
+      cv.width = W2 * d;
+      cv.height = H * d;
+      ctx.setTransform(d, 0, 0, d, 0, 0);
+    };
+    resize2();
+    addEventListener("resize", resize2);
+    const stars = Array.from({ length: 110 }, () => ({ x: Math.random(), y: Math.random(), r: Math.random() * 1.4 + 0.3, p: Math.random() * 6 }));
+    const parts = [];
+    let flash = 0, bloomed = false, rings = [], raf = 0, start = 0, t = 0, closed = false;
+    const ac = chime2(opts.volume ? opts.volume() : 1);
+    const cx = () => W2 / 2, cy = () => CY;
+    const burst = (n) => {
+      for (let k = 0; k < n; k++) {
+        const a = Math.random() * Math.PI * 2, sp = 140 + Math.random() * 460 * u;
+        parts.push({
+          x: cx(),
+          y: cy(),
+          vx: Math.cos(a) * sp,
+          vy: Math.sin(a) * sp - 90,
+          g: 170,
+          life: 0,
+          max: 2.6 + Math.random() * 2.6,
+          s: (5 + Math.random() * 9) * u,
+          rot: Math.random() * 6,
+          vr: (Math.random() - 0.5) * 7,
+          c: SEEDS[Math.random() * 8 | 0][1],
+          petal: Math.random() < 0.65
+        });
+      }
+    };
+    const rain = (dt) => {
+      if (Math.random() < dt * 16) parts.push({
+        x: Math.random() * W2,
+        y: -12,
+        vx: (Math.random() - 0.5) * 30,
+        vy: 40 + Math.random() * 60,
+        g: 6,
+        life: 0,
+        max: 9,
+        s: (4 + Math.random() * 7) * u,
+        rot: Math.random() * 6,
+        vr: (Math.random() - 0.5) * 3,
+        c: SEEDS[Math.random() * 8 | 0][1],
+        petal: true,
+        sway: Math.random() * 6
+      });
+    };
+    function drawSeed(i, ang, rad, s, fade) {
+      const [name, col] = SEEDS[i], x = cx() + Math.cos(ang) * rad, y = cy() + Math.sin(ang) * rad;
+      const pulse = 1 + 0.12 * Math.sin(t * 3 + i);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, 52 * u * s * pulse);
+      g.addColorStop(0, col + "ff");
+      g.addColorStop(0.25, col + "aa");
+      g.addColorStop(1, col + "00");
+      ctx.globalCompositeOperation = "lighter";
+      ctx.globalAlpha = fade;
+      ctx.fillStyle = g;
+      ctx.beginPath();
+      ctx.arc(x, y, 52 * u * s * pulse, 0, 7);
+      ctx.fill();
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = THEME_LIGHT;
+      ctx.globalAlpha = fade;
+      ctx.beginPath();
+      ctx.arc(x, y, 7 * u * s, 0, 7);
+      ctx.fill();
+      if (fade > 0.05 && t < T_GATHER) {
+        ctx.globalAlpha = fade * 0.85;
+        ctx.fillStyle = THEME_LIGHT;
+        ctx.font = `${Math.round(12 * u + 1)}px monospace`;
+        ctx.textAlign = "center";
+        ctx.fillText(name.toUpperCase(), x, y + 40 * u);
+      }
+      ctx.globalAlpha = 1;
+    }
+    function drawFlower(k) {
+      const x = cx(), y = cy(), L = 150 * fu * k, w = 54 * fu * k, rot = t * 0.25;
+      ctx.save();
+      ctx.translate(x, y);
+      const halo = ctx.createRadialGradient(0, 0, 0, 0, 0, 260 * fu * k);
+      halo.addColorStop(0, `rgba(${THEME_ACCENT_RGB},.55)`);
+      halo.addColorStop(1, `rgba(${THEME_ACCENT_RGB},0)`);
+      ctx.globalCompositeOperation = "lighter";
+      ctx.fillStyle = halo;
+      ctx.beginPath();
+      ctx.arc(0, 0, 260 * fu * k, 0, 7);
+      ctx.fill();
+      SEEDS.forEach(([, col], i) => {
+        ctx.save();
+        ctx.rotate(rot + i * Math.PI / 4 + Math.sin(t * 1.3 + i) * 0.03);
+        const g = ctx.createLinearGradient(0, 0, 0, -L);
+        g.addColorStop(0, THEME_LIGHT + "cc");
+        g.addColorStop(0.35, col + "dd");
+        g.addColorStop(1, col + "55");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.ellipse(0, -L * 0.55, w, L * 0.5, 0, 0, 7);
+        ctx.fill();
+        ctx.restore();
+      });
+      ctx.globalCompositeOperation = "source-over";
+      const c = ctx.createRadialGradient(0, 0, 0, 0, 0, 30 * fu * k * (1 + 0.1 * Math.sin(t * 4)));
+      c.addColorStop(0, THEME_LIGHT);
+      c.addColorStop(0.5, THEME_LIGHT);
+      c.addColorStop(1, THEME_ACCENT);
+      ctx.fillStyle = c;
+      ctx.beginPath();
+      ctx.arc(0, 0, 30 * fu * k, 0, 7);
+      ctx.fill();
+      ctx.restore();
+    }
+    function frame(now2) {
+      if (closed) return;
+      if (!start) start = now2;
+      const el = (now2 - start) / 1e3, dt = Math.min(0.05, el - t);
+      t = el;
+      ctx.clearRect(0, 0, W2, H);
+      stars.forEach((s) => {
+        ctx.globalAlpha = (0.25 + 0.5 * Math.abs(Math.sin(t * 0.8 + s.p))) * clamp2(t / 1.2);
+        ctx.fillStyle = THEME_LIGHT;
+        ctx.fillRect(s.x * W2, s.y * H, s.r, s.r);
+      });
+      ctx.globalAlpha = 1;
+      const ringR = Math.min(W2 * 0.4, CY - 36, 250 * u + 60);
+      const gk = clamp2((t - T_GATHER) / (T_BLOOM - T_GATHER)), ge = easeInOut(gk);
+      SEEDS.forEach((_, i) => {
+        const a0 = clamp2((t - T_APPEAR(i)) / 0.6);
+        if (a0 <= 0) return;
+        const s = easeOutBack(a0);
+        const ang = i / 8 * Math.PI * 2 - Math.PI / 2 + t * 0.32 + gk * gk * 9;
+        const rad = ringR * (1 - ge) * (a0 < 1 ? easeInOut(a0) * 0.4 + 0.6 : 1);
+        if (t < T_BLOOM - 0.15) {
+          if (t < T_GATHER) {
+            ctx.globalAlpha = 0.22 * a0;
+            ctx.strokeStyle = SEEDS[i][1];
+            ctx.lineWidth = 1.4;
+            ctx.beginPath();
+            ctx.moveTo(cx(), cy());
+            ctx.lineTo(cx() + Math.cos(ang) * rad, cy() + Math.sin(ang) * rad);
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+          }
+          drawSeed(i, ang, rad, s, 1 - clamp2((t - (T_BLOOM - 0.5)) / 0.35));
+        }
+        if (a0 < 1) {
+          const wv = a0;
+          ctx.globalAlpha = (1 - wv) * 0.7;
+          ctx.strokeStyle = SEEDS[i][1];
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.arc(cx() + Math.cos(ang) * rad, cy() + Math.sin(ang) * rad, 10 * u + wv * 90 * u, 0, 7);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      });
+      if (t > T_BLOOM - 0.6) drawFlower(easeOutBack(clamp2((t - (T_BLOOM - 0.6)) / 1.5)));
+      if (!bloomed && t >= T_BLOOM) {
+        bloomed = true;
+        flash = reduce ? 0.25 : 1;
+        burst(190);
+        rings.push(0, 0.15, 0.3);
+        root.classList.add("show");
+        setTimeout(() => {
+          const b = root.querySelector("[data-go]");
+          b && b.focus({ preventScroll: true });
+        }, 900);
+      }
+      if (bloomed) rain(dt);
+      rings = rings.map((r) => r + dt * 0.9).filter((r) => r < 1.2);
+      rings.forEach((r) => {
+        if (r < 0) return;
+        ctx.globalAlpha = clamp2(1 - r) * 0.8;
+        ctx.strokeStyle = THEME_LIGHT;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(cx(), cy(), r * Math.max(W2, H) * 0.75, 0, 7);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      });
+      for (let k = parts.length - 1; k >= 0; k--) {
+        const p = parts[k];
+        p.life += dt;
+        if (p.life > p.max || p.y > H + 30) {
+          parts.splice(k, 1);
+          continue;
+        }
+        p.vy += p.g * dt;
+        p.vx *= 1 - dt * (p.sway === void 0 ? 0.6 : 0);
+        p.x += p.vx * dt + (p.sway !== void 0 ? Math.sin(t * 1.5 + p.sway) * 20 * dt : 0);
+        p.y += p.vy * dt;
+        p.rot += p.vr * dt;
+        ctx.globalAlpha = clamp2(1 - p.life / p.max) * 0.95;
+        ctx.fillStyle = p.c;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        if (p.petal) {
+          ctx.beginPath();
+          ctx.ellipse(0, 0, p.s * 0.55, p.s, 0, 0, 7);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-p.s / 4, -p.s / 4, p.s / 2, p.s / 2);
+        }
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      if (flash > 0) {
+        ctx.fillStyle = `rgba(${THEME_LIGHT_RGB},${flash})`;
+        ctx.fillRect(0, 0, W2, H);
+        flash = Math.max(0, flash - dt * 1.6);
+      }
+      raf = requestAnimationFrame(frame);
+    }
+    raf = requestAnimationFrame(frame);
+    function close(goTop) {
+      if (closed) return;
+      closed = true;
+      cancelAnimationFrame(raf);
+      removeEventListener("resize", resize2);
+      removeEventListener("keydown", onKey);
+      root.classList.remove("on");
+      setTimeout(() => {
+        root.remove();
+        try {
+          ac && ac.close();
+        } catch (e) {
+        }
+      }, 900);
+      document.body.classList.add("memoria");
+      if (goTop) scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+      if (opts.onClose) opts.onClose();
+    }
+    const onKey = (e) => {
+      if (e.key === "Escape") close(false);
+    };
+    addEventListener("keydown", onKey);
+    root.querySelector(".mm-x").onclick = () => close(false);
+    root.querySelector("[data-close]").onclick = () => close(false);
+    root.querySelector("[data-go]").onclick = () => close(true);
+  }
+
   // js/site.js
   var $$ = (s) => [...document.querySelectorAll(s)];
   var NOTES = {
@@ -1642,6 +2265,8 @@
     n6: ["Cada ciclo, otra puerta. Cada puerta, otra flor. Esta vez, \xBFpara qui\xE9n?", "Al final de la p\xE1gina"],
     n7: ["Adri\xE1n: las encontraste todas. No s\xE9 qui\xE9n eres, pero la flor ya sabe tu nombre. Sube y cruza la puerta.", "La s\xE9ptima nota"]
   };
+  var NOTE_IDS = Object.keys(NOTES);
+  var FIRST_SIX_NOTE_IDS = NOTE_IDS.filter((id) => id !== "n7");
   var TABS = [
     "Deileanna es la civilizaci\xF3n milenaria que canalizaba la Resonancia Primordial. De sus ruinas vienen los glifos que decoran cada expediente.",
     "Sael Vantorin se fragment\xF3 en ocho semillas: Rythden, Nyxa, Tala, Volt, Kael, Lyra, Virena y Naxaly. El museo es el anclaje que las protege.",
@@ -1649,21 +2274,33 @@
   ];
   var found = [];
   try {
-    found = JSON.parse(localStorage.getItem("ecos-notas") || "[]");
-  } catch (e) {
+    const saved = JSON.parse(localStorage.getItem("ecos-notas") || "[]");
+    if (Array.isArray(saved)) {
+      found = [...new Set(saved.filter((id) => Object.prototype.hasOwnProperty.call(NOTES, id)))];
+    }
+  } catch (error) {
+    console.warn("No se pudieron leer las notas guardadas:", error);
   }
+  var allNotesCollected = () => NOTE_IDS.every((id) => found.includes(id));
   var chip = () => {
     $("#chip").hidden = !found.length;
     $("#cc").textContent = found.length;
+    $("#chip").classList.toggle("done", memoriaVista());
+  };
+  var saveNotes = () => {
+    try {
+      localStorage.setItem("ecos-notas", JSON.stringify(found));
+    } catch (error) {
+      console.error("No se pudieron guardar las notas:", error);
+    }
+  };
+  var stopPageAudio = () => {
   };
   function openNote(id) {
     if (!NOTES[id]) return;
     if (!found.includes(id)) {
       found.push(id);
-      try {
-        localStorage.setItem("ecos-notas", JSON.stringify(found));
-      } catch (e) {
-      }
+      saveNotes();
     }
     $("#nt").textContent = NOTES[id][0];
     $("#nf").textContent = NOTES[id][1] + " \xB7 " + found.length + "/7";
@@ -1671,12 +2308,22 @@
     chip();
   }
   function closeNote() {
+    if ($("#note").hidden) return;
     $("#note").hidden = true;
-    if (found.filter((n) => n !== "n7").length === 6 && !found.includes("n7")) setTimeout(() => openNote("n7"), 500);
+    if (FIRST_SIX_NOTE_IDS.every((id) => found.includes(id)) && !found.includes("n7")) {
+      setTimeout(() => openNote("n7"), 500);
+      return;
+    }
+    if (allNotesCollected() && !memoriaVista()) {
+      stopPageAudio();
+      playMemoria({ volume: () => Number($("#page-volume").value) });
+      chip();
+    }
   }
   var plDown = null;
   var CTRL = ".pl,[data-note],a,button";
   function initSite() {
+    if (memoriaVista()) document.body.classList.add("memoria");
     const volumeControls = $$(".volume-control");
     const setVolumeControlOpen = (control, open) => {
       const toggle = control.querySelector(".volume-toggle");
@@ -1748,6 +2395,8 @@
       plDown = e.target.closest && e.target.closest(".pl") || null;
     }, true);
     $$(".cc").forEach((c) => {
+      const color = CHARACTER_COLORS[c.dataset.character];
+      if (color) c.style.setProperty("--ac", color);
       const flip = () => {
         $$(".cc").forEach((o) => o !== c && o.classList.remove("sel2"));
         c.classList.toggle("flipped");
@@ -1775,17 +2424,65 @@
         c.style.transform = "";
       };
     });
-    $$(".ep").forEach((c) => {
-      const t = () => {
-        const o = c.classList.toggle("open");
-        c.setAttribute("aria-expanded", o);
-      };
-      c.onclick = (e) => {
-        if (!e.target.closest("button,[data-note],.more")) t();
-      };
-      c.onkeydown = (e) => {
-        if (e.key === "Enter") t();
-      };
+    const eps = $("#eps"), epCards = $$(".ep");
+    let coverFrame = 0, snapTimer = 0;
+    const updateCoverFlow = () => {
+      coverFrame = 0;
+      const center = eps.scrollLeft + eps.clientWidth / 2;
+      const cardWidth = epCards.length ? epCards[0].offsetWidth : eps.clientWidth;
+      epCards.forEach((card) => {
+        const offset = (card.offsetLeft + card.offsetWidth / 2 - center) / cardWidth;
+        const distance = Math.abs(offset);
+        const shift = -Math.sign(offset) * Math.min(distance * 0.2, 0.36) * cardWidth;
+        const active = distance < 0.15;
+        card.style.setProperty("--cover-x", `${shift}px`);
+        card.style.setProperty("--cover-z", `${-Math.min(420, distance * 150)}px`);
+        card.style.setProperty("--cover-rotate", `${Math.max(-36, Math.min(36, offset * 18))}deg`);
+        card.style.setProperty("--cover-scale", Math.max(0.55, 1 - distance * 0.12));
+        card.style.setProperty("--cover-blur", `${Math.min(9, distance * 2.2)}px`);
+        card.style.setProperty("--cover-opacity", Math.max(0.28, 1 - distance * 0.22));
+        card.style.setProperty("--cover-order", Math.round(100 - Math.min(distance, 9) * 10));
+        card.classList.toggle("is-active", active);
+        if (active) card.setAttribute("aria-current", "true");
+        else card.removeAttribute("aria-current");
+      });
+    };
+    const scheduleCoverFlow = () => {
+      if (!coverFrame) coverFrame = requestAnimationFrame(updateCoverFlow);
+    };
+    const centerNearestEpisode = () => {
+      const center = eps.scrollLeft + eps.clientWidth / 2;
+      let nearest = null, nearestDistance = Infinity;
+      epCards.forEach((card) => {
+        const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+        if (distance < nearestDistance) {
+          nearest = card;
+          nearestDistance = distance;
+        }
+      });
+      if (!nearest) return;
+      const target = nearest.offsetLeft + nearest.offsetWidth / 2 - eps.clientWidth / 2;
+      if (Math.abs(target - eps.scrollLeft) > 2) eps.scrollTo({ left: target, behavior: "smooth" });
+    };
+    eps.addEventListener("scroll", () => {
+      scheduleCoverFlow();
+      clearTimeout(snapTimer);
+      snapTimer = setTimeout(centerNearestEpisode, 150);
+    }, { passive: true });
+    eps.addEventListener("scrollend", () => {
+      clearTimeout(snapTimer);
+      centerNearestEpisode();
+    });
+    eps.addEventListener("wheel", (e) => {
+      const maxScroll = eps.scrollWidth - eps.clientWidth;
+      const delta = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? eps.clientWidth : 1);
+      if (Math.abs(delta) <= Math.abs(e.deltaX) || e.deltaY < 0 && eps.scrollLeft <= 1 || e.deltaY > 0 && eps.scrollLeft >= maxScroll - 1) return;
+      e.preventDefault();
+      eps.scrollLeft += delta;
+    }, { passive: false });
+    addEventListener("resize", scheduleCoverFlow);
+    updateCoverFlow();
+    epCards.forEach((c) => {
       c.onpointermove = (e) => {
         const r = c.getBoundingClientRect();
         c.style.setProperty("--mx", e.clientX - r.left + "px");
@@ -1814,16 +2511,34 @@
       };
     });
     const ty = $("#typ");
-    new IntersectionObserver(([e], o) => {
-      if (!e.isIntersecting) return;
-      o.disconnect();
-      let i = 0;
-      const t = ty.dataset.t;
-      const step = () => {
-        ty.textContent = t.slice(0, ++i);
-        if (i < t.length) setTimeout(step, 35);
-      };
-      step();
+    const revealQuote = () => {
+      if (ty.classList.contains("is-revealed")) return;
+      ty.classList.add("is-revealed");
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const particles = document.createElement("span");
+      particles.className = "typ-particles";
+      particles.setAttribute("aria-hidden", "true");
+      particles.innerHTML = Array.from({ length: 12 }, () => {
+        const size = 1.5 + Math.random() * 2;
+        const duration = 1.2 + Math.random() * 0.7;
+        const delay = Math.random() * 0.18;
+        const opacity = 0.22 + Math.random() * 0.25;
+        const drift = Math.random() * 38 - 19;
+        const rise = 18 + Math.random() * 30;
+        const x = Math.random() * 100;
+        const y = Math.random() * 112 - 6;
+        return `<i style="--size:${size}px;--duration:${duration}s;--delay:${delay}s;--opacity:${opacity};--drift:${drift}px;--rise:${rise}px;--x:${x}%;--y:${y}%"></i>`;
+      }).join("");
+      particles.addEventListener("animationend", (event) => {
+        if (event.target.parentNode === particles) event.target.remove();
+        if (!particles.firstElementChild) particles.remove();
+      });
+      ty.parentElement.append(particles);
+    };
+    new IntersectionObserver(([entry], observer) => {
+      if (!entry.isIntersecting) return;
+      observer.disconnect();
+      revealQuote();
     }, { threshold: 0.6 }).observe(ty);
     const wh = $$(".wh"), halo = $("#halo");
     let mx = -999, my = -999;
@@ -1857,6 +2572,48 @@
     };
     pageVolume.addEventListener("input", updatePageVolume);
     updatePageVolume();
+    const seekUI = (button) => {
+      const card = button && button.closest(".ep");
+      if (!card) return null;
+      return {
+        range: card.querySelector(".chapter-seek"),
+        time: card.querySelector(".seek-time")
+      };
+    };
+    const formatTime = (seconds) => {
+      if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
+      const value = Math.floor(seconds);
+      return `${String(Math.floor(value / 60)).padStart(2, "0")}:${String(value % 60).padStart(2, "0")}`;
+    };
+    const syncSeek = (audio, button) => {
+      const ui = seekUI(button);
+      if (!ui || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+      const time = Math.min(audio.currentTime, audio.duration);
+      ui.range.max = String(audio.duration);
+      ui.range.value = String(time);
+      ui.range.disabled = false;
+      ui.range.style.setProperty("--seek-progress", `${time / audio.duration * 100}%`);
+      ui.range.setAttribute("aria-valuetext", `${formatTime(time)} de ${formatTime(audio.duration)}`);
+      ui.time.textContent = formatTime(time);
+    };
+    const resetSeek = (button) => {
+      const ui = seekUI(button);
+      if (!ui) return;
+      ui.range.max = "1";
+      ui.range.value = "0";
+      ui.range.disabled = true;
+      ui.range.style.setProperty("--seek-progress", "0%");
+      ui.range.setAttribute("aria-valuetext", "00:00");
+      ui.time.textContent = "00:00";
+    };
+    $$(".chapter-seek").forEach((range) => {
+      const button = range.closest(".ep").querySelector(".pl");
+      range.addEventListener("input", () => {
+        if (!cur || curBtn !== button || !Number.isFinite(cur.duration)) return;
+        cur.currentTime = Number(range.value);
+        syncSeek(cur, button);
+      });
+    });
     const stopAud = () => {
       playId++;
       if (cur) {
@@ -1864,10 +2621,12 @@
         cur.removeAttribute("src");
         cur.load();
       }
+      if (curBtn) resetSeek(curBtn);
       if (curBtn) curBtn.textContent = curBtn.dataset.l || "\u25B6 Escuchar";
       if (curUrl) URL.revokeObjectURL(curUrl);
       cur = curBtn = curUrl = null;
     };
+    stopPageAudio = stopAud;
     $("#go").addEventListener("click", stopAud);
     $$(".pl").forEach((b) => b.addEventListener("click", (e) => {
       e.preventDefault();
@@ -1908,12 +2667,19 @@
         audio.preload = "auto";
         audio.volume = volume2;
         audio.src = src;
+        audio.onloadedmetadata = () => {
+          if (id === playId && cur === audio) syncSeek(audio, b);
+        };
+        audio.ontimeupdate = () => {
+          if (id === playId && cur === audio) syncSeek(audio, b);
+        };
         audio.onended = () => {
           if (id === playId) stopAud();
         };
         audio.onerror = () => {
           if (id !== playId || cur !== audio) return;
           unavailable(audio.error);
+          resetSeek(b);
           cur = curBtn = null;
           if (curUrl) URL.revokeObjectURL(curUrl);
           curUrl = null;
@@ -1923,6 +2689,7 @@
         }).catch((error) => {
           if (id !== playId || cur !== audio) return;
           unavailable(error);
+          resetSeek(b);
           cur = curBtn = null;
           if (curUrl) URL.revokeObjectURL(curUrl);
           curUrl = null;
@@ -1930,6 +2697,7 @@
       }).catch((error) => {
         if (id !== playId) return;
         unavailable(error);
+        resetSeek(b);
         curBtn = null;
       });
     }));
@@ -1963,7 +2731,7 @@
       };
       size();
       addEventListener("resize", size);
-      const COL = ["154,120,166", "216,200,230", "216,200,230", "255,77,166"], P = [], MAX = 48;
+      const COL = ["134,66,105", "177,155,175", "228,219,224", "134,66,105"], P = [], MAX = 48;
       let lx = -99, ly = -99, raf = 0, last2 = 0;
       const loop2 = (t) => {
         const dt = Math.min(48, t - last2) / 16.7;
@@ -2020,7 +2788,7 @@
     $("#chip").onclick = () => openNote(found[found.length - 1]);
     chip();
     sp();
-    console.log("%c\u273F Hay 7 notas escondidas en esta p\xE1gina.", "color:#c46a9a");
+    console.log("%c\u273F Hay 7 notas escondidas en esta p\xE1gina.", "color:#864269");
   }
 
   // js/main.js

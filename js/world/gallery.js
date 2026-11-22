@@ -1,5 +1,6 @@
 /* Zona 2: el TESERACTO — cubo doble con conectores, anillos y vitrinas flotantes. */
 import { T, basic } from './materials.js';
+import { fillTala, SKIN } from './vitrinas-extras.js';
 
 /* Cubo dentro de cubo unido por aristas */
 function buildTesseract(edge) {
@@ -23,13 +24,7 @@ function fillNyxa(v) { // nudo + sombras orbitando
     v.inner.add(b); v.x.push(b);
   }
 }
-function fillTala(v) { // icosaedro + ondas que se expanden
-  v.inner.add(new THREE.Mesh(new THREE.IcosahedronGeometry(.45, 1), basic(0xa67c52, { wireframe: true })));
-  for (let k = 0; k < 3; k++) {
-    const r = new THREE.Mesh(new THREE.TorusGeometry(.8, .02, 6, 40), basic(0xc9a070, { transparent: true }));
-    r.rotation.x = Math.PI / 2; v.g.add(r); v.x.push(r);
-  }
-}
+
 function fillVolt(v) { // octaedro dentro de una jaula
   v.inner.add(new THREE.Mesh(new THREE.OctahedronGeometry(.4), basic(0xf3efb0)));
   v.inner.add(new THREE.LineSegments(
@@ -37,12 +32,12 @@ function fillVolt(v) { // octaedro dentro de una jaula
     new THREE.LineBasicMaterial({ color: 0xffee88 })
   ));
 }
-function fillEmpty(v) { // vitrina vacía
+function fillEmpty(v) { // reserva para una vitrina sin representación asignada
   v.inner.add(new THREE.Mesh(new THREE.SphereGeometry(.25, 12, 10), basic(0x888888, { transparent: true, opacity: .18 })));
 }
 const FILL = { nyxa: fillNyxa, tala: fillTala, volt: fillVolt };
 
-function buildShowcase(id, i, edge) {
+function buildShowcase(id, i, edge, skin) {
   const a = i * Math.PI / 3, g = new THREE.Group();
   const bx = Math.sin(a) * 8, bz = -Math.cos(a) * 8;
 
@@ -57,9 +52,9 @@ function buildShowcase(id, i, edge) {
 
   g.add(glass, new THREE.LineSegments(new THREE.EdgesGeometry(glass.geometry), edge), base);
 
-  const v = { g, id, bx, bz, y0: Math.random() * 6, inner: new THREE.Group(), x: [], glass };
+  const v = { g, id, bx, bz,skin, y0: Math.random() * 6, inner: new THREE.Group(), x: [], glass };
   g.add(v.inner);
-  (FILL[id] || fillEmpty)(v);
+  (FILL[id] || SKIN[skin] ||fillEmpty)(v);
   return v;
 }
 
@@ -81,10 +76,10 @@ export function buildGallery(scene, pos) {
     group.add(m);
   });
 
-  /* 6 vitrinas: 3 con resonante y 3 vacías (una esconde el glifo secreto) */
+  /* 6 vitrinas: 3 resonantes y 3 representaciones selladas (una esconde el glifo secreto) */
   const vit = [], glass = [];
-  ['nyxa', null, 'tala', null, 'volt', null].forEach((id, i) => {
-    const v = buildShowcase(id, i, edge);
+  [['nyxa'], [null, 'virena'], ['tala'], [null, 'lyra'], ['volt'], [null, 'kael']].forEach(([id, skin], i) => {
+    const v = buildShowcase(id, i, edge, skin);
     group.add(v.g); vit.push(v); glass.push(v.glass);
   });
 

@@ -4,7 +4,7 @@
   <script>document.documentElement.classList.add("js"); setTimeout(function () { if (!window.__ecos) document.documentElement.classList.add("nojs") }, 3500)</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Ecos de Azahares · podcast interactivo</title>
+  <title>Ecos de Azahares | podcast interactivo</title>
   <link rel="icon" type="image/png" href="assets/imgs/IMGs_Trasmedia/florIcono.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/site.css">
@@ -86,7 +86,7 @@
         <div class="ff"></div>
       </div>
       <div>
-        <div class="dot"></div>
+        <img class="intro-flower" src="assets/imgs/IMGs_Trasmedia/florPunto.png" alt="">
         <h1>Ecos de Azahares</h1>
         <p>Una experiencia narrativa y un podcast interactivo: cada resonante se libera solo cuando escuchas su historia
           completa. Funciona mejor con audífonos.</p>
@@ -116,7 +116,7 @@
       <p class="m" id="de"></p>
       <p class="t" id="dt"></p>
       <canvas class="w" id="dw" width="360" height="56"></canvas>
-      <div class="bar"><i id="dbar" style="background:var(--gold)"></i></div>
+      <input id="dbar" type="range" min="0" max="1" step="0.1" value="0" disabled aria-label="Posición de reproducción de la historia">
       <p class="m"><span id="dst"></span><span id="dtm">00:00</span></p>
       <p style="margin:8px 0 0"><button id="dp">Pausar</button></p>
     </aside>
@@ -142,7 +142,7 @@
     <p class="wh" style="left:62%;top:26%">Cada vitrina guarda a alguien.</p>
     <p class="wh" id="n3" data-note="n3" style="right:7%;bottom:9%">El archivo ya te cuenta como testigo.</p>
     <div class="aura" data-speed=".15"></div>
-    <p class="eye rv">Sección 02 · El universo</p>
+    <p class="eye rv">Sección 02 | El universo</p>
     <h2 class="rv">Khaelos guarda<br>lo que olvidamos</h2>
     <div class="ed">
       <figure class="ph a rv" data-speed=".08"><span class="gl">ᛞᛟᚱ</span>
@@ -150,10 +150,10 @@
           src="./assets/imgs/IMGs_Trasmedia/museo.jpg"
           alt="El museo central"
         >
-        <figcaption>Ilustración · el museo central</figcaption>
+        <figcaption>Ilustración | el museo central</figcaption>
       </figure>
       <figure class="ph b ph2 rv" id="pho" tabindex="0" role="button" data-speed="-.06"><span class="gl">ᚲᚱᚢ</span>
-        <figcaption>Ilustración · ruinas de Deileanna</figcaption>
+        <figcaption>Ilustración | ruinas de Deileanna</figcaption>
         <img
           src="./assets/imgs/IMGs_Trasmedia/ruinas.jpg"
           alt="Ruinas de Deileanna"
@@ -183,21 +183,21 @@
   </section>
   <section id="personajes" class="sec dark">
     <p class="wh" style="right:6%;top:9%">El museo es un anclaje, no una tumba.</p>
-    <p class="eye rv">Sección 03 · Personajes</p>
+    <p class="eye rv">Sección 03 | Personajes</p>
     <h2 class="rv">Cinco voces,<br>una misma flor</h2>
     <div id="chars" class="chars">
-      <div class="cc" tabindex="0" role="button" aria-label="Adrián" style="--ac:#FF4DA6">
+      <div class="cc" tabindex="0" role="button" aria-label="Adrián" data-character="adrian">
         <div class="in3">
           <div class="cf">
             <img class="pf" src="assets/imgs/IMGs_Trasmedia/Adrian.jpg" alt="Adrián">
-              <g fill="#FF4DA6" fill-opacity=".85">
+              <g fill="var(--ac)" fill-opacity=".85">
                 <ellipse cx="0" cy="-22" rx="11" ry="22" />
                 <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(72)" />
                 <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(144)" />
                 <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(216)" />
                 <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(288)" />
               </g>
-              <circle r="7" fill="#FFE3F1" />
+              <circle r="7" fill="var(--t1)" />
             </svg>
             <h3>Adrián</h3>
             <p class="m2">Quien recibe la flor</p>
@@ -210,7 +210,7 @@
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Rythden" style="--ac:#8472AC">
+      <div class="cc" tabindex="0" role="button" aria-label="Rythden" data-character="rythden">
         <div class="in3">
           <div class="cf">
             <img class="pf" src="assets/imgs/IMGs_Trasmedia/Rythden.jpeg" alt="Rythden">
@@ -227,7 +227,7 @@
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Dra. Selene Marlowe" style="--ac:#6F86C9">
+      <div class="cc" tabindex="0" role="button" aria-label="Dra. Selene Marlowe" data-character="selene">
         <div class="in3">
           <div class="cf">
             <img class="pf" src="assets/imgs/IMGs_Trasmedia/Dra.jpeg" alt="Dra. Selene Marlowe">
@@ -242,7 +242,7 @@
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Nyxa" style="--ac:#8A6FD0">
+      <div class="cc" tabindex="0" role="button" aria-label="Nyxa" data-character="nyxa">
         <div class="in3">
           <div class="cf">
             <img class="pf" src="assets/imgs/IMGs_Trasmedia/Nyxa.jpeg" alt="Nyxa">
@@ -257,7 +257,7 @@
           </div>
         </div>
       </div>
-      <div class="cc" tabindex="0" role="button" aria-label="Naxaly" style="--ac:#C28894">
+      <div class="cc" tabindex="0" role="button" aria-label="Naxaly" data-character="naxaly">
         <div class="in3">
           <div class="cf">
             <img class="pf" src="assets/imgs/IMGs_Trasmedia/Naxaly.jpeg" alt="Naxaly">
@@ -285,84 +285,88 @@
   </section>
   <section id="capitulos" class="sec">
     <p class="wh" style="left:46%;top:8%">Las semillas de Sael aún respiran.</p>
-    <p class="eye rv">Sección 04 · Capítulos</p>
+    <p class="eye rv">Sección 04 | Capítulos</p>
     <h2 class="rv">Expedientes<br>del podcast</h2>
     <article class="typ rv">
-      <p class="m2">Grabación 01 · voz de Adrián</p>
-      <p id="typ"
-        data-t="Se levanta, hace el mismo recorrido, regresa a casa sin que nada cambie. Hasta que una mañana, en su puerta, hay un color que no existe en la ciudad.">
-      </p>
+      <p class="m2">Grabación 01 | voz de Adrián</p>
+      <p id="typ">Se levanta, hace el mismo recorrido, regresa a casa sin que nada cambie. Hasta que una mañana, en su puerta, hay un color que no existe en la ciudad.</p>
     </article>
-    <div id="eps" class="eps">
-      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
-        <div class="n">01</div>
-        <h3>La flor y la carta</h3>
+    <div id="eps" class="eps" tabindex="0" role="region" aria-label="Carrusel de capítulos">
+      <article class="ep rv">
         <div class="th has-image">
           <img src="assets/imgs/imagenesCapitulos/capitulo1.jpg" alt="Escena del capítulo 1" loading="lazy">
         </div>
-        <div class="meta"><span>Capítulo 1</span><span>00:31</span></div>
-        <div class="more">
-          <p>Adrián rompe su rutina y cruza las puertas del museo.</p>
+        <div class="ep-content">
+          <div class="n">01</div>
+          <h3>La flor y la carta</h3>
+          <p class="summary">Adrián rompe su rutina y cruza las puertas del museo.</p>
+          <div class="seek-control"><input class="chapter-seek" type="range" min="0" max="1" step="0.1" value="0" disabled aria-label="Posición de reproducción del capítulo 1"><span class="seek-time">00:00</span></div>
+          <div class="meta"><span>Capítulo 1</span><span>00:31</span></div>
           <div class="slot"><button class="pl" aria-label="Reproducir capítulo 1" data-audio="audios/AudiosCapitulos/Capitulo 1.mp3">▶</button><span>Escuchar capítulo 1</span></div>
         </div>
       </article>
-      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
-        <div class="n">02</div>
-        <h3>La Resonancia</h3>
+      <article class="ep rv">
         <div class="th has-image">
-          <img src="assets/imgs/imagenesCapitulos/capitulo2.jpg" alt="Escena del capítulo 1" loading="lazy">
+          <img src="assets/imgs/imagenesCapitulos/capitulo2.jpg" alt="Escena del capítulo 2" loading="lazy">
         </div>
-        <div class="meta"><span>Capítulo 2</span><span>00:51</span></div>
-        <div class="more">
-          <p>Las vitrinas respiran: no guardan objetos, guardan personas.</p>
+        <div class="ep-content">
+          <div class="n">02</div>
+          <h3>La Resonancia</h3>
+          <p class="summary">Las vitrinas respiran: no guardan objetos, guardan personas.</p>
+          <div class="seek-control"><input class="chapter-seek" type="range" min="0" max="1" step="0.1" value="0" disabled aria-label="Posición de reproducción del capítulo 2"><span class="seek-time">00:00</span></div>
+          <div class="meta"><span>Capítulo 2</span><span>00:51</span></div>
           <div class="slot"><button class="pl" aria-label="Reproducir capítulo 2" data-audio="audios/AudiosCapitulos/Capitulo 2.mp3">▶</button><span>Escuchar capítulo 2</span></div>
         </div>
       </article>
-      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
-        <div class="n">03</div>
-        <h3>Rythden y Selene</h3>
+      <article class="ep rv">
         <div class="th has-image">
           <img src="assets/imgs/imagenesCapitulos/capitulo3.jpg" alt="Escena del capítulo 3" loading="lazy">
         </div>
-        <div class="meta"><span>Capítulo 3</span><span>00:48</span></div>
-        <div class="more">
-          <p>El museo es un anclaje. Nace un equipo con un mismo fin.</p>
+        <div class="ep-content">
+          <div class="n">03</div>
+          <h3>Rythden y Selene</h3>
+          <p class="summary">El museo es un anclaje. Nace un equipo con un mismo fin.</p>
+          <div class="seek-control"><input class="chapter-seek" type="range" min="0" max="1" step="0.1" value="0" disabled aria-label="Posición de reproducción del capítulo 3"><span class="seek-time">00:00</span></div>
+          <div class="meta"><span>Capítulo 3</span><span>00:48</span></div>
           <div class="slot"><button class="pl" aria-label="Reproducir capítulo 3" data-audio="audios/AudiosCapitulos/Capitulo 3.mp3">▶</button><span>Escuchar capítulo 3</span></div>
         </div>
       </article>
-      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
-        <div class="n">04</div>
-        <h3>La Fractura</h3>
+      <article class="ep rv">
         <div class="th has-image">
           <img src="assets/imgs/imagenesCapitulos/capitulo4.jpg" alt="Escena del capítulo 4" loading="lazy">
         </div>
-        <div class="meta"><span>Capítulo 4</span><span>00:32</span></div>
-        <div class="more">
-          <p>Absorbe las salas y borra la memoria. Hay que estabilizar las voces.</p>
+        <div class="ep-content">
+          <div class="n">04</div>
+          <h3>La Fractura</h3>
+          <p class="summary">Absorbe las salas y borra la memoria. Hay que estabilizar las voces.</p>
+          <div class="seek-control"><input class="chapter-seek" type="range" min="0" max="1" step="0.1" value="0" disabled aria-label="Posición de reproducción del capítulo 4"><span class="seek-time">00:00</span></div>
+          <div class="meta"><span>Capítulo 4</span><span>00:32</span></div>
           <div class="slot"><button class="pl" aria-label="Reproducir capítulo 4" data-audio="audios/AudiosCapitulos/Capitulo 4.mp3">▶</button><span>Escuchar capítulo 4</span></div>
         </div>
       </article>
-      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
-        <div class="n">05</div>
-        <h3>Un camino hacia la verdad</h3>
+      <article class="ep rv">
         <div class="th has-image">
           <img src="assets/imgs/imagenesCapitulos/capitulo5.jpg" alt="Escena del capítulo 5" loading="lazy">
         </div>
-        <div class="meta"><span>Capítulo 5</span><span>00:39</span></div>
-        <div class="more">
-          <p>Sincronizar los archivos para ganar tiempo y descubrir qué es La Fractura.</p>
+        <div class="ep-content">
+          <div class="n">05</div>
+          <h3>Un camino hacia la verdad</h3>
+          <p class="summary">Sincronizar los archivos para ganar tiempo y descubrir qué es La Fractura.</p>
+          <div class="seek-control"><input class="chapter-seek" type="range" min="0" max="1" step="0.1" value="0" disabled aria-label="Posición de reproducción del capítulo 5"><span class="seek-time">00:00</span></div>
+          <div class="meta"><span>Capítulo 5</span><span>00:39</span></div>
           <div class="slot"><button class="pl" aria-label="Reproducir capítulo 5" data-audio="audios/AudiosCapitulos/Capitulo 5.mp3">▶</button><span>Escuchar capítulo 5</span> <i class="gl2" data-note="n5">✦</i></div>
         </div>
       </article>
-      <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
-        <div class="n">06</div>
-        <h3>La liberación</h3>
+      <article class="ep rv">
         <div class="th has-image">
           <img src="assets/imgs/imagenesCapitulos/capitulo6.jpg" alt="Escena del capítulo 6" loading="lazy">
         </div>
-        <div class="meta"><span>Capítulo 6</span><span>00:51</span></div>
-        <div class="more">
-          <p>Elegir qué dejar atrás. Otra flor aparece en otra puerta.</p>
+        <div class="ep-content">
+          <div class="n">06</div>
+          <h3>La liberación</h3>
+          <p class="summary">Elegir qué dejar atrás. Otra flor aparece en otra puerta.</p>
+          <div class="seek-control"><input class="chapter-seek" type="range" min="0" max="1" step="0.1" value="0" disabled aria-label="Posición de reproducción del capítulo 6"><span class="seek-time">00:00</span></div>
+          <div class="meta"><span>Capítulo 6</span><span>00:51</span></div>
           <div class="slot"><button class="pl" aria-label="Reproducir capítulo 6" data-audio="audios/AudiosCapitulos/Capitulo 6.mp3">▶</button><span>Escuchar capítulo 6</span></div>
         </div>
       </article>
@@ -370,7 +374,7 @@
   </section>
 
   <section id="equipo" class="sec dark">
-    <p class="eye rv">Sección 05 · Equipo</p>
+    <p class="eye rv">Sección 05 | Equipo</p>
     <h2 class="rv">Quienes le dieron<br>vida a Ecos</h2>
     <div class="tgrid">
       <div class="tmw rv">
@@ -381,7 +385,7 @@
           <div class="ov"></div>
           <div class="inf">
             <h3>Daniel Muñoz Delgado <i class="vf">✿</i></h3>
-            <p>Equipo de desarrollo · Ecos de Azahares</p>
+            <p>Equipo de desarrollo | Ecos de Azahares</p>
             <a class="tb" href="https://www.linkedin.com/in/daniel-mu%C3%B1oz-delgado-04b90a362/" target="_blank" rel="noopener">LinkedIn ↗</a>
           </div>
         </article>
@@ -392,7 +396,7 @@
           <div class="ov"></div>
           <div class="inf">
             <h3>Valentina Montero Zapata <i class="vf">✿</i></h3>
-            <p>Equipo de desarrollo · Ecos de Azahares</p>
+            <p>Equipo de desarrollo | Ecos de Azahares</p>
             <a class="tb" href="https://www.linkedin.com/in/valentina-montero-zapata-vmz2212/" target="_blank" rel="noopener">LinkedIn ↗</a>
           </div>
         </article>
@@ -403,7 +407,7 @@
           <div class="ov"></div>
           <div class="inf">
             <h3>Estefanía del Amor Restrepo Campo <i class="vf">✿</i></h3>
-            <p>Equipo de desarrollo · Ecos de Azahares</p>
+            <p>Equipo de desarrollo | Ecos de Azahares</p>
             <a class="tb" href="https://www.linkedin.com/in/estefan%C3%ADa-del-amor-restrepo-campo-11ba6339a/" target="_blank" rel="noopener">LinkedIn ↗</a>
           </div>
         </article>
@@ -429,7 +433,7 @@
     </div>
     <p class="wh ft-wh">Lo que sueltas, la flor lo recuerda.</p>
     <div class="ft-bot">
-      <span>© 2026 Ecos de Azahares · Podcast interactivo en sitio web <i class="fl" data-note="n6" aria-label="Flor">✿</i></span>
+      <span>© 2026 Ecos de Azahares | Podcast interactivo en sitio web <i class="fl" data-note="n6" aria-label="Flor">✿</i></span>
       <a href="#game">Volver al juego ↑</a>
     </div>
   </footer>

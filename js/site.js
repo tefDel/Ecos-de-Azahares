@@ -3,6 +3,8 @@ import { $ } from './utils.js';
 import { S } from './state.js';
 import { W } from './world/index.js';
 import { Aud } from './audio/index.js';
+import { CHARACTER_COLORS } from './data.js';
+import { playMemoria, memoriaVista } from './memoria.js';
 
 const $$ = s => [...document.querySelectorAll(s)];
 const NOTES = {
@@ -14,6 +16,8 @@ const NOTES = {
   n6: ['Cada ciclo, otra puerta. Cada puerta, otra flor. Esta vez, ¿para quién?', 'Al final de la página'],
   n7: ['Adrián: las encontraste todas. No sé quién eres, pero la flor ya sabe tu nombre. Sube y cruza la puerta.', 'La séptima nota']
 };
+const NOTE_IDS = Object.keys(NOTES);
+const FIRST_SIX_NOTE_IDS = NOTE_IDS.filter(id => id !== 'n7');
 /* Contenido de referencia (las cartas se escriben en index.html): edítalo aquí */
 const CHARS = [
   ['Adrián', 'Quien recibe la flor', 'ᚨᛞᚱ', 'Vive atrapado en una rutina hasta que una flor fucsia y una carta lo llevan al museo.', 'Detalle: la carta que vuelve a aparecer'],
@@ -37,17 +41,43 @@ const TABS = [
 ];
 
 let found = [];
-try { found = JSON.parse(localStorage.getItem('ecos-notas') || '[]'); } catch (e) {}
-const chip = () => { $('#chip').hidden = !found.length; $('#cc').textContent = found.length; };
+try {
+  const saved = JSON.parse(localStorage.getItem('ecos-notas') || '[]');
+  if (Array.isArray(saved)) {
+    found = [...new Set(saved.filter(id => Object.prototype.hasOwnProperty.call(NOTES, id)))];
+  }
+} catch (error) {
+  console.warn('No se pudieron leer las notas guardadas:', error);
+}
+const allNotesCollected = () => NOTE_IDS.every(id => found.includes(id));
+const chip = () => {
+  $('#chip').hidden = !found.length;
+  $('#cc').textContent = found.length;
+  $('#chip').classList.toggle('done', memoriaVista());
+};
+const saveNotes = () => {
+  try { localStorage.setItem('ecos-notas', JSON.stringify(found)); }
+  catch (error) { console.error('No se pudieron guardar las notas:', error); }
+};
+let stopPageAudio = () => {};
 function openNote(id) {
   if (!NOTES[id]) return;
-  if (!found.includes(id)) { found.push(id); try { localStorage.setItem('ecos-notas', JSON.stringify(found)); } catch (e) {} }
+  if (!found.includes(id)) { found.push(id); saveNotes(); }
   $('#nt').textContent = NOTES[id][0]; $('#nf').textContent = NOTES[id][1] + ' · ' + found.length + '/7';
   $('#note').hidden = false; chip();
 }
 function closeNote() {
+  if ($('#note').hidden) return;
   $('#note').hidden = true;
-  if (found.filter(n => n !== 'n7').length === 6 && !found.includes('n7')) setTimeout(() => openNote('n7'), 500);
+  if (FIRST_SIX_NOTE_IDS.every(id => found.includes(id)) && !found.includes('n7')) {
+    setTimeout(() => openNote('n7'), 500);
+    return;
+  }
+  if (allNotesCollected() && !memoriaVista()) {
+    stopPageAudio();
+    playMemoria({ volume: () => Number($('#page-volume').value) });
+    chip();
+  }
 }
 
 /* Botón de audio (.pl) sobre el que empezó la pulsación actual.
@@ -58,6 +88,7 @@ let plDown = null;
 const CTRL = '.pl,[data-note],a,button';
 
 export function initSite() {
+  if (memoriaVista()) document.body.classList.add('memoria');
   const volumeControls = $$('.volume-control');
   const setVolumeControlOpen = (control, open) => {
     const toggle = control.querySelector('.volume-toggle');
@@ -111,6 +142,8 @@ export function initSite() {
 
   /* 03 cartas: volteo (clic / toque / teclado) y brillo que sigue al puntero */
   $$('.cc').forEach(c => {
+    const color = CHARACTER_COLORS[c.dataset.character];
+    if (color) c.style.setProperty('--ac', color);
     const flip = () => { $$('.cc').forEach(o => o !== c && o.classList.remove('sel2')); c.classList.toggle('flipped'); c.classList.add('sel2'); c.style.transform = ''; };
     c.onclick = e => { if (plDown || e.target.closest(CTRL)) return; flip(); };
     c.onkeydown = e => { if (e.target.closest(CTRL)) return; if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
@@ -122,10 +155,65 @@ export function initSite() {
     c.onpointerleave = () => { c.style.transform = ''; };
   });
 
-  /* 04 expedientes: luz, expansión y espacio para el audio */
-  $$('.ep').forEach(c => {
-    const t = () => { const o = c.classList.toggle('open'); c.setAttribute('aria-expanded', o); };
-    c.onclick = e => { if (!e.target.closest('button,[data-note],.more')) t(); }; c.onkeydown = e => { if (e.key === 'Enter') t(); };
+  /* 04 expedientes: Cover Flow con scroll horizontal, rueda y gesto táctil */
+  const eps = $('#eps'), epCards = $$('.ep');
+  let coverFrame = 0, snapTimer = 0;
+  const updateCoverFlow = () => {
+    coverFrame = 0;
+    const center = eps.scrollLeft + eps.clientWidth / 2;
+    const cardWidth = epCards.length ? epCards[0].offsetWidth : eps.clientWidth;
+    epCards.forEach(card => {
+      const offset = (card.offsetLeft + card.offsetWidth / 2 - center) / cardWidth;
+      const distance = Math.abs(offset);
+      const shift = -Math.sign(offset) * Math.min(distance * .2, .36) * cardWidth;
+      const active = distance < .15;
+      card.style.setProperty('--cover-x', `${shift}px`);
+      card.style.setProperty('--cover-z', `${-Math.min(420, distance * 150)}px`);
+      card.style.setProperty('--cover-rotate', `${Math.max(-36, Math.min(36, offset * 18))}deg`);
+      card.style.setProperty('--cover-scale', Math.max(.55, 1 - distance * .12));
+      card.style.setProperty('--cover-blur', `${Math.min(9, distance * 2.2)}px`);
+      card.style.setProperty('--cover-opacity', Math.max(.28, 1 - distance * .22));
+      card.style.setProperty('--cover-order', Math.round(100 - Math.min(distance, 9) * 10));
+      card.classList.toggle('is-active', active);
+      if (active) card.setAttribute('aria-current', 'true');
+      else card.removeAttribute('aria-current');
+    });
+  };
+  const scheduleCoverFlow = () => {
+    if (!coverFrame) coverFrame = requestAnimationFrame(updateCoverFlow);
+  };
+  const centerNearestEpisode = () => {
+    const center = eps.scrollLeft + eps.clientWidth / 2;
+    let nearest = null, nearestDistance = Infinity;
+    epCards.forEach(card => {
+      const distance = Math.abs(card.offsetLeft + card.offsetWidth / 2 - center);
+      if (distance < nearestDistance) { nearest = card; nearestDistance = distance; }
+    });
+    if (!nearest) return;
+    const target = nearest.offsetLeft + nearest.offsetWidth / 2 - eps.clientWidth / 2;
+    if (Math.abs(target - eps.scrollLeft) > 2) eps.scrollTo({ left: target, behavior: 'smooth' });
+  };
+  eps.addEventListener('scroll', () => {
+    scheduleCoverFlow();
+    clearTimeout(snapTimer);
+    snapTimer = setTimeout(centerNearestEpisode, 150);
+  }, { passive: true });
+  eps.addEventListener('scrollend', () => {
+    clearTimeout(snapTimer);
+    centerNearestEpisode();
+  });
+  eps.addEventListener('wheel', e => {
+    const maxScroll = eps.scrollWidth - eps.clientWidth;
+    const delta = e.deltaY * (e.deltaMode === 1 ? 40 : e.deltaMode === 2 ? eps.clientWidth : 1);
+    if (Math.abs(delta) <= Math.abs(e.deltaX)
+      || (e.deltaY < 0 && eps.scrollLeft <= 1)
+      || (e.deltaY > 0 && eps.scrollLeft >= maxScroll - 1)) return;
+    e.preventDefault();
+    eps.scrollLeft += delta;
+  }, { passive: false });
+  addEventListener('resize', scheduleCoverFlow);
+  updateCoverFlow();
+  epCards.forEach(c => {
     c.onpointermove = e => { const r = c.getBoundingClientRect(); c.style.setProperty('--mx', e.clientX - r.left + 'px'); c.style.setProperty('--my', e.clientY - r.top + 'px'); };
   });
   $$('.rv').forEach(el => io.observe(el));
@@ -138,9 +226,36 @@ export function initSite() {
     r.onclick = e => { if (plDown || e.target.closest('.pl')) return; r.classList.toggle('on'); };
     r.onkeydown = e => { if (e.target.closest('.pl')) return; if (e.key === 'Enter') r.classList.toggle('on'); };
   });
-  const ty = $('#typ'); new IntersectionObserver(([e], o) => {
-    if (!e.isIntersecting) return; o.disconnect(); let i = 0; const t = ty.dataset.t;
-    const step = () => { ty.textContent = t.slice(0, ++i); if (i < t.length) setTimeout(step, 35); }; step();
+  const ty = $('#typ');
+  const revealQuote = () => {
+    if (ty.classList.contains('is-revealed')) return;
+    ty.classList.add('is-revealed');
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const particles = document.createElement('span');
+    particles.className = 'typ-particles';
+    particles.setAttribute('aria-hidden', 'true');
+    particles.innerHTML = Array.from({ length: 12 }, () => {
+      const size = 1.5 + Math.random() * 2;
+      const duration = 1.2 + Math.random() * .7;
+      const delay = Math.random() * .18;
+      const opacity = .22 + Math.random() * .25;
+      const drift = Math.random() * 38 - 19;
+      const rise = 18 + Math.random() * 30;
+      const x = Math.random() * 100;
+      const y = Math.random() * 112 - 6;
+      return `<i style="--size:${size}px;--duration:${duration}s;--delay:${delay}s;--opacity:${opacity};--drift:${drift}px;--rise:${rise}px;--x:${x}%;--y:${y}%"></i>`;
+    }).join('');
+    particles.addEventListener('animationend', event => {
+      if (event.target.parentNode === particles) event.target.remove();
+      if (!particles.firstElementChild) particles.remove();
+    });
+    ty.parentElement.append(particles);
+  };
+  new IntersectionObserver(([entry], observer) => {
+    if (!entry.isIntersecting) return;
+    observer.disconnect();
+    revealQuote();
   }, { threshold: .6 }).observe(ty);
 
   /* Susurros: textos que despiertan cuando la luz del cursor (o tu toque) se acerca */
@@ -166,6 +281,48 @@ export function initSite() {
   };
   pageVolume.addEventListener('input', updatePageVolume);
   updatePageVolume();
+  const seekUI = button => {
+    const card = button && button.closest('.ep');
+    if (!card) return null;
+    return {
+      range: card.querySelector('.chapter-seek'),
+      time: card.querySelector('.seek-time')
+    };
+  };
+  const formatTime = seconds => {
+    if (!Number.isFinite(seconds) || seconds < 0) return '00:00';
+    const value = Math.floor(seconds);
+    return `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`;
+  };
+  const syncSeek = (audio, button) => {
+    const ui = seekUI(button);
+    if (!ui || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
+    const time = Math.min(audio.currentTime, audio.duration);
+    ui.range.max = String(audio.duration);
+    ui.range.value = String(time);
+    ui.range.disabled = false;
+    ui.range.style.setProperty('--seek-progress', `${time / audio.duration * 100}%`);
+    ui.range.setAttribute('aria-valuetext', `${formatTime(time)} de ${formatTime(audio.duration)}`);
+    ui.time.textContent = formatTime(time);
+  };
+  const resetSeek = button => {
+    const ui = seekUI(button);
+    if (!ui) return;
+    ui.range.max = '1';
+    ui.range.value = '0';
+    ui.range.disabled = true;
+    ui.range.style.setProperty('--seek-progress', '0%');
+    ui.range.setAttribute('aria-valuetext', '00:00');
+    ui.time.textContent = '00:00';
+  };
+  $$('.chapter-seek').forEach(range => {
+    const button = range.closest('.ep').querySelector('.pl');
+    range.addEventListener('input', () => {
+      if (!cur || curBtn !== button || !Number.isFinite(cur.duration)) return;
+      cur.currentTime = Number(range.value);
+      syncSeek(cur, button);
+    });
+  });
   const stopAud = () => {
     playId++;
     if (cur) {
@@ -173,10 +330,12 @@ export function initSite() {
       cur.removeAttribute('src');
       cur.load();
     }
+    if (curBtn) resetSeek(curBtn);
     if (curBtn) curBtn.textContent = curBtn.dataset.l || '▶ Escuchar';
     if (curUrl) URL.revokeObjectURL(curUrl);
     cur = curBtn = curUrl = null;
   };
+  stopPageAudio = stopAud;
   $('#go').addEventListener('click', stopAud);
   $$('.pl').forEach(b => b.addEventListener('click', e => {
     e.preventDefault();
@@ -219,10 +378,17 @@ export function initSite() {
       audio.preload = 'auto';
       audio.volume = volume;
       audio.src = src;
+      audio.onloadedmetadata = () => {
+        if (id === playId && cur === audio) syncSeek(audio, b);
+      };
+      audio.ontimeupdate = () => {
+        if (id === playId && cur === audio) syncSeek(audio, b);
+      };
       audio.onended = () => { if (id === playId) stopAud(); };
       audio.onerror = () => {
         if (id !== playId || cur !== audio) return;
         unavailable(audio.error);
+        resetSeek(b);
         cur = curBtn = null;
         if (curUrl) URL.revokeObjectURL(curUrl);
         curUrl = null;
@@ -232,6 +398,7 @@ export function initSite() {
       }).catch(error => {
         if (id !== playId || cur !== audio) return;
         unavailable(error);
+        resetSeek(b);
         cur = curBtn = null;
         if (curUrl) URL.revokeObjectURL(curUrl);
         curUrl = null;
@@ -239,6 +406,7 @@ export function initSite() {
     }).catch(error => {
       if (id !== playId) return;
       unavailable(error);
+      resetSeek(b);
       curBtn = null;
     });
   }));
@@ -270,7 +438,7 @@ export function initSite() {
     document.body.appendChild(cv);
     const size = () => { const d = Math.min(devicePixelRatio || 1, 2); cv.width = innerWidth * d; cv.height = innerHeight * d; cx.setTransform(d, 0, 0, d, 0, 0); };
     size(); addEventListener('resize', size);
-    const COL = ['154,120,166', '216,200,230', '216,200,230', '255,77,166'], P = [], MAX = 48;
+    const COL = ['134,66,105', '177,155,175', '228,219,224', '134,66,105'], P = [], MAX = 48;
     let lx = -99, ly = -99, raf = 0, last = 0;
     const loop = t => {
       const dt = Math.min(48, t - last) / 16.7; last = t;
@@ -304,5 +472,5 @@ export function initSite() {
   $('#nx').onclick = closeNote; addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#note').hidden) closeNote(); });
   $('#chip').onclick = () => openNote(found[found.length - 1]);
   chip(); sp();
-  console.log('%c✿ Hay 7 notas escondidas en esta página.', 'color:#c46a9a');
+  console.log('%c✿ Hay 7 notas escondidas en esta página.', 'color:#864269');
 }

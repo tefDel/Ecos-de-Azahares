@@ -38,7 +38,7 @@ export function updClues() {
     : '';
   const clues = S.clues.length
     ? S.clues.map(c => '<p style="margin:6px 0">' + c + '</p>').join('')
-    : '<p class="m" style="display:block">Sin pistas todavía. Libera a los resonantes y mira bajo las vitrinas vacías.</p>';
+    : '<p class="m" style="display:block">Sin pistas todavía. Libera a los resonantes y busca bajo las vitrinas sin resonante.</p>';
 
   $('#journal').innerHTML = header + order + clues;
   $('#jx').addEventListener('click', () => show('#journal', false));

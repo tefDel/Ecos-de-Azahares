@@ -5,7 +5,7 @@ import { Aud } from '../audio/index.js';
 import { W } from '../world/index.js';
 import { show } from './ui.js';
 import { begin, openLetter, cross } from './intro.js';
-import { openDoss, closeDoss, togglePlayback } from './dossier.js';
+import { openDoss, closeDoss, togglePlayback, beginDossierSeek, seekDossier, endDossierSeek } from './dossier.js';
 import { fracture } from './fracture.js';
 import { openAccuse } from './finale.js';
 import { restart } from './restart.js';
@@ -47,9 +47,10 @@ export function initInput() {
   /* Teclado: ← → giran la cámara, Esc cierra el expediente */
   addEventListener('keydown', e => {
     if (!W.visible) return; // la página se desplaza normal fuera del juego
+    if (e.key === 'Escape') { closeDoss(); return; }
+    if (e.target.closest && e.target.closest('input,button,select,textarea,[contenteditable="true"]')) return;
     if (e.key === 'ArrowLeft') S.dir = -1;
     if (e.key === 'ArrowRight') S.dir = 1;
-    if (e.key === 'Escape') closeDoss();
   });
   addEventListener('keyup', e => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') S.dir = 0;
@@ -71,6 +72,19 @@ export function initInput() {
   $('#cross').addEventListener('click', cross);
   $('#dx').addEventListener('click', closeDoss);
   $('#dp').addEventListener('click', togglePlayback);
+  const dossierSeek = $('#dbar');
+  dossierSeek.addEventListener('pointerdown', beginDossierSeek);
+  dossierSeek.addEventListener('input', () => seekDossier(dossierSeek.value));
+  dossierSeek.addEventListener('change', endDossierSeek);
+  dossierSeek.addEventListener('blur', endDossierSeek);
+  dossierSeek.addEventListener('keydown', e => {
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) beginDossierSeek();
+  });
+  dossierSeek.addEventListener('keyup', e => {
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(e.key)) endDossierSeek();
+  });
+  addEventListener('pointerup', endDossierSeek);
+  addEventListener('pointercancel', endDossierSeek);
   $('#adv').addEventListener('click', fracture);
   $('#again').addEventListener('click', restart);
   $('#jb').addEventListener('click', () => show('#journal', !$('#journal').classList.contains('on')));

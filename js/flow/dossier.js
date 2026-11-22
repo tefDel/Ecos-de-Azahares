@@ -2,7 +2,7 @@
    Podcast: la liberación exige escuchar la historia completa (el progreso se conserva si pausas o cierras). */
 import { $, fmt } from '../utils.js';
 import { S } from '../state.js';
-import { RES, CLUES } from '../data.js';
+import { RES, CLUES, CHARACTER_COLORS } from '../data.js';
 import { Aud } from '../audio/index.js';
 import { W } from '../world/index.js';
 import { say, show } from './ui.js';
@@ -14,7 +14,7 @@ export const exploreHint = () =>
 /* Duración que hay que escuchar: la del audio real, o la de demostración */
 export const durOf = id => Aud.buf[id] ? Aud.buf[id].duration : RES[id].dur;
 
-/* Clic en una vitrina vacía: puede esconder el glifo secreto */
+/* Clic en una vitrina sin resonante liberable: puede esconder el glifo secreto */
 function openEmptyShowcase(u) {
   const r = S.run;
   if (u.i === r.secret && !r.secretFound) {
@@ -22,7 +22,7 @@ function openEmptyShowcase(u) {
     addClue('Bajo una peana hay un glifo grabado: ' + RES[r.culprit].glyph.split(' ')[0] + '. Busca dónde lo has visto.');
     say('Algo brilla bajo la peana: encontraste una pista.');
   } else {
-    say('Vitrina vacía: este eco aún no despierta.');
+    say('Vitrina sellada: este eco aún no despierta.');
   }
 }
 
@@ -42,6 +42,8 @@ export function openDoss(u) {
 
   const r = RES[u.id];
   S.dossier = u.id;
+  $('#dossier').style.setProperty('--character-color', CHARACTER_COLORS[u.id]);
+  S.seeking = S.resumeAfterSeek = false;
   $('#dm').textContent = `Expediente R-0${r.n} · lengua de Deileanna`;
   $('#dg').textContent = r.glyph;
   $('#di').src = r.img;
@@ -50,6 +52,7 @@ export function openDoss(u) {
   $('#dt').textContent = r.txt;
 
   S.heard[u.id] = S.heard[u.id] || 0;
+  S.maxHeard[u.id] = Math.max(S.maxHeard[u.id] || 0, S.heard[u.id]);
   S.playing = true;
   startVoice();
   updDoss();
@@ -60,12 +63,14 @@ export function openDoss(u) {
 
 export function closeDoss() {
   if (!S.dossier) return;
+  S.seeking = S.resumeAfterSeek = false;
   S.dossier = null; S.playing = false;
   if (S.dv) S.dv.stop();
   S.dv = null;
   show('#dossier', false);
   $('#dx').textContent = 'Cerrar';
   $('#dp').style.visibility = '';
+  $('#dbar').disabled = true;
   S.moodT = .2 + .12 * S.freed.size;
   exploreHint();
   if (S.freed.size === 3) {
@@ -88,6 +93,7 @@ export function startVoice() {
 /* Botón Pausar / Reanudar */
 export function togglePlayback() {
   if (!S.dossier) return;
+  if (S.seeking) endDossierSeek();
   S.playing = !S.playing;
   if (S.playing) {
     startVoice();
@@ -98,10 +104,43 @@ export function togglePlayback() {
   }
 }
 
+export function beginDossierSeek() {
+  if (!S.dossier || S.freed.has(S.dossier) || S.seeking) return;
+  S.seeking = true;
+  S.resumeAfterSeek = S.playing;
+  if (S.dv) S.dv.stop();
+  S.dv = null;
+}
+
+export function seekDossier(value) {
+  const id = S.dossier;
+  if (!id || S.freed.has(id)) return;
+  if (!S.seeking) beginDossierSeek();
+  const target = Number(value), d = durOf(id);
+  if (!Number.isFinite(target)) return;
+  const furthest = Math.min(d, Math.max(S.maxHeard[id] || 0, S.heard[id] || 0));
+  S.heard[id] = Math.min(furthest, Math.max(0, target));
+  updDoss();
+}
+
+export function endDossierSeek() {
+  if (!S.seeking) return;
+  S.seeking = false;
+  const resume = S.resumeAfterSeek;
+  S.resumeAfterSeek = false;
+  if (resume && S.dossier && S.playing && !S.freed.has(S.dossier)) startVoice();
+}
+
 /* Barra de progreso y estado del expediente */
 export function updDoss() {
   const id = S.dossier, d = durOf(id), h = Math.min(S.heard[id], d);
-  $('#dbar').style.width = h / d * 100 + '%';
+  const bar = $('#dbar');
+  const furthest = Math.min(S.maxHeard[id] || 0, d);
+  bar.max = String(d);
+  bar.value = String(h);
+  bar.disabled = S.freed.has(id) || furthest <= 0;
+  bar.style.setProperty('--progress', `${h / d * 100}%`);
+  bar.setAttribute('aria-valuetext', `${fmt(h)} de ${fmt(d)}`);
   $('#dtm').textContent = fmt(h) + ' / ' + fmt(d);
   $('#dst').textContent = S.freed.has(id)
     ? RES[id].name + ' quedó liberado'
@@ -111,6 +150,7 @@ export function updDoss() {
 /* Se escuchó la historia completa: liberar al resonante y revelar su testimonio */
 export function liberate(id) {
   S.freed.add(id); S.playing = false;
+  S.seeking = S.resumeAfterSeek = false;
   if (S.dv) S.dv.stop();
   S.dv = null;
   W.freeVit(id); Aud.chime();

@@ -1,6 +1,7 @@
 /* Zona 3: el NÚCLEO — cámara esférica dorada, flor sin color y figura de Sael Vantorin. */
 import { T, basic } from './materials.js';
 import { createFlower, setFlower } from './flower.js';
+import { CONFIG } from '../config.js';
 
 export function buildCore(scene, pos) {
   const group = new THREE.Group();
@@ -22,7 +23,7 @@ export function buildCore(scene, pos) {
     group.add(m);
   });
 
-  const flower = createFlower();
+  const flower = createFlower(CONFIG.images.florColores, 'warm');
   setFlower(flower, 'none');
   flower.g.position.set(0, .1, 0);
   group.add(flower.g);

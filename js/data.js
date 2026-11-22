@@ -3,6 +3,20 @@
 export const PHASES = ['Detonante', 'Teseracto', 'Fractura', 'Núcleo'];
 export const IDS = ['nyxa', 'tala', 'volt'];
 
+export const CHARACTER_COLORS = Object.freeze({
+  volt: '#FFD60A',
+  nyxa: '#9B59E0',
+  lyra: '#5CCBFF',
+  tala: '#A9713B',
+  naxaly: '#FF2E93',
+  kael: '#E32B2B',
+  rythden: '#3A5F8A',
+  selene: '#3A5F8A',
+  virena: '#8FE388',
+  adrian: '#6E8B3D',
+  fractura: '#6F36A3'
+});
+
 /* Los tres resonantes */
 export const RES = {
   nyxa: {

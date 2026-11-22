@@ -23,7 +23,7 @@ export function restart() {
     S.nextLost = null;
     Aud.shuffle();
     newRun();
-    S.heard = {}; S.freed.clear(); S.playing = false;
+    S.heard = {}; S.maxHeard = {}; S.seeking = S.resumeAfterSeek = false; S.freed.clear(); S.playing = false;
     S.mood = S.moodT = 0; S.glitch = S.glitchT = 0;
     S.step = 0; S.yawT = null;
 

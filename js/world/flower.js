@@ -14,10 +14,9 @@ const glowTexture = (() => {
   return new THREE.CanvasTexture(c);
 })();
 
-/* imageUrl (opcional): PNG que reemplaza la flor dibujada. Se muestra sin deformarlo
-   (el alto es fijo y el ancho sale de las proporciones reales del archivo).
-   Mientras carga, o si falla, se ve la flor dibujada. */
-export function createFlower(imageUrl) {
+/* imageUrl opcional reemplaza la flor dibujada; imageMode retrasa su aparición
+   hasta que la flor entra en ese modo. Mientras carga, se ve la flor dibujada. */
+export function createFlower(imageUrl, imageMode = 'always') {
   const g = new THREE.Group(), pets = [];
   const art = new THREE.Group(); g.add(art); // flor dibujada con código
 
@@ -39,7 +38,11 @@ export function createFlower(imageUrl) {
   }));
   glow.scale.set(3.2, 3.2, 1); glow.renderOrder = 1; g.add(glow);
 
-  const f = { g, pets, cm, glow, s: 1 };
+  const f = {
+    g, pets, cm, glow, s: 1, art, imageUrl, imageMode,
+    imageVisible: Boolean(imageUrl) && imageMode === 'always',
+    imageLoaded: false
+  };
 
   if (imageUrl) {
     const addImage = tex => {
@@ -49,7 +52,11 @@ export function createFlower(imageUrl) {
         new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false })
       );
       img.renderOrder = 2; // por encima del halo, sin teñirlo
-      g.add(img); art.visible = false; f.img = img;
+      g.add(img);
+      f.img = img;
+      f.imageLoaded = true;
+      img.visible = f.imageVisible;
+      art.visible = !f.imageVisible;
     };
     const onError = () => console.warn('No se pudo cargar', imageUrl, '— se usa la flor dibujada');
     if (location.protocol === 'file:') {
@@ -61,9 +68,10 @@ export function createFlower(imageUrl) {
       image.style.display = 'none';
       $('#game').append(image);
       image.onload = () => {
-        art.visible = false;
         f.imageElement = image;
         f.imageHeight = 2.3;
+        f.imageLoaded = true;
+        art.visible = !f.imageVisible;
       };
       image.onerror = onError;
       image.src = imageUrl;
@@ -90,4 +98,8 @@ export function setFlower(f, mode) {
   f.cm.color.setHex(mode === 'neon' ? 0xffe3f1 : mode === 'none' ? 0xffffff : 0xfff3c4);
   f.glow.material.color.setHex(mode === 'neon' ? 0xff007f : mode === 'none' ? 0xffffff : 0xffd27a);
   f.mode = mode;
+  f.imageVisible = Boolean(f.imageUrl) && (f.imageMode === 'always' || mode === f.imageMode);
+  const showImage = f.imageLoaded && f.imageVisible;
+  f.art.visible = !showImage;
+  if (f.img) f.img.visible = showImage;
 }

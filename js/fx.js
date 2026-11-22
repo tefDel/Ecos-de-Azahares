@@ -1,5 +1,12 @@
 /* Efectos 2D: estática/glitch sobre el mundo y visualizador de ondas. */
 import { $, RM } from './utils.js';
+import { CHARACTER_COLORS } from './data.js';
+
+const fracturaRgb = [
+  parseInt(CHARACTER_COLORS.fractura.slice(1, 3), 16),
+  parseInt(CHARACTER_COLORS.fractura.slice(3, 5), 16),
+  parseInt(CHARACTER_COLORS.fractura.slice(5, 7), 16)
+].join(',');
 
 /* Estática digital (canvas 2D de baja resolución) */
 export const FX = (() => {
@@ -12,9 +19,9 @@ export const FX = (() => {
     if (g < .01) { gl.style.transform = ''; return; }
 
     const n = Math.floor(6 + g * 30);
-    for (let i = 0; i < n; i++) { // franjas fucsia / blancas
+    for (let i = 0; i < n; i++) { // franjas de La Fractura / blancas
       x.fillStyle = Math.random() < .7
-        ? `rgba(255,0,127,${Math.random() * .5 * g})`
+        ? `rgba(${fracturaRgb},${Math.random() * .5 * g})`
         : `rgba(255,255,255,${Math.random() * .25 * g})`;
       x.fillRect(Math.random() * 320, Math.random() * 180, Math.random() * 160 * g + 4, Math.random() * 5 + 1);
     }
@@ -29,13 +36,13 @@ export const FX = (() => {
   return { draw };
 })();
 
-/* Visualizador de ondas: sano (dorado, limpio) vs corrompido (fucsia, roto).
-   cv = canvas, an = analizador (o null), c = corrupción 0..1 */
-export function wave(cv, an, c) {
+/* Visualizador de ondas: cada registro conserva el color de su personaje; la corrupción altera la forma.
+   cv = canvas, an = analizador (o null), c = corrupción 0..1, color = identidad del personaje */
+export function wave(cv, an, c, color = CHARACTER_COLORS.fractura) {
   const x = cv.getContext('2d'), w = cv.width, h = cv.height;
   x.clearRect(0, 0, w, h);
   x.lineWidth = 2;
-  x.strokeStyle = c > .05 ? '#FF007F' : '#e0b25a';
+  x.strokeStyle = color;
   x.beginPath();
 
   const d = new Uint8Array(an ? an.fftSize : 2);

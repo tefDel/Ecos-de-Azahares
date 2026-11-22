@@ -2,6 +2,7 @@
    Une las tres zonas (ciudad, teseracto, núcleo) y expone lo que el resto del juego necesita. */
 import { $, RM, clamp, ease } from '../utils.js';
 import { S } from '../state.js';
+import { CHARACTER_COLORS } from '../data.js';
 import { tint } from './materials.js';
 import { setFlower } from './flower.js';
 import { buildCity, doorX } from './city.js';
@@ -15,7 +16,7 @@ renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 const scene = new THREE.Scene();
 const cam = new THREE.PerspectiveCamera(58, 1, .1, 300);
 const bgGray = new THREE.Color(0x0d0216), bgGold = new THREE.Color(0xc9a24f);
-const bg = new THREE.Color(), neon = new THREE.Color(0xff007f);
+const bg = new THREE.Color(), neon = new THREE.Color(CHARACTER_COLORS.fractura);
 scene.background = bg;
 scene.fog = new THREE.Fog(0x0d0216, 4, 70);
 
@@ -173,46 +174,49 @@ function animateFlowers(dt, t) {
     const target = 1 + .06 * Math.sin(t * 3) + (hover ? .2 * (.5 + .5 * Math.sin(t * 9)) : 0);
     f.s += (target - f.s) * .2;
     f.g.scale.setScalar(f.s);
-    if (f !== fl1) f.g.rotation.z += dt * (f.mode === 'warm' ? .6 : .1);
+    if (f !== fl1 && !f.imageUrl) f.g.rotation.z += dt * (f.mode === 'warm' ? .6 : .1);
     f.glow.material.opacity = (f.mode === 'none' ? .18 : .4) + .2 * Math.sin(t * 3) + (hover ? .25 : 0);
   });
 }
 
 function updateFlowerImage() {
-  const image = fl1.imageElement;
-  if (!image) return;
-  if (S.p !== 0 || !W.visible || !image.naturalWidth) {
-    image.style.display = 'none';
-    return;
-  }
-
+  const flowers = [[fl1, 0], [fl2, 3]].filter(([flower]) => flower.imageElement);
+  if (!flowers.length) return;
   scene.updateMatrixWorld(true);
   cam.updateMatrixWorld();
-  const center = fl1.g.getWorldPosition(new THREE.Vector3());
-  const halfHeight = fl1.imageHeight * fl1.g.scale.y / 2;
-  const halfWidth = halfHeight * image.naturalWidth / image.naturalHeight;
-  const points = [
-    new THREE.Vector3(center.x - halfWidth, center.y - halfHeight, center.z),
-    new THREE.Vector3(center.x - halfWidth, center.y + halfHeight, center.z),
-    new THREE.Vector3(center.x + halfWidth, center.y - halfHeight, center.z),
-    new THREE.Vector3(center.x + halfWidth, center.y + halfHeight, center.z)
-  ].map(point => point.project(cam));
-  if (points.some(point => point.z < -1 || point.z > 1)) {
-    image.style.display = 'none';
-    return;
-  }
-
   const rect = renderer.domElement.getBoundingClientRect();
   const gameRect = $('#game').getBoundingClientRect();
-  const xs = points.map(point => (point.x + 1) * rect.width / 2);
-  const ys = points.map(point => (1 - point.y) * rect.height / 2);
-  const left = rect.left - gameRect.left + Math.min(...xs);
-  const top = rect.top - gameRect.top + Math.min(...ys);
-  image.style.left = `${left}px`;
-  image.style.top = `${top}px`;
-  image.style.width = `${Math.max(...xs) - Math.min(...xs)}px`;
-  image.style.height = `${Math.max(...ys) - Math.min(...ys)}px`;
-  image.style.display = 'block';
+  flowers.forEach(([flower, phase]) => {
+    const image = flower.imageElement;
+    if (S.p !== phase || !W.visible || !flower.imageVisible || !image.naturalWidth) {
+      image.style.display = 'none';
+      return;
+    }
+
+    const center = flower.g.getWorldPosition(new THREE.Vector3());
+    const halfHeight = flower.imageHeight * flower.g.scale.y / 2;
+    const halfWidth = halfHeight * image.naturalWidth / image.naturalHeight;
+    const points = [
+      new THREE.Vector3(center.x - halfWidth, center.y - halfHeight, center.z),
+      new THREE.Vector3(center.x - halfWidth, center.y + halfHeight, center.z),
+      new THREE.Vector3(center.x + halfWidth, center.y - halfHeight, center.z),
+      new THREE.Vector3(center.x + halfWidth, center.y + halfHeight, center.z)
+    ].map(point => point.project(cam));
+    if (points.some(point => point.z < -1 || point.z > 1)) {
+      image.style.display = 'none';
+      return;
+    }
+
+    const xs = points.map(point => (point.x + 1) * rect.width / 2);
+    const ys = points.map(point => (1 - point.y) * rect.height / 2);
+    const left = rect.left - gameRect.left + Math.min(...xs);
+    const top = rect.top - gameRect.top + Math.min(...ys);
+    image.style.left = `${left}px`;
+    image.style.top = `${top}px`;
+    image.style.width = `${Math.max(...xs) - Math.min(...xs)}px`;
+    image.style.height = `${Math.max(...ys) - Math.min(...ys)}px`;
+    image.style.display = 'block';
+  });
 }
 
 function animateDoors(dt) {

@@ -173,9 +173,46 @@ function animateFlowers(dt, t) {
     const target = 1 + .06 * Math.sin(t * 3) + (hover ? .2 * (.5 + .5 * Math.sin(t * 9)) : 0);
     f.s += (target - f.s) * .2;
     f.g.scale.setScalar(f.s);
-    f.g.rotation.z += dt * (f.mode === 'warm' ? .6 : .1);
+    if (f !== fl1) f.g.rotation.z += dt * (f.mode === 'warm' ? .6 : .1);
     f.glow.material.opacity = (f.mode === 'none' ? .18 : .4) + .2 * Math.sin(t * 3) + (hover ? .25 : 0);
   });
+}
+
+function updateFlowerImage() {
+  const image = fl1.imageElement;
+  if (!image) return;
+  if (S.p !== 0 || !W.visible || !image.naturalWidth) {
+    image.style.display = 'none';
+    return;
+  }
+
+  scene.updateMatrixWorld(true);
+  cam.updateMatrixWorld();
+  const center = fl1.g.getWorldPosition(new THREE.Vector3());
+  const halfHeight = fl1.imageHeight * fl1.g.scale.y / 2;
+  const halfWidth = halfHeight * image.naturalWidth / image.naturalHeight;
+  const points = [
+    new THREE.Vector3(center.x - halfWidth, center.y - halfHeight, center.z),
+    new THREE.Vector3(center.x - halfWidth, center.y + halfHeight, center.z),
+    new THREE.Vector3(center.x + halfWidth, center.y - halfHeight, center.z),
+    new THREE.Vector3(center.x + halfWidth, center.y + halfHeight, center.z)
+  ].map(point => point.project(cam));
+  if (points.some(point => point.z < -1 || point.z > 1)) {
+    image.style.display = 'none';
+    return;
+  }
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  const gameRect = $('#game').getBoundingClientRect();
+  const xs = points.map(point => (point.x + 1) * rect.width / 2);
+  const ys = points.map(point => (1 - point.y) * rect.height / 2);
+  const left = rect.left - gameRect.left + Math.min(...xs);
+  const top = rect.top - gameRect.top + Math.min(...ys);
+  image.style.left = `${left}px`;
+  image.style.top = `${top}px`;
+  image.style.width = `${Math.max(...xs) - Math.min(...xs)}px`;
+  image.style.height = `${Math.max(...ys) - Math.min(...ys)}px`;
+  image.style.display = 'block';
 }
 
 function animateDoors(dt) {
@@ -232,6 +269,7 @@ function update(dt, t) {
   animateShowcases(dt, t, S.glitch);
   coreRoom.sael.position.y = -.2 + Math.sin(t * .6) * .1;
 
+  updateFlowerImage();
   if (W.visible) renderer.render(scene, cam); // fuera de pantalla no se dibuja
   cam.position.x = px; cam.position.y = py;
 }

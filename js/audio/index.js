@@ -4,13 +4,29 @@ import { urban, doors, ping, boom, chime } from './scenes.js';
 import { voice } from './voice.js';
 
 const { buf, pool, eng } = E;
+let volume = 1, muted = false;
+
+function syncMasterVolume() {
+  if (eng.master) eng.master.gain.value = muted ? 0 : volume;
+}
+
+function init() {
+  E.init();
+  syncMasterVolume();
+}
 
 export const Aud = {
-  init: E.init, urban, doors, ping, boom, chime, voice, buf,
+  init,
+  urban, doors, ping, boom, chime, voice, buf,
+
+  setVolume(value) {
+    volume = Math.max(0, Math.min(1, Number(value)));
+    syncMasterVolume();
+  },
 
   /* Decodifica un audio subido y lo guarda (se pueden subir varios por clave) */
   async load(k, data) {
-    E.init();
+    init();
     const b = await eng.ctx.decodeAudioData(data);
     (pool[k] = pool[k] || []).push(b);
     buf[k] = buf[k] || b;
@@ -24,5 +40,5 @@ export const Aud = {
 
   clear(k) { delete buf[k]; delete pool[k]; },
 
-  mute(m) { if (eng.master) eng.master.gain.value = m ? 0 : 1; }
+  mute(m) { muted = m; syncMasterVolume(); }
 };

@@ -25,6 +25,7 @@ export function letterText() {
 /* Botón "Comenzar" */
 export function begin() {
   Aud.init();
+  document.body.classList.add('playing');
   loadConfig().then(() => Aud.urban(true));
   show('#intro', false);
   S.lock = false;

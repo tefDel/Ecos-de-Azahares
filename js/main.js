@@ -8,10 +8,8 @@
 import { W } from './world/index.js';
 import { tick } from './flow/tick.js';
 import { initInput } from './flow/input.js';
-import { initStudio } from './flow/studio.js';
 import { initSite } from './site.js';
 
-initStudio();
 initSite();
 initInput();
 

@@ -58,6 +58,31 @@ let plDown = null;
 const CTRL = '.pl,[data-note],a,button';
 
 export function initSite() {
+  const volumeControls = $$('.volume-control');
+  const setVolumeControlOpen = (control, open) => {
+    const toggle = control.querySelector('.volume-toggle');
+    control.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
+    toggle.setAttribute('aria-label', `${open ? 'Ocultar' : 'Mostrar'} ${toggle.dataset.volumeLabel}`);
+  };
+  volumeControls.forEach(control => {
+    const toggle = control.querySelector('.volume-toggle');
+    toggle.addEventListener('click', () => setVolumeControlOpen(control, !control.classList.contains('open')));
+  });
+  document.addEventListener('click', e => {
+    volumeControls.forEach(control => {
+      if (!control.contains(e.target)) setVolumeControlOpen(control, false);
+    });
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const control = volumeControls.find(item => item.classList.contains('open') && item.contains(document.activeElement));
+    if (!control) return;
+    setVolumeControlOpen(control, false);
+    control.querySelector('.volume-toggle').focus();
+    e.stopPropagation();
+  });
+
   /* Botón Jugar: lleva al juego y, si está en la portada, lo inicia */
   $('#play').addEventListener('click', e => {
     e.preventDefault();
@@ -100,7 +125,7 @@ export function initSite() {
   /* 04 expedientes: luz, expansión y espacio para el audio */
   $$('.ep').forEach(c => {
     const t = () => { const o = c.classList.toggle('open'); c.setAttribute('aria-expanded', o); };
-    c.onclick = e => { if (!e.target.closest('button,[data-note]')) t(); }; c.onkeydown = e => { if (e.key === 'Enter') t(); };
+    c.onclick = e => { if (!e.target.closest('button,[data-note],.more')) t(); }; c.onkeydown = e => { if (e.key === 'Enter') t(); };
     c.onpointermove = e => { const r = c.getBoundingClientRect(); c.style.setProperty('--mx', e.clientX - r.left + 'px'); c.style.setProperty('--my', e.clientY - r.top + 'px'); };
   });
   $$('.rv').forEach(el => io.observe(el));
@@ -131,17 +156,92 @@ export function initSite() {
   window.__ecos = 1;
 
   /* Audios de los personajes: suena el del botón tocado, uno a la vez */
-  let cur = null, curBtn = null;
-  const stopAud = () => { if (cur) { cur.pause(); curBtn.textContent = curBtn.dataset.l || '▶ Escuchar'; cur = curBtn = null; } };
-  document.addEventListener('click', e => {
-    const b = (e.target.closest && e.target.closest('.pl')) || plDown; plDown = null;
-    if (!b) return;
+  const pageVolume = $('#page-volume'), pageVolumeValue = $('#page-volume-value');
+  let volume = Number(pageVolume.value), cur = null, curBtn = null, curUrl = null, playId = 0;
+  const updatePageVolume = () => {
+    volume = Number(pageVolume.value);
+    pageVolumeValue.textContent = Math.round(volume * 100) + '%';
+    pageVolume.style.setProperty('--volume-fill', `${volume * 100}%`);
+    if (cur) cur.volume = volume;
+  };
+  pageVolume.addEventListener('input', updatePageVolume);
+  updatePageVolume();
+  const stopAud = () => {
+    playId++;
+    if (cur) {
+      cur.pause();
+      cur.removeAttribute('src');
+      cur.load();
+    }
+    if (curBtn) curBtn.textContent = curBtn.dataset.l || '▶ Escuchar';
+    if (curUrl) URL.revokeObjectURL(curUrl);
+    cur = curBtn = curUrl = null;
+  };
+  $('#go').addEventListener('click', stopAud);
+  $$('.pl').forEach(b => b.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    plDown = null;
     const same = curBtn === b; stopAud(); if (same) return;
-    cur = new Audio(encodeURI(b.dataset.audio)); curBtn = b;
-    cur.onended = stopAud;
-    cur.onerror = () => { b.textContent = 'Audio no disponible'; cur = curBtn = null; };
-    cur.play().then(() => { b.textContent = '❚❚ Pausar'; }).catch(() => { b.textContent = 'Audio no disponible'; cur = curBtn = null; });
-  });
+    if (!b.dataset.audio) {
+      b.textContent = 'Audio no configurado';
+      return;
+    }
+    curBtn = b;
+    b.removeAttribute('title');
+    b.textContent = 'Cargando…';
+    const id = playId, assetUrl = new URL(b.dataset.audio, location.href);
+    const source = location.protocol === 'file:'
+      ? fetch(assetUrl.href).then(response => {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.arrayBuffer();
+      }).then(data => {
+        if (id !== playId) return null;
+        curUrl = URL.createObjectURL(new Blob([data], { type: 'audio/mpeg' }));
+        return curUrl;
+      }).catch(error => {
+        console.warn('No se pudo leer el audio local como Blob; se probará la ruta directa:', assetUrl.href, error);
+        return assetUrl.href;
+      })
+      : Promise.resolve(assetUrl.href);
+
+    const unavailable = error => {
+      console.error('No se pudo reproducir el audio:', assetUrl.href, error);
+      b.textContent = 'Audio no disponible';
+      if (location.protocol === 'file:') {
+        b.title = 'Chrome puede bloquear audios locales al abrir el HTML directamente. Abre el proyecto con Live Server o Live Share.';
+      }
+    };
+
+    source.then(src => {
+      if (!src || id !== playId) return;
+      const audio = cur = new Audio();
+      audio.preload = 'auto';
+      audio.volume = volume;
+      audio.src = src;
+      audio.onended = () => { if (id === playId) stopAud(); };
+      audio.onerror = () => {
+        if (id !== playId || cur !== audio) return;
+        unavailable(audio.error);
+        cur = curBtn = null;
+        if (curUrl) URL.revokeObjectURL(curUrl);
+        curUrl = null;
+      };
+      return audio.play().then(() => {
+        if (id === playId) b.textContent = '❚❚ Pausar';
+      }).catch(error => {
+        if (id !== playId || cur !== audio) return;
+        unavailable(error);
+        cur = curBtn = null;
+        if (curUrl) URL.revokeObjectURL(curUrl);
+        curUrl = null;
+      });
+    }).catch(error => {
+      if (id !== playId) return;
+      unavailable(error);
+      curBtn = null;
+    });
+  }));
 
   /* Título: reinicia la página y vuelve a la portada */
   $('#nav .logo').title = 'Volver a la portada';

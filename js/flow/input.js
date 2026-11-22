@@ -80,4 +80,13 @@ export function initInput() {
     e.target.textContent = S.muted ? 'Sonido silenciado' : 'Sonido activado';
     e.target.setAttribute('aria-pressed', !S.muted);
   });
+  const gameVolume = $('#game-volume'), gameVolumeValue = $('#game-volume-value');
+  const updateGameVolume = () => {
+    const volume = Number(gameVolume.value);
+    Aud.setVolume(volume);
+    gameVolumeValue.textContent = Math.round(volume * 100) + '%';
+    gameVolume.style.setProperty('--volume-fill', `${volume * 100}%`);
+  };
+  gameVolume.addEventListener('input', updateGameVolume);
+  updateGameVolume();
 }

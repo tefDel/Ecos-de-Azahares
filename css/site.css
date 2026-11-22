@@ -315,6 +315,13 @@
     overflow: hidden
 }
 
+.ph img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block
+}
+
 .ph::before {
     content: "";
     position: absolute;
@@ -548,6 +555,7 @@
     content: "";
     position: absolute;
     inset: 0;
+    pointer-events: none;
     background: radial-gradient(260px at var(--mx, 50%) var(--my, 0), var(--t2) / 20%, transparent);
     opacity: 0;
     transition: .3s
@@ -583,6 +591,19 @@
     font: 11px var(--mono)
 }
 
+.ep .th.has-image {
+    height: auto;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 0;
+}
+
+.ep .th img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 .ep .more {
     max-height: 0;
     overflow: hidden;
@@ -890,11 +911,28 @@ p.team {
     cursor: pointer
 }
 
+.ph2::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: var(--bg0);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .6s
+}
+
+.ph2:hover::after,
+.ph2.open::after {
+    opacity: .36
+}
+
 .ph2 .cap {
     position: absolute;
     inset: 0;
     padding: 44px 22px 22px;
-    background: var(--bg0) / 95%;
+    z-index: 2;
+    background: color-mix(in srgb, var(--bg0) 72%, transparent);
     color: var(--t1);
     transform: translateY(100%);
     transition: transform .6s;
@@ -987,9 +1025,9 @@ p.team {
 }
 
 .ed .env {
-    grid-column: 8/13;
+    grid-column: 9/13;
     grid-row: 2;
-    margin-top: -40px
+    margin-top: 0
 }
 
 @media(max-width:800px) {
@@ -1593,7 +1631,17 @@ p.team {
     z-index: 1
 }
 
-.sc .crack,
+.sc .main-art {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    opacity: .12
+}
+
 .sc .floor {
     z-index: 2
 }
@@ -1628,45 +1676,36 @@ p.team {
     stroke-width: 2;
     stroke-dasharray: 1 16;
     stroke-linecap: round;
-    animation: spin 90s linear infinite
+    animation: water-ripple 8s ease-out -5.2s infinite
 }
 
 .res .r1 {
     stroke: rgba(138, 111, 208, .45);
     stroke-width: 1;
     stroke-dasharray: 60 14 6 14;
-    animation: spin 140s linear infinite reverse
+    animation: water-ripple 8s ease-out -2.6s infinite
 }
 
 .res .r2 {
     stroke: rgba(255, 77, 166, .4);
     stroke-width: 1;
-    animation: breathe 5s ease-in-out infinite
+    animation: water-ripple 8s ease-out infinite
 }
 
-@keyframes spin {
-    to {
-        transform: rotate(360deg)
+@keyframes water-ripple {
+    0% {
+        opacity: .2;
+        transform: scale(.94)
     }
-}
 
-@keyframes breathe {
-    50% {
-        stroke: rgba(255, 77, 166, .12);
-        transform: scale(1.03)
+    25% {
+        opacity: .65
     }
-}
 
-/* Grieta fucsia: cae desde lo alto hasta la vitrina de Naxaly */
-.crack path {
-    fill: none;
-    stroke: #FF4DA6;
-    stroke-width: 1.5;
-    vector-effect: non-scaling-stroke;
-    stroke-linejoin: bevel;
-    opacity: .5;
-    filter: drop-shadow(0 0 5px #FF4DA6);
-    animation: pulse 4s ease-in-out infinite
+    100% {
+        opacity: 0;
+        transform: scale(1.12)
+    }
 }
 
 /* Suelo del museo en perspectiva */
@@ -1852,7 +1891,6 @@ p.team {
 
     .vits figure,
     .res circle,
-    .crack path,
     #intro .dot {
         animation: none
     }

@@ -97,8 +97,10 @@
     x.fillRect(0, 0, 64, 64);
     return new THREE.CanvasTexture(c);
   })();
-  function createFlower() {
+  function createFlower(imageUrl) {
     const g = new THREE.Group(), pets = [];
+    const art = new THREE.Group();
+    g.add(art);
     for (let i = 0; i < 5; i++) {
       const petal = new THREE.Group();
       const m = basic(16711807, { transparent: true });
@@ -107,11 +109,11 @@
       s.scale.set(0.6, 1.15, 0.22);
       s.position.y = 0.42;
       petal.add(s);
-      g.add(petal);
+      art.add(petal);
       pets.push(m);
     }
     const cm = basic(16770033);
-    g.add(new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), cm));
+    art.add(new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), cm));
     const glow = new THREE.Sprite(new THREE.SpriteMaterial({
       map: glowTexture,
       color: 16711807,
@@ -121,10 +123,45 @@
       opacity: 0.5
     }));
     glow.scale.set(3.2, 3.2, 1);
+    glow.renderOrder = 1;
     g.add(glow);
+    const f = { g, pets, cm, glow, s: 1 };
+    if (imageUrl) {
+      const addImage = (tex) => {
+        const H = 2.3, { width, height } = tex.image;
+        const img = new THREE.Mesh(
+          new THREE.PlaneGeometry(H * width / height, H),
+          new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false })
+        );
+        img.renderOrder = 2;
+        g.add(img);
+        art.visible = false;
+        f.img = img;
+      };
+      const onError = () => console.warn("No se pudo cargar", imageUrl, "\u2014 se usa la flor dibujada");
+      if (location.protocol === "file:") {
+        const image = new Image();
+        image.className = "world-flower-image";
+        image.alt = "";
+        image.setAttribute("aria-hidden", "true");
+        image.draggable = false;
+        image.style.display = "none";
+        $("#game").append(image);
+        image.onload = () => {
+          art.visible = false;
+          f.imageElement = image;
+          f.imageHeight = 2.3;
+        };
+        image.onerror = onError;
+        image.src = imageUrl;
+      } else {
+        new THREE.TextureLoader().load(imageUrl, addImage, void 0, onError);
+      }
+    }
     const hit = new THREE.Mesh(new THREE.SphereGeometry(1.1, 8, 6), basic(0, { visible: false }));
     g.add(hit);
-    return { g, pets, cm, glow, hit, s: 1 };
+    f.hit = hit;
+    return f;
   }
   function setFlower(f, mode) {
     const cols = {
@@ -140,6 +177,24 @@
     f.glow.material.color.setHex(mode === "neon" ? 16711807 : mode === "none" ? 16777215 : 16765562);
     f.mode = mode;
   }
+
+  // js/config.js
+  var CONFIG = {
+    audio: {
+      urban: null,
+      doors: null,
+      nyxa: "audios/Nyxa.mp3",
+      tala: "audios/Tala.mp3",
+      volt: "audios/Volt entero.mp3",
+      bit0: "audios/Rythden.mp3",
+      bit1: "audios/Rythden2.mp3",
+      bit2: "audios/Dra Selene.mp3",
+      core: "audios/Naxaly.mp3"
+    },
+    /* Imágenes que sustituyen elementos dibujados con código (se usan tal cual, con su transparencia y proporción) */
+    images: { florFucsia: "assets/imgs/IMGs_Trasmedia/florFucsia.png" },
+    models: { city: null, gal: null, core: null, flor: null }
+  };
 
   // js/world/city.js
   var doorX = (i) => (i - 2) * 6;
@@ -176,7 +231,7 @@
       T(new THREE.PointsMaterial({ size: 0.06 }), 11901618, 14725722)
     );
     group.add(dust2);
-    const flower = createFlower();
+    const flower = createFlower(CONFIG.images.florFucsia);
     setFlower(flower, "neon");
     group.add(flower.g);
     const decor = group.children.filter((c) => c !== flower.g && !doors3.some((d) => d.panel === c || d.back === c));
@@ -459,9 +514,43 @@
       const target = 1 + 0.06 * Math.sin(t * 3) + (hover ? 0.2 * (0.5 + 0.5 * Math.sin(t * 9)) : 0);
       f.s += (target - f.s) * 0.2;
       f.g.scale.setScalar(f.s);
-      f.g.rotation.z += dt * (f.mode === "warm" ? 0.6 : 0.1);
+      if (f !== fl1) f.g.rotation.z += dt * (f.mode === "warm" ? 0.6 : 0.1);
       f.glow.material.opacity = (f.mode === "none" ? 0.18 : 0.4) + 0.2 * Math.sin(t * 3) + (hover ? 0.25 : 0);
     });
+  }
+  function updateFlowerImage() {
+    const image = fl1.imageElement;
+    if (!image) return;
+    if (S.p !== 0 || !W.visible || !image.naturalWidth) {
+      image.style.display = "none";
+      return;
+    }
+    scene.updateMatrixWorld(true);
+    cam.updateMatrixWorld();
+    const center = fl1.g.getWorldPosition(new THREE.Vector3());
+    const halfHeight = fl1.imageHeight * fl1.g.scale.y / 2;
+    const halfWidth = halfHeight * image.naturalWidth / image.naturalHeight;
+    const points = [
+      new THREE.Vector3(center.x - halfWidth, center.y - halfHeight, center.z),
+      new THREE.Vector3(center.x - halfWidth, center.y + halfHeight, center.z),
+      new THREE.Vector3(center.x + halfWidth, center.y - halfHeight, center.z),
+      new THREE.Vector3(center.x + halfWidth, center.y + halfHeight, center.z)
+    ].map((point) => point.project(cam));
+    if (points.some((point) => point.z < -1 || point.z > 1)) {
+      image.style.display = "none";
+      return;
+    }
+    const rect = renderer.domElement.getBoundingClientRect();
+    const gameRect = $("#game").getBoundingClientRect();
+    const xs = points.map((point) => (point.x + 1) * rect.width / 2);
+    const ys = points.map((point) => (1 - point.y) * rect.height / 2);
+    const left = rect.left - gameRect.left + Math.min(...xs);
+    const top = rect.top - gameRect.top + Math.min(...ys);
+    image.style.left = `${left}px`;
+    image.style.top = `${top}px`;
+    image.style.width = `${Math.max(...xs) - Math.min(...xs)}px`;
+    image.style.height = `${Math.max(...ys) - Math.min(...ys)}px`;
+    image.style.display = "block";
   }
   function animateDoors(dt) {
     doors.forEach((d, k) => {
@@ -510,6 +599,7 @@
     gallery.tess.rotation.y = t * 0.07;
     animateShowcases(dt, t, S.glitch);
     coreRoom.sael.position.y = -0.2 + Math.sin(t * 0.6) * 0.1;
+    updateFlowerImage();
     if (W.visible) renderer.render(scene, cam);
     cam.position.x = px;
     cam.position.y = py;
@@ -954,8 +1044,17 @@
 
   // js/audio/index.js
   var { buf: buf2, pool: pool2, eng: eng2 } = engine_exports;
+  var volume = 1;
+  var muted = false;
+  function syncMasterVolume() {
+    if (eng2.master) eng2.master.gain.value = muted ? 0 : volume;
+  }
+  function init2() {
+    init();
+    syncMasterVolume();
+  }
   var Aud = {
-    init,
+    init: init2,
     urban,
     doors: doors2,
     ping,
@@ -963,9 +1062,13 @@
     chime,
     voice,
     buf: buf2,
+    setVolume(value) {
+      volume = Math.max(0, Math.min(1, Number(value)));
+      syncMasterVolume();
+    },
     /* Decodifica un audio subido y lo guarda (se pueden subir varios por clave) */
     async load(k, data) {
-      init();
+      init2();
       const b = await eng2.ctx.decodeAudioData(data);
       (pool2[k] = pool2[k] || []).push(b);
       buf2[k] = buf2[k] || b;
@@ -982,7 +1085,8 @@
       delete pool2[k];
     },
     mute(m) {
-      if (eng2.master) eng2.master.gain.value = m ? 0 : 1;
+      muted = m;
+      syncMasterVolume();
     }
   };
 
@@ -1141,37 +1245,7 @@
     $("#dp").style.visibility = "hidden";
   }
 
-  // js/config.js
-  var CONFIG = {
-    audio: {
-      urban: null,
-      doors: null,
-      nyxa: "audios/Nyxa.mp3",
-      tala: "audios/Tala.mp3",
-      volt: "audios/Volt entero.mp3",
-      bit0: "audios/Rythden.mp3",
-      bit1: "audios/Rythden2.mp3",
-      bit2: "audios/Dra Selene.mp3",
-      core: "audios/Naxaly.mp3"
-    },
-    models: { city: null, gal: null, core: null, flor: null }
-  };
-
   // js/flow/studio.js
-  var SLOTS = [
-    ["a", "urban", "Ambiente urbano (vista 1)"],
-    ["a", "doors", "Puertas del museo"],
-    ["a", "nyxa", "Historia de Nyxa"],
-    ["a", "tala", "Historia de Tala"],
-    ["a", "volt", "Historia de Volt"],
-    ["a", "bit0", "Bit\xE1cora de Rythden 1"],
-    ["a", "bit1", "Bit\xE1cora de Rythden 2"],
-    ["a", "bit2", "Bit\xE1cora de Rythden 3"],
-    ["a", "core", "Eco final del n\xFAcleo"],
-    ["m", "city", "Entorno 3D: ciudad (.glb)"],
-    ["m", "gal", "Entorno 3D: teseracto (.glb)"],
-    ["m", "core", "Entorno 3D: n\xFAcleo (.glb)"]
-  ];
   async function loadSlot(type, key, data) {
     if (type === "a") {
       await Aud.load(key, data);
@@ -1196,36 +1270,6 @@
       }
     }
   }
-  function initStudio() {
-    const st = $("#studio");
-    st.innerHTML = '<p class="m"><span>Estudio \xB7 reemplaza audios y entornos</span><button id="sx" style="padding:2px 8px">Cerrar</button></p>' + SLOTS.map(
-      ([t, k, l], i) => `<label class="sl"><span>${l}</span><input type="file" data-i="${i}" accept="${t === "a" ? "audio/*" : ".glb,.gltf"}"${t === "a" ? " multiple" : ""}><em></em></label>`
-    ).join("") + '<p class="m" style="display:block">Los .glb reemplazan la decoraci\xF3n de cada zona; puertas, flor y vitrinas se conservan. Cada audio de resonante define cu\xE1nto hay que escuchar para liberarlo. Puedes subir varios audios por casilla: cada ciclo usa uno distinto al azar.</p><button id="sr">Restaurar valores</button>';
-    st.querySelectorAll("input").forEach((inp) => inp.addEventListener("change", async () => {
-      const [t, k] = SLOTS[+inp.dataset.i], em = inp.nextElementSibling, files = [...inp.files];
-      if (!files.length) return;
-      em.textContent = "cargando\u2026";
-      try {
-        for (const f of files) await loadSlot(t, k, await f.arrayBuffer());
-        em.textContent = "listo: " + files.length + " archivo(s)";
-      } catch (e) {
-        em.textContent = "no se pudo leer el archivo";
-      }
-    }));
-    $("#sx").addEventListener("click", () => show("#studio", false));
-    $("#stu").addEventListener("click", () => show("#studio", !st.classList.contains("on")));
-    $("#sr").addEventListener("click", () => {
-      Object.keys(Aud.buf).forEach((k) => Aud.clear(k));
-      ["city", "gal", "core"].forEach((z) => W.setEnv(z, null));
-      Object.values(RES).forEach((r) => {
-        r.dur = 30;
-      });
-      st.querySelectorAll("input").forEach((i) => {
-        i.value = "";
-        i.nextElementSibling.textContent = "";
-      });
-    });
-  }
 
   // js/flow/intro.js
   function letterText() {
@@ -1240,6 +1284,7 @@
   }
   function begin() {
     Aud.init();
+    document.body.classList.add("playing");
     loadConfig().then(() => Aud.urban(true));
     show("#intro", false);
     S.lock = false;
@@ -1575,6 +1620,15 @@
       e.target.textContent = S.muted ? "Sonido silenciado" : "Sonido activado";
       e.target.setAttribute("aria-pressed", !S.muted);
     });
+    const gameVolume = $("#game-volume"), gameVolumeValue = $("#game-volume-value");
+    const updateGameVolume = () => {
+      const volume2 = Number(gameVolume.value);
+      Aud.setVolume(volume2);
+      gameVolumeValue.textContent = Math.round(volume2 * 100) + "%";
+      gameVolume.style.setProperty("--volume-fill", `${volume2 * 100}%`);
+    };
+    gameVolume.addEventListener("input", updateGameVolume);
+    updateGameVolume();
   }
 
   // js/site.js
@@ -1623,6 +1677,30 @@
   var plDown = null;
   var CTRL = ".pl,[data-note],a,button";
   function initSite() {
+    const volumeControls = $$(".volume-control");
+    const setVolumeControlOpen = (control, open) => {
+      const toggle = control.querySelector(".volume-toggle");
+      control.classList.toggle("open", open);
+      toggle.setAttribute("aria-expanded", String(open));
+      toggle.setAttribute("aria-label", `${open ? "Ocultar" : "Mostrar"} ${toggle.dataset.volumeLabel}`);
+    };
+    volumeControls.forEach((control) => {
+      const toggle = control.querySelector(".volume-toggle");
+      toggle.addEventListener("click", () => setVolumeControlOpen(control, !control.classList.contains("open")));
+    });
+    document.addEventListener("click", (e) => {
+      volumeControls.forEach((control) => {
+        if (!control.contains(e.target)) setVolumeControlOpen(control, false);
+      });
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      const control = volumeControls.find((item) => item.classList.contains("open") && item.contains(document.activeElement));
+      if (!control) return;
+      setVolumeControlOpen(control, false);
+      control.querySelector(".volume-toggle").focus();
+      e.stopPropagation();
+    });
     $("#play").addEventListener("click", (e) => {
       e.preventDefault();
       $("#game").scrollIntoView({ behavior: "smooth" });
@@ -1703,7 +1781,7 @@
         c.setAttribute("aria-expanded", o);
       };
       c.onclick = (e) => {
-        if (!e.target.closest("button,[data-note]")) t();
+        if (!e.target.closest("button,[data-note],.more")) t();
       };
       c.onkeydown = (e) => {
         if (e.key === "Enter") t();
@@ -1769,35 +1847,92 @@
       Aud.mute(!e.isIntersecting || S.muted);
     }, { threshold: 0.05 }).observe($("#game"));
     window.__ecos = 1;
-    let cur = null, curBtn = null;
+    const pageVolume = $("#page-volume"), pageVolumeValue = $("#page-volume-value");
+    let volume2 = Number(pageVolume.value), cur = null, curBtn = null, curUrl = null, playId = 0;
+    const updatePageVolume = () => {
+      volume2 = Number(pageVolume.value);
+      pageVolumeValue.textContent = Math.round(volume2 * 100) + "%";
+      pageVolume.style.setProperty("--volume-fill", `${volume2 * 100}%`);
+      if (cur) cur.volume = volume2;
+    };
+    pageVolume.addEventListener("input", updatePageVolume);
+    updatePageVolume();
     const stopAud = () => {
+      playId++;
       if (cur) {
         cur.pause();
-        curBtn.textContent = curBtn.dataset.l || "\u25B6 Escuchar";
-        cur = curBtn = null;
+        cur.removeAttribute("src");
+        cur.load();
       }
+      if (curBtn) curBtn.textContent = curBtn.dataset.l || "\u25B6 Escuchar";
+      if (curUrl) URL.revokeObjectURL(curUrl);
+      cur = curBtn = curUrl = null;
     };
-    document.addEventListener("click", (e) => {
-      const b = e.target.closest && e.target.closest(".pl") || plDown;
+    $("#go").addEventListener("click", stopAud);
+    $$(".pl").forEach((b) => b.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       plDown = null;
-      if (!b) return;
       const same = curBtn === b;
       stopAud();
       if (same) return;
-      cur = new Audio(encodeURI(b.dataset.audio));
+      if (!b.dataset.audio) {
+        b.textContent = "Audio no configurado";
+        return;
+      }
       curBtn = b;
-      cur.onended = stopAud;
-      cur.onerror = () => {
+      b.removeAttribute("title");
+      b.textContent = "Cargando\u2026";
+      const id = playId, assetUrl = new URL(b.dataset.audio, location.href);
+      const source = location.protocol === "file:" ? fetch(assetUrl.href).then((response) => {
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        return response.arrayBuffer();
+      }).then((data) => {
+        if (id !== playId) return null;
+        curUrl = URL.createObjectURL(new Blob([data], { type: "audio/mpeg" }));
+        return curUrl;
+      }).catch((error) => {
+        console.warn("No se pudo leer el audio local como Blob; se probar\xE1 la ruta directa:", assetUrl.href, error);
+        return assetUrl.href;
+      }) : Promise.resolve(assetUrl.href);
+      const unavailable = (error) => {
+        console.error("No se pudo reproducir el audio:", assetUrl.href, error);
         b.textContent = "Audio no disponible";
-        cur = curBtn = null;
+        if (location.protocol === "file:") {
+          b.title = "Chrome puede bloquear audios locales al abrir el HTML directamente. Abre el proyecto con Live Server o Live Share.";
+        }
       };
-      cur.play().then(() => {
-        b.textContent = "\u275A\u275A Pausar";
-      }).catch(() => {
-        b.textContent = "Audio no disponible";
-        cur = curBtn = null;
+      source.then((src) => {
+        if (!src || id !== playId) return;
+        const audio = cur = new Audio();
+        audio.preload = "auto";
+        audio.volume = volume2;
+        audio.src = src;
+        audio.onended = () => {
+          if (id === playId) stopAud();
+        };
+        audio.onerror = () => {
+          if (id !== playId || cur !== audio) return;
+          unavailable(audio.error);
+          cur = curBtn = null;
+          if (curUrl) URL.revokeObjectURL(curUrl);
+          curUrl = null;
+        };
+        return audio.play().then(() => {
+          if (id === playId) b.textContent = "\u275A\u275A Pausar";
+        }).catch((error) => {
+          if (id !== playId || cur !== audio) return;
+          unavailable(error);
+          cur = curBtn = null;
+          if (curUrl) URL.revokeObjectURL(curUrl);
+          curUrl = null;
+        });
+      }).catch((error) => {
+        if (id !== playId) return;
+        unavailable(error);
+        curBtn = null;
       });
-    });
+    }));
     $("#nav .logo").title = "Volver a la portada";
     $("#nav .logo").addEventListener("click", (e) => {
       e.preventDefault();
@@ -1889,7 +2024,6 @@
   }
 
   // js/main.js
-  initStudio();
   initSite();
   initInput();
   var last = performance.now();

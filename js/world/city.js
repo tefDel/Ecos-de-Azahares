@@ -1,6 +1,7 @@
 /* Zona 1: la CIUDAD — cinco puertas grises, edificios, polvo y la primera flor. */
 import { T, basic } from './materials.js';
 import { createFlower, setFlower } from './flower.js';
+import { CONFIG } from '../config.js';
 
 /* Posición X de la puerta i (la del centro es la 2) */
 export const doorX = i => (i - 2) * 6;
@@ -44,7 +45,7 @@ export function buildCity(scene) {
   );
   group.add(dust);
 
-  const flower = createFlower();
+  const flower = createFlower(CONFIG.images.florFucsia);
   setFlower(flower, 'neon');
   group.add(flower.g);
 

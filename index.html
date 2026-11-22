@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <script>document.documentElement.classList.add("js"); setTimeout(function () { if (!window.__ecos) document.documentElement.classList.add("nojs") }, 3500)</script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Ecos de Azahares · podcast interactivo</title>
+  <link rel="icon" type="image/png" href="assets/imgs/IMGs_Trasmedia/florIcono.png">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/site.css">
 </head>
@@ -19,19 +19,54 @@
         href="#capitulos">Capítulos</a><a href="#equipo">Equipo</a></span>
     <a class="btn" id="play" href="#game">Jugar</a>
   </nav>
+  <aside id="volume-controls" aria-label="Control de volumen">
+    <div id="page-volume-control" class="volume-control volume-vertical">
+      <div class="volume-head">
+        <output id="page-volume-value" for="page-volume">100%</output>
+        <button class="volume-toggle" type="button" aria-label="Mostrar volumen de la página" aria-expanded="false"
+          aria-controls="page-volume-panel" data-volume-label="volumen de la página">
+          <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 10v4h4l5 4V6l-5 4H4z" />
+            <path d="M16 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12" />
+          </svg>
+        </button>
+      </div>
+      <div class="volume-panel" id="page-volume-panel" role="group" aria-label="Volumen de los audios de la página">
+        <input id="page-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volumen de los audios de la página">
+      </div>
+    </div>
+  </aside>
   <div class="petals" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <main id="game">
     <canvas id="gl"></canvas><canvas id="fx"></canvas>
 
     <header id="hud">
       <div class="pill"><span id="dots"><i></i><i></i><i></i><i></i></span><span id="ph">Detonante</span></div>
-      <span><button id="jb">Pistas (0)</button> <button id="stu">Estudio</button> <button id="snd"
-          aria-pressed="true">Sonido activado</button></span>
+      <div class="hud-controls">
+        <div id="game-volume-control" class="volume-control volume-horizontal">
+          <div class="volume-head">
+            <button class="volume-toggle" type="button" aria-label="Mostrar volumen del juego" aria-expanded="false"
+              aria-controls="game-volume-panel" data-volume-label="volumen del juego">
+              <svg class="volume-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 10v4h4l5 4V6l-5 4H4z" />
+            <path d="M16 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12" />
+          </svg>
+            </button>
+            <output id="game-volume-value" for="game-volume">100%</output>
+          </div>
+          <div class="volume-panel" id="game-volume-panel" role="group" aria-label="Volumen del juego">
+            <input id="game-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Volumen del juego">
+          </div>
+        </div>
+        <button id="jb">Pistas (0)</button>
+        <button id="snd" aria-pressed="true">Sonido activado</button>
+      </div>
     </header>
     <div id="say" class="ov pill"></div>
 
         <section id="intro" class="ov ctr on">
       <div class="sc" aria-hidden="true">
+        <img class="main-art" src="assets/imgs/IMGs_Trasmedia/fondoPrincipal.png" alt="">
         <div class="moon l" data-d="10"></div>
         <div class="wsp w1 l" data-d="14"></div>
         <div class="wsp w2 l" data-d="22"></div>
@@ -39,10 +74,6 @@
           <circle class="r0" cx="50%" cy="37%" r="33%" />
           <circle class="r1" cx="50%" cy="37%" r="25%" />
           <circle class="r2" cx="50%" cy="37%" r="17%" />
-        </svg>
-        <svg class="l crack" data-d="30" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <path d="M88 0L86 8L89 14L84 24L86 30L80 40L82 47L77 58" />
-          <path d="M84 24L90 29L88 36" />
         </svg>
         <div class="floor l" data-d="40"><i></i></div>
         <div class="fog l" data-d="20"></div>
@@ -103,11 +134,9 @@
       <p id="fl"></p><canvas class="w" id="fw" width="360" height="56"></canvas>
       <p class="m"><span id="fc"></span><button id="again">Volver a la ciudad</button></p>
     </section>
-    <aside id="studio" class="ov card"></aside>
     <aside id="journal" class="ov card"></aside>
     <div id="fade"></div>
   </main>
-
   <section id="universo" class="sec">
     <i class="rp" data-note="n2" aria-label="Pétalo"></i>
     <p class="wh" style="left:62%;top:26%">Cada vitrina guarda a alguien.</p>
@@ -117,10 +146,18 @@
     <h2 class="rv">Khaelos guarda<br>lo que olvidamos</h2>
     <div class="ed">
       <figure class="ph a rv" data-speed=".08"><span class="gl">ᛞᛟᚱ</span>
+        <img
+          src="./assets/imgs/IMGs_Trasmedia/museo.jpg"
+          alt="El museo central"
+        >
         <figcaption>Ilustración · el museo central</figcaption>
       </figure>
       <figure class="ph b ph2 rv" id="pho" tabindex="0" role="button" data-speed="-.06"><span class="gl">ᚲᚱᚢ</span>
         <figcaption>Ilustración · ruinas de Deileanna</figcaption>
+        <img
+          src="./assets/imgs/IMGs_Trasmedia/ruinas.jpg"
+          alt="Ruinas de Deileanna"
+        >
         <div class="cap">Una flor de azahar fucsia sobre una puerta cualquiera. Ninguna otra flor de la ciudad tiene ese
           color.</div>
       </figure>
@@ -144,7 +181,6 @@
       </div>
     </div>
   </section>
-
   <section id="personajes" class="sec dark">
     <p class="wh" style="right:6%;top:9%">El museo es un anclaje, no una tumba.</p>
     <p class="eye rv">Sección 03 · Personajes</p>
@@ -153,7 +189,7 @@
       <div class="cc" tabindex="0" role="button" aria-label="Adrián" style="--ac:#FF4DA6">
         <div class="in3">
           <div class="cf">
-            <svg class="ad" viewBox="-50 -50 100 100" aria-hidden="true">
+            <img class="pf" src="assets/imgs/IMGs_Trasmedia/Adrian.jpg" alt="Adrián">
               <g fill="#FF4DA6" fill-opacity=".85">
                 <ellipse cx="0" cy="-22" rx="11" ry="22" />
                 <ellipse cx="0" cy="-22" rx="11" ry="22" transform="rotate(72)" />
@@ -247,7 +283,6 @@
     </div>
     <p class="hint">Toca o pasa el cursor sobre una carta para voltearla</p>
   </section>
-
   <section id="capitulos" class="sec">
     <p class="wh" style="left:46%;top:8%">Las semillas de Sael aún respiran.</p>
     <p class="eye rv">Sección 04 · Capítulos</p>
@@ -262,67 +297,73 @@
       <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
         <div class="n">01</div>
         <h3>La flor y la carta</h3>
-        <div class="th">espacio para imagen</div>
-        <div class="meta"><span>Capítulo 1</span><span>--:--</span></div>
+        <div class="th has-image">
+          <img src="assets/imgs/imagenesCapitulos/capitulo1.jpg" alt="Escena del capítulo 1" loading="lazy">
+        </div>
+        <div class="meta"><span>Capítulo 1</span><span>00:31</span></div>
         <div class="more">
           <p>Adrián rompe su rutina y cruza las puertas del museo.</p>
-          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
-              próximamente</span></div>
+          <div class="slot"><button class="pl" aria-label="Reproducir capítulo 1" data-audio="audios/AudiosCapitulos/Capitulo 1.mp3">▶</button><span>Escuchar capítulo 1</span></div>
         </div>
       </article>
       <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
         <div class="n">02</div>
         <h3>La Resonancia</h3>
-        <div class="th">espacio para imagen</div>
-        <div class="meta"><span>Capítulo 2</span><span>--:--</span></div>
+        <div class="th has-image">
+          <img src="assets/imgs/imagenesCapitulos/capitulo2.jpg" alt="Escena del capítulo 1" loading="lazy">
+        </div>
+        <div class="meta"><span>Capítulo 2</span><span>00:51</span></div>
         <div class="more">
           <p>Las vitrinas respiran: no guardan objetos, guardan personas.</p>
-          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
-              próximamente</span></div>
+          <div class="slot"><button class="pl" aria-label="Reproducir capítulo 2" data-audio="audios/AudiosCapitulos/Capitulo 2.mp3">▶</button><span>Escuchar capítulo 2</span></div>
         </div>
       </article>
       <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
         <div class="n">03</div>
         <h3>Rythden y Selene</h3>
-        <div class="th">espacio para imagen</div>
-        <div class="meta"><span>Capítulo 3</span><span>--:--</span></div>
+        <div class="th has-image">
+          <img src="assets/imgs/imagenesCapitulos/capitulo3.jpg" alt="Escena del capítulo 3" loading="lazy">
+        </div>
+        <div class="meta"><span>Capítulo 3</span><span>00:48</span></div>
         <div class="more">
           <p>El museo es un anclaje. Nace un equipo con un mismo fin.</p>
-          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
-              próximamente</span></div>
+          <div class="slot"><button class="pl" aria-label="Reproducir capítulo 3" data-audio="audios/AudiosCapitulos/Capitulo 3.mp3">▶</button><span>Escuchar capítulo 3</span></div>
         </div>
       </article>
       <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
         <div class="n">04</div>
         <h3>La Fractura</h3>
-        <div class="th">espacio para imagen</div>
-        <div class="meta"><span>Capítulo 4</span><span>--:--</span></div>
+        <div class="th has-image">
+          <img src="assets/imgs/imagenesCapitulos/capitulo4.jpg" alt="Escena del capítulo 4" loading="lazy">
+        </div>
+        <div class="meta"><span>Capítulo 4</span><span>00:32</span></div>
         <div class="more">
           <p>Absorbe las salas y borra la memoria. Hay que estabilizar las voces.</p>
-          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
-              próximamente</span></div>
+          <div class="slot"><button class="pl" aria-label="Reproducir capítulo 4" data-audio="audios/AudiosCapitulos/Capitulo 4.mp3">▶</button><span>Escuchar capítulo 4</span></div>
         </div>
       </article>
       <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
         <div class="n">05</div>
         <h3>Un camino hacia la verdad</h3>
-        <div class="th">espacio para imagen</div>
-        <div class="meta"><span>Capítulo 5</span><span>--:--</span></div>
+        <div class="th has-image">
+          <img src="assets/imgs/imagenesCapitulos/capitulo5.jpg" alt="Escena del capítulo 5" loading="lazy">
+        </div>
+        <div class="meta"><span>Capítulo 5</span><span>00:39</span></div>
         <div class="more">
           <p>Sincronizar los archivos para ganar tiempo y descubrir qué es La Fractura.</p>
-          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
-              próximamente</span> <i class="gl2" data-note="n5">✦</i></div>
+          <div class="slot"><button class="pl" aria-label="Reproducir capítulo 5" data-audio="audios/AudiosCapitulos/Capitulo 5.mp3">▶</button><span>Escuchar capítulo 5</span> <i class="gl2" data-note="n5">✦</i></div>
         </div>
       </article>
       <article class="ep rv" tabindex="0" role="button" aria-expanded="false">
         <div class="n">06</div>
         <h3>La liberación</h3>
-        <div class="th">espacio para imagen</div>
-        <div class="meta"><span>Capítulo 6</span><span>--:--</span></div>
+        <div class="th has-image">
+          <img src="assets/imgs/imagenesCapitulos/capitulo6.jpg" alt="Escena del capítulo 6" loading="lazy">
+        </div>
+        <div class="meta"><span>Capítulo 6</span><span>00:51</span></div>
         <div class="more">
           <p>Elegir qué dejar atrás. Otra flor aparece en otra puerta.</p>
-          <div class="slot"><button disabled aria-label="Reproducir">▶</button><span data-audio="">Audio
-              próximamente</span></div>
+          <div class="slot"><button class="pl" aria-label="Reproducir capítulo 6" data-audio="audios/AudiosCapitulos/Capitulo 6.mp3">▶</button><span>Escuchar capítulo 6</span></div>
         </div>
       </article>
     </div>
@@ -335,7 +376,7 @@
       <div class="tmw rv">
         <article class="tm" tabindex="0" role="button" aria-label="Daniel Muñoz Delgado">
           <div class="ph">
-            <img src="assets/imgs/equipo/DaniFoto.jpeg" alt="Foto de Daniel Muñoz Delgado" loading="lazy" style="object-position:50% 42%">
+            <img src="assets/imgs/equipo/Dani.jpeg" alt="Foto de Daniel Muñoz Delgado" loading="lazy" style="object-position:50% 42%">
           </div>
           <div class="ov"></div>
           <div class="inf">

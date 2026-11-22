@@ -40,6 +40,13 @@ canvas#gl {
     display: block;
 }
 
+#game .world-flower-image {
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    object-fit: contain;
+}
+
 canvas#fx {
     position: absolute;
     inset: 0;
@@ -90,6 +97,385 @@ button {
 
 #hud>* {
     pointer-events: auto
+}
+
+.hud-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px
+}
+
+/* ===== Controles de volumen =====
+   Posición fija: la cabeza (icono + indicador) mide siempre lo mismo y el
+   panel del deslizador flota con position:absolute, así que mover el valor
+   nunca desplaza ni redimensiona nada. Todo el tamaño sale de variables
+   que cambian por tamaño de pantalla (ver los @media al final del bloque). */
+.volume-control {
+    --vol-toggle: 46px;
+    --vol-track: 6px;
+    --vol-thumb: 18px;
+    --vol-len: clamp(100px, 26vh, 190px);
+    --vol-game-w: 210px;
+    --vol-out-size: 15px;
+    --vol-ease: cubic-bezier(.22, .8, .3, 1);
+    --vol-empty: rgba(154, 120, 166, .42);
+    display: none;
+    position: relative;
+    pointer-events: auto
+}
+
+body:not(.ingame) #page-volume-control,
+body:not(.playing) #page-volume-control,
+body.playing.ingame #game-volume-control {
+    display: block
+}
+
+#volume-controls {
+    position: fixed;
+    top: 50%;
+    right: max(16px, env(safe-area-inset-right, 0px));
+    z-index: 45;
+    transform: translateY(-50%);
+    pointer-events: none
+}
+
+/* Cabeza: icono + indicador (siempre visibles, tamaño constante) */
+.volume-head {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: var(--panel);
+    backdrop-filter: blur(8px);
+    opacity: .6;
+    transition: opacity .25s, border-color .25s, box-shadow .25s
+}
+
+.volume-control:hover .volume-head,
+.volume-control.open .volume-head,
+.volume-head:focus-within {
+    opacity: 1;
+    border-color: var(--gold);
+    box-shadow: 0 0 18px rgba(154, 120, 166, .35)
+}
+
+.volume-toggle {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: var(--vol-toggle);
+    height: var(--vol-toggle);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    transition: background .25s
+}
+
+.volume-toggle:hover,
+.volume-control.open .volume-toggle {
+    background: rgba(154, 120, 166, .22);
+    color: var(--ink)
+}
+
+.volume-icon {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: transform .25s var(--vol-ease)
+}
+
+.volume-control.open .volume-icon {
+    transform: scale(1.08)
+}
+
+/* Indicador: ancho fijo y cifras uniformes → "5%" y "100%" ocupan lo mismo */
+.volume-control output {
+    flex: none;
+    width: 3.4em;
+    color: var(--gold);
+    font: var(--vol-out-size)/1 var(--serif);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: .02em;
+    text-align: center;
+    white-space: nowrap;
+    user-select: none
+}
+
+/* Panel del deslizador: flota, no ocupa espacio en el diseño */
+.volume-panel {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--accent);
+    border-radius: 999px;
+    background: var(--panel);
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity .22s, transform .22s var(--vol-ease), visibility 0s .22s
+}
+
+/* puente invisible entre cabeza y panel para que el hover no se corte */
+.volume-panel::after {
+    content: "";
+    position: absolute
+}
+
+.volume-control:hover .volume-panel,
+.volume-control.open .volume-panel {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transition-delay: 0s
+}
+
+/* ---- Página: vertical, indicador ENCIMA del icono, panel hacia arriba ---- */
+.volume-vertical .volume-head {
+    flex-direction: column;
+    gap: 2px;
+    width: calc(var(--vol-toggle) + 12px);
+    padding: 12px 0 5px
+}
+
+.volume-vertical .volume-control output,
+.volume-vertical output {
+    width: 100%;
+    font-size: var(--vol-out-size)
+}
+
+.volume-vertical .volume-panel {
+    bottom: calc(100% + 10px);
+    left: 0;
+    width: 100%;
+    height: calc(var(--vol-len) + 28px);
+    transform: translateY(8px)
+}
+
+.volume-vertical .volume-panel::after {
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: 12px
+}
+
+.volume-vertical:hover .volume-panel,
+.volume-vertical.open .volume-panel {
+    transform: translateY(0)
+}
+
+/* ---- Juego: horizontal, indicador AL LADO del icono, panel hacia abajo ---- */
+#game-volume-control {
+    z-index: 1
+}
+
+.volume-horizontal .volume-head {
+    padding: 3px 4px 3px 3px;
+    gap: 2px
+}
+
+.volume-horizontal .volume-toggle {
+    --vol-toggle: 36px
+}
+
+.volume-horizontal .volume-panel {
+    top: calc(100% + 8px);
+    right: 0;
+    width: var(--vol-game-w);
+    height: 46px;
+    padding: 0 20px;
+    transform: translateY(-8px)
+}
+
+.volume-horizontal .volume-panel::after {
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 10px
+}
+
+.volume-horizontal:hover .volume-panel,
+.volume-horizontal.open .volume-panel {
+    transform: translateY(0)
+}
+
+/* ---- Deslizador ---- */
+.volume-control input[type=range] {
+    appearance: none;
+    -webkit-appearance: none;
+    flex: 1;
+    min-width: 0;
+    height: 28px;
+    margin: 0;
+    background: transparent;
+    cursor: pointer;
+    outline: none;
+    touch-action: none
+}
+
+.volume-vertical input[type=range] {
+    flex: none;
+    width: 28px;
+    height: var(--vol-len);
+    writing-mode: vertical-lr;
+    direction: rtl
+}
+
+/* relleno: lila → dorado hasta el pulgar; el resto, riel tenue */
+.volume-horizontal input[type=range] {
+    --vol-dir: to right
+}
+
+.volume-vertical input[type=range] {
+    --vol-dir: to top
+}
+
+.volume-control input[type=range]::-webkit-slider-runnable-track {
+    height: var(--vol-track);
+    border-radius: 999px;
+    background: linear-gradient(var(--vol-dir), var(--accent) 0%, var(--gold) var(--volume-fill, 100%), var(--vol-empty) var(--volume-fill, 100%), var(--vol-empty) 100%);
+    box-shadow: inset 0 0 0 1px rgba(154, 120, 166, .25)
+}
+
+.volume-vertical input[type=range]::-webkit-slider-runnable-track {
+    width: var(--vol-track);
+    height: 100%
+}
+
+.volume-control input[type=range]::-webkit-slider-thumb {
+    appearance: none;
+    -webkit-appearance: none;
+    width: var(--vol-thumb);
+    height: var(--vol-thumb);
+    margin-top: calc((var(--vol-track) - var(--vol-thumb)) / 2);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .45);
+    transition: box-shadow .2s, transform .2s var(--vol-ease)
+}
+
+.volume-vertical input[type=range]::-webkit-slider-thumb {
+    margin-top: 0;
+    margin-left: calc((var(--vol-track) - var(--vol-thumb)) / 2)
+}
+
+.volume-control input[type=range]:hover::-webkit-slider-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 0 8px 1px rgba(154, 120, 166, .7)
+}
+
+.volume-control input[type=range]:active::-webkit-slider-thumb,
+.volume-control input[type=range]:focus-visible::-webkit-slider-thumb {
+    transform: scale(1.18);
+    box-shadow: 0 0 7px 2px var(--neon), 0 0 16px 5px rgba(154, 120, 166, .65)
+}
+
+.volume-control input[type=range]::-moz-range-track {
+    height: var(--vol-track);
+    border-radius: 999px;
+    background: linear-gradient(var(--vol-dir), var(--accent) 0%, var(--gold) var(--volume-fill, 100%), var(--vol-empty) var(--volume-fill, 100%), var(--vol-empty) 100%);
+    box-shadow: inset 0 0 0 1px rgba(154, 120, 166, .25)
+}
+
+.volume-vertical input[type=range]::-moz-range-track {
+    width: var(--vol-track);
+    height: 100%
+}
+
+.volume-control input[type=range]::-moz-range-progress {
+    background: transparent
+}
+
+.volume-control input[type=range]::-moz-range-thumb {
+    box-sizing: border-box;
+    width: var(--vol-thumb);
+    height: var(--vol-thumb);
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    background: var(--gold);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .45);
+    transition: box-shadow .2s, transform .2s var(--vol-ease)
+}
+
+.volume-control input[type=range]:hover::-moz-range-thumb {
+    transform: scale(1.1);
+    box-shadow: 0 0 8px 1px rgba(154, 120, 166, .7)
+}
+
+.volume-control input[type=range]:active::-moz-range-thumb,
+.volume-control input[type=range]:focus-visible::-moz-range-thumb {
+    transform: scale(1.18);
+    box-shadow: 0 0 7px 2px var(--neon), 0 0 16px 5px rgba(154, 120, 166, .65)
+}
+
+/* ---- Responsivo: solo cambian las variables ---- */
+@media (max-width: 1024px) {
+    .volume-control {
+        --vol-toggle: 44px;
+        --vol-len: clamp(90px, 22vh, 160px);
+        --vol-game-w: 190px;
+        --vol-out-size: 14px
+    }
+
+    #volume-controls {
+        right: max(12px, env(safe-area-inset-right, 0px))
+    }
+}
+
+@media (max-width: 640px) {
+    .volume-control {
+        --vol-toggle: 40px;
+        --vol-thumb: 22px;
+        --vol-len: clamp(80px, 20vh, 132px);
+        --vol-game-w: min(170px, calc(100vw - 24px));
+        --vol-out-size: 13px
+    }
+
+    #volume-controls {
+        right: max(6px, env(safe-area-inset-right, 0px))
+    }
+
+    .volume-vertical .volume-head {
+        width: calc(var(--vol-toggle) + 10px);
+        padding-top: 10px
+    }
+
+    .volume-vertical .volume-panel {
+        height: calc(var(--vol-len) + 24px)
+    }
+
+    .volume-horizontal .volume-toggle {
+        --vol-toggle: 34px
+    }
+
+    .volume-horizontal .volume-panel {
+        height: 44px;
+        padding: 0 18px
+    }
+
+    .volume-control input[type=range] {
+        height: 32px
+    }
+
+    .volume-vertical input[type=range] {
+        width: 32px
+    }
+}
+
+/* celulares en horizontal u otras pantallas bajas */
+@media (max-height: 480px) {
+    .volume-control {
+        --vol-len: clamp(60px, 18vh, 100px)
+    }
 }
 
 #dots i {
@@ -381,7 +767,6 @@ canvas.w {
     white-space: pre-line
 }
 
-#studio,
 #journal {
     left: 50%;
     top: 50%;
@@ -392,25 +777,22 @@ canvas.w {
     z-index: 30
 }
 
-.sl {
-    display: grid;
-    gap: 2px;
-    padding: 7px 0;
-    border-top: 1px solid var(--bg1);
-    font: 12px var(--mono)
-}
-
-.sl em {
-    color: var(--gold);
-    font-style: normal
-}
-
-.sl input {
-    font: 12px var(--mono);
-    color: var(--ink)
-}
-
 @media(max-width:640px) {
+    #hud {
+        padding-right: 10px;
+        padding-left: 10px;
+        align-items: flex-start
+    }
+
+    .hud-controls {
+        max-width: calc(100vw - 130px);
+        gap: 5px
+    }
+
+    .hud-controls>button {
+        padding: 8px 10px
+    }
+
     #dossier {
         left: 12px;
         right: 12px;

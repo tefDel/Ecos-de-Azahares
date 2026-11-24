@@ -2,6 +2,7 @@
 import { T, basic } from './materials.js';
 import { createFlower, setFlower } from './flower.js';
 import { CONFIG } from '../config.js';
+import { buildCoreAmbience } from './coreAmbience.js';
 
 export function buildCore(scene, pos) {
   const group = new THREE.Group();
@@ -37,6 +38,8 @@ export function buildCore(scene, pos) {
   sael.position.set(0, -.2, -5);
   group.add(sael);
 
+  const ambience = buildCoreAmbience(group); // cúpula, luces, ecos, semillas y pétalos del núcleo
+
   const decor = group.children.filter(c => c !== flower.g && c !== sael);
-  return { group, flower, sael, decor };
+  return { group, flower, sael, decor, ambient: ambience.animate };
 }

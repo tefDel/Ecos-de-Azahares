@@ -1,6 +1,7 @@
 /* Zona 2: el TESERACTO — cubo doble con conectores, anillos y vitrinas flotantes. */
 import { T, basic } from './materials.js';
 import { fillTala, SKIN } from './vitrinas-extras.js';
+import { buildAmbience } from './ambience.js';
 
 /* Cubo dentro de cubo unido por aristas */
 function buildTesseract(edge) {
@@ -35,7 +36,7 @@ function fillVolt(v) { // octaedro dentro de una jaula
 function fillEmpty(v) { // reserva para una vitrina sin representación asignada
   v.inner.add(new THREE.Mesh(new THREE.SphereGeometry(.25, 12, 10), basic(0x888888, { transparent: true, opacity: .18 })));
 }
-const FILL = { nyxa: fillNyxa, tala: fillTala, volt: fillVolt };
+const FILL = { nyxa: fillNyxa, tala: fillTala, volt: fillVolt, ...SKIN }; // SKIN aporta virena, lyra y kael
 
 function buildShowcase(id, i, edge, skin) {
   const a = i * Math.PI / 3, g = new THREE.Group();
@@ -76,13 +77,15 @@ export function buildGallery(scene, pos) {
     group.add(m);
   });
 
-  /* 6 vitrinas: 3 resonantes y 3 representaciones selladas (una esconde el glifo secreto) */
+  /* 6 vitrinas, una por resonante (en el orden de la historia) */
   const vit = [], glass = [];
-  [['nyxa'], [null, 'virena'], ['tala'], [null, 'lyra'], ['volt'], [null, 'kael']].forEach(([id, skin], i) => {
+  [['nyxa'], ['virena'], ['tala'], ['lyra'], ['volt'], ['kael']].forEach(([id, skin], i) => {
     const v = buildShowcase(id, i, edge, skin);
     group.add(v.g); vit.push(v); glass.push(v.glass);
   });
 
+  const ambience = buildAmbience(group, vit); // fondo, luces y detalles del estudio
+
   const decor = group.children.filter(c => !vit.some(v => v.g === c));
-  return { group, tess, vit, glass, decor };
+  return { group, tess, vit, glass, decor, ambient: ambience.animate };
 }

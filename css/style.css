@@ -731,6 +731,29 @@ canvas.w {
     opacity: .85
 }
 
+#wall::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -36px;
+    width: min(94vw, 780px);
+    height: calc(100% + 80px);
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center, rgba(26, 8, 36, .55) 0%, rgba(26, 8, 36, .28) 45%, rgba(26, 8, 36, 0) 72%);
+    z-index: -1;
+    pointer-events: none
+}
+
+#choices button {
+    transition: border-color .25s, box-shadow .25s, transform .25s
+}
+
+#choices button:hover {
+    border-color: #ffe3b0;
+    box-shadow: 0 0 22px rgba(255, 214, 130, .35);
+    transform: translateY(-2px)
+}
+
 #choices {
     left: 50%;
     bottom: calc(24px + env(safe-area-inset-bottom, 0px));

@@ -84,7 +84,8 @@
 
   // js/data.js
   var PHASES = ["Detonante", "Teseracto", "Fractura", "N\xFAcleo"];
-  var IDS = ["nyxa", "tala", "volt"];
+  var IDS = ["nyxa", "virena", "tala", "lyra", "volt", "kael"];
+  var ORDER_FIXED = 4;
   var CHARACTER_COLORS = Object.freeze({
     volt: "#FFD60A",
     nyxa: "#9B59E0",
@@ -109,8 +110,18 @@
       img: "assets/imgs/IMGs_Trasmedia/Nyxa.jpeg",
       txt: "Aqu\xED las sombras no persiguen: sostienen. Aprend\xED a vivir en el borde de lo que nadie mira. Si me nombras, me haces un poco m\xE1s real. N\xF3mbrame despacio."
     },
-    tala: {
+    virena: {
       n: 2,
+      name: "Virena",
+      epi: "La de las hojas que respiran",
+      glyph: "\u16A1\u16C1\u16B1\u16D6\u16BE\u16A8 \u16A0\u16D6\u16B1",
+      dur: 30,
+      angle: Math.PI / 3,
+      img: "assets/imgs/IMGs_Trasmedia/Virena.jpeg",
+      txt: "Nac\xED donde nadie plant\xF3 nada. Cada hoja guarda un aliento que el museo olvid\xF3, y las esporas que me rodean son recuerdos esperando suelo. Esc\xFAchame con calma: yo crezco despacio."
+    },
+    tala: {
+      n: 3,
       name: "Tala",
       epi: "La de los ecos de bestias",
       glyph: "\u16CF\u16A8\u16DA\u16A8 \u16B2\u16B1\u16A2",
@@ -119,8 +130,18 @@
       img: "assets/imgs/IMGs_Trasmedia/Tala.jpeg",
       txt: "Lo que ruge en m\xED no es m\xEDo. Son las bestias que otros callaron, convertidas en voz. Cuando el pasillo tiembla, soy yo recordando que alguna vez corr\xED libre."
     },
+    lyra: {
+      n: 4,
+      name: "Lyra",
+      epi: "La que guarda las cuatro fuerzas",
+      glyph: "\u16DA\u16A3\u16B1\u16A8 \u16A6\u16A2\u16BE",
+      dur: 30,
+      angle: Math.PI,
+      img: "assets/imgs/IMGs_Trasmedia/Lyra.jpeg",
+      txt: "Sobre mi nube giran el fuego, el agua, la roca y el trueno, y ninguno me obedece del todo. Aprend\xED a dejarlos girar. Si me escuchas hasta el final, quiz\xE1 los reconozcas tambi\xE9n en ti."
+    },
     volt: {
-      n: 3,
+      n: 5,
       name: "Volt",
       epi: "El de la jaula de energ\xEDa",
       glyph: "\u16A1\u16DF\u16DA\u16CF \u16D6\u16BE\u16C9",
@@ -128,6 +149,16 @@
       angle: 4 * Math.PI / 3,
       img: "assets/imgs/IMGs_Trasmedia/Volt.jpeg",
       txt: 'Me llaman corriente, pero soy un deseo sin salida. Cada barrote es una vez que dije "despu\xE9s". La jaula no me contiene: me recuerda.'
+    },
+    kael: {
+      n: 6,
+      name: "Kael",
+      epi: "El de las m\xE1scaras que miran",
+      glyph: "\u16B2\u16A8\u16D6\u16DA \u16D7\u16A8\u16B2",
+      dur: 30,
+      angle: 5 * Math.PI / 3,
+      img: "assets/imgs/IMGs_Trasmedia/Kael.jpeg",
+      txt: "Llevo dos rostros porque uno solo nunca bast\xF3. Las m\xE1scaras no esconden: miran por m\xED hacia donde t\xFA est\xE1s. Si te asusto, es porque me est\xE1s viendo de verdad."
     }
   };
   var OPEN = [
@@ -144,18 +175,51 @@
   var CLUES = {
     nyxa: {
       nyxa: "Yo no sal\xED de mi sombra... aunque ahora huele a azahar entre mis manos.",
+      virena: "Entre mis sombras se col\xF3 un aroma verde y unas esporas que brillaban solas.",
       tala: "Una bestia roz\xF3 mi sombra y dej\xF3 p\xE9talos en el suelo.",
-      volt: "Sent\xED un chispazo en la oscuridad: alguien con la jaula abierta."
+      lyra: "Una nube baja cruz\xF3 mi sombra y dej\xF3 gotas con sabor a trueno.",
+      volt: "Sent\xED un chispazo en la oscuridad: alguien con la jaula abierta.",
+      kael: "Dos ojos dorados me miraron desde la oscuridad, sin parpadear."
+    },
+    virena: {
+      nyxa: "Una sombra detuvo mis esporas en el aire; solo Nyxa hace callar as\xED.",
+      virena: "Yo no mov\xED nada... pero hay hojas m\xEDas en un lugar donde no crezco.",
+      tala: "Algo pesado pis\xF3 mi ra\xEDz y dej\xF3 huellas de bestia sobre las hojas.",
+      lyra: "Cay\xF3 una llovizna sobre mis hojas, en una sala que no tiene cielo.",
+      volt: "Una hoja m\xEDa amaneci\xF3 chamuscada, con olor a ozono.",
+      kael: "Mis esporas se apartaron de dos m\xE1scaras que pasaron sin hacer ruido."
     },
     tala: {
       nyxa: "Entre mis ecos o\xED susurros que solo nacen de las sombras.",
+      virena: "Mis ecos se aquietaron: algo verde respiraba cerca y las bestias callaron.",
       tala: "No fui yo... pero mis ecos repiten un paso muy parecido al m\xEDo.",
-      volt: "El suelo ol\xEDa a ozono. Solo hay una jaula que huela as\xED."
+      lyra: "O\xED un trueno peque\xF1o sobre mis ecos, como si una nube pasara sobre la piedra.",
+      volt: "El suelo ol\xEDa a ozono. Solo hay una jaula que huela as\xED.",
+      kael: "Mis ecos volvieron con otra voz: la de alguien que habla detr\xE1s de una m\xE1scara."
+    },
+    lyra: {
+      nyxa: "Mi nube se oscureci\xF3 un instante, como si una sombra la hubiera tocado.",
+      virena: "Mi agua oli\xF3 a hoja reci\xE9n cortada.",
+      tala: "Mi roca vibr\xF3 con un paso de bestia sobre el suelo.",
+      lyra: "Yo no solt\xE9 nada... aunque mi fuego, mi agua, mi roca y mi trueno giran distinto.",
+      volt: "Mi trueno se apag\xF3 y otro, m\xE1s seco, respondi\xF3 desde una jaula.",
+      kael: "Mis cuatro fuerzas se detuvieron frente a dos m\xE1scaras rojas."
     },
     volt: {
       nyxa: "Todas las luces se apagaron un instante. Solo Nyxa apaga luces as\xED.",
+      virena: "Mis chispas se posaron sobre una hoja que antes no estaba. Alguien la trajo.",
       tala: "Escuch\xE9 pasos de bestia sobre mis barrotes.",
-      volt: "Yo no abr\xED nada... y sin embargo mis barrotes est\xE1n tibios."
+      lyra: "Un trueno ajeno choc\xF3 con mi jaula: hab\xEDa una nube dentro del museo.",
+      volt: "Yo no abr\xED nada... y sin embargo mis barrotes est\xE1n tibios.",
+      kael: "Vi dos m\xE1scaras rojas reflejadas en mis barrotes, mirando hacia dentro."
+    },
+    kael: {
+      nyxa: "Mis m\xE1scaras no vieron a nadie; solo una sombra que se dejaba mirar.",
+      virena: "Una espora verde se pos\xF3 en mi cuerno y no supe de d\xF3nde vino.",
+      tala: "Una de mis m\xE1scaras gir\xF3 hacia un eco de bestia que no era suyo.",
+      lyra: "Sent\xED humedad de nube sobre mis m\xE1scaras.",
+      volt: "Mis m\xE1scaras se ti\xF1eron de un resplandor el\xE9ctrico por un segundo.",
+      kael: "Yo no fui... pero mis m\xE1scaras ya miraban hacia la puerta antes que yo."
     }
   };
   var FRAG = {
@@ -170,6 +234,18 @@
     volt: [
       "Volt, en la bit\xE1cora: \xABEstuve enjaulado toda la noche; los barrotes son testigos\xBB.",
       "Volt, en la bit\xE1cora: \xABRomp\xED un barrote por un segundo; fue suficiente\xBB."
+    ],
+    virena: [
+      "Virena, en la bit\xE1cora: \xABMis hojas se quedaron quietas toda la noche; preg\xFAntales\xBB.",
+      "Virena, en la bit\xE1cora: \xABDej\xE9 una hoja en el umbral; cre\xED que nadie la ver\xEDa\xBB."
+    ],
+    lyra: [
+      "Lyra, en la bit\xE1cora: \xABMis cuatro fuerzas giraron en su sitio; ninguna sali\xF3 de la nube\xBB.",
+      "Lyra, en la bit\xE1cora: \xABDej\xE9 escapar un trueno por un instante; bast\xF3 para abrir la puerta\xBB."
+    ],
+    kael: [
+      "Kael, en la bit\xE1cora: \xABMis m\xE1scaras miraron todo el tiempo hacia afuera; no cruzaron nada\xBB.",
+      "Kael, en la bit\xE1cora: \xABUna de mis m\xE1scaras mir\xF3 hacia la puerta, y yo la segu\xED\xBB."
     ]
   };
   var ENDS = {
@@ -221,7 +297,7 @@
     }
     const cm = basic(16770033);
     art.add(new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 12), cm));
-    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+    const glow3 = new THREE.Sprite(new THREE.SpriteMaterial({
       map: glowTexture,
       color: 16711807,
       transparent: true,
@@ -229,14 +305,14 @@
       depthWrite: false,
       opacity: 0.5
     }));
-    glow.scale.set(3.2, 3.2, 1);
-    glow.renderOrder = 1;
-    g.add(glow);
+    glow3.scale.set(3.2, 3.2, 1);
+    glow3.renderOrder = 1;
+    g.add(glow3);
     const f = {
       g,
       pets,
       cm,
-      glow,
+      glow: glow3,
       s: 1,
       art,
       imageUrl,
@@ -245,11 +321,11 @@
       imageLoaded: false
     };
     if (imageUrl) {
-      const addImage = (tex) => {
-        const H = 2.3, { width, height } = tex.image;
+      const addImage = (tex3) => {
+        const H = 2.3, { width, height } = tex3.image;
         const img = new THREE.Mesh(
           new THREE.PlaneGeometry(H * width / height, H),
-          new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false })
+          new THREE.MeshBasicMaterial({ map: tex3, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false })
         );
         img.renderOrder = 2;
         g.add(img);
@@ -311,6 +387,9 @@
       nyxa: "audios/Nyxa.mp3",
       tala: "audios/Tala.mp3",
       volt: "audios/Volt entero.mp3",
+      virena: "audios/Virena.mp3",
+      lyra: "audios/Lyra.mp3",
+      kael: "audios/Kael.mp3",
       bit0: "audios/Rythden.mp3",
       bit1: "audios/Rythden2.mp3",
       bit2: "audios/Dra Selene.mp3",
@@ -371,9 +450,9 @@
     mesh.onBeforeRender = () => fn(performance.now() / 1e3);
   };
   function fillTala(v) {
-    const R = 0.55;
+    const R3 = 0.55;
     const bump = (x, y, z) => 1 + 0.07 * Math.sin(x * 7.3 + y * 3.1) + 0.07 * Math.sin(y * 6.1 + z * 5.3) + 0.06 * Math.sin(z * 9.7 + x * 2.3);
-    const geo = new THREE.DodecahedronGeometry(R, 3);
+    const geo = new THREE.DodecahedronGeometry(R3, 3);
     const pos = geo.attributes.position, col = [];
     for (let k = 0; k < pos.count; k++) {
       const x = pos.getX(k), y = pos.getY(k), z = pos.getZ(k), d = new THREE.Vector3(x, y, z).normalize(), n = bump(d.x, d.y, d.z);
@@ -386,7 +465,7 @@
     v.inner.add(new THREE.Mesh(geo, basic(16777215, { vertexColors: true })));
     const ochre = basic(16171610);
     const onStone = (x, y, side) => {
-      const d = new THREE.Vector3(x, y, side).normalize(), r = R * bump(d.x, d.y, d.z) * 1.03;
+      const d = new THREE.Vector3(x, y, side).normalize(), r = R3 * bump(d.x, d.y, d.z) * 1.03;
       return new THREE.Vector3(d.x * r, d.y * r * 0.92, d.z * r);
     };
     const tube = (pts, closed) => new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, closed, "catmullrom", 0.1), pts.length * 4, 0.016, 5, closed), ochre);
@@ -520,6 +599,198 @@
   }
   var SKIN = { virena: fillVirena, lyra: fillLyra, kael: fillKael };
 
+  // js/world/ambience.js
+  var R = 15;
+  var FLOOR = -1.6;
+  var TOP = 8.9;
+  var ADD = THREE.AdditiveBlending;
+  var polar = (a, r) => [Math.sin(a) * r, -Math.cos(a) * r];
+  function tex(w, h, draw) {
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    draw(c.getContext("2d"), w, h);
+    const t = new THREE.CanvasTexture(c);
+    t.anisotropy = 4;
+    return t;
+  }
+  var radial = (stops) => tex(256, 256, (g, w, h) => {
+    const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    stops.forEach(([o, col]) => r.addColorStop(o, col));
+    g.fillStyle = r;
+    g.fillRect(0, 0, w, h);
+  });
+  var vertical = (stops) => tex(8, 128, (g, w, h) => {
+    const l = g.createLinearGradient(0, 0, 0, h);
+    stops.forEach(([o, col]) => l.addColorStop(o, col));
+    g.fillStyle = l;
+    g.fillRect(0, 0, w, h);
+  });
+  var glow = (map, color, opacity, extra) => new THREE.MeshBasicMaterial(Object.assign({
+    map,
+    color,
+    opacity,
+    transparent: true,
+    blending: ADD,
+    depthWrite: false,
+    fog: false
+  }, extra));
+  function buildAmbience(group, vit) {
+    const soft = radial([[0, "#fff"], [0.35, "#aaa"], [1, "#000"]]);
+    const wallTex = tex(2048, 512, (g, w, h) => {
+      const base = g.createLinearGradient(0, 0, 0, h);
+      base.addColorStop(0, "#4c4c4c");
+      base.addColorStop(0.38, "#8c8c8c");
+      base.addColorStop(1, "#9c9c9c");
+      g.fillStyle = base;
+      g.fillRect(0, 0, w, h);
+      const y0 = h * 0.38, step = w / 128;
+      for (let i = 0; i < 128; i++) {
+        const x = i * step, v = 104 + i * 37 % 7 * 3;
+        g.fillStyle = "#d4d4d4";
+        g.fillRect(x, y0, step, h - y0);
+        g.fillStyle = `rgb(${v},${v},${v})`;
+        g.fillRect(x + 1.5, y0, step - 3, h - y0);
+        g.fillStyle = "rgba(255,255,255,.2)";
+        g.fillRect(x + 1.5, y0, 1.5, h - y0);
+      }
+      const sh = g.createLinearGradient(0, y0, 0, y0 + 90);
+      sh.addColorStop(0, "rgba(0,0,0,.5)");
+      sh.addColorStop(1, "rgba(0,0,0,0)");
+      g.fillStyle = sh;
+      g.fillRect(0, y0, w, 90);
+      g.fillStyle = "#c4c4c4";
+      g.fillRect(0, y0 - 9, w, 9);
+      const fl = g.createLinearGradient(0, h - 70, 0, h);
+      fl.addColorStop(0, "rgba(0,0,0,0)");
+      fl.addColorStop(1, "rgba(0,0,0,.45)");
+      g.fillStyle = fl;
+      g.fillRect(0, h - 70, w, 70);
+    });
+    const wall = new THREE.Mesh(
+      new THREE.CylinderGeometry(R, R, TOP - FLOOR, 96, 1, true),
+      T(basic(16777215, { map: wallTex, side: THREE.BackSide, fog: false }), 12160174, 15320188)
+    );
+    wall.position.y = (TOP + FLOOR) / 2;
+    group.add(wall);
+    const floorTex2 = radial([[0, "#d6d6d6"], [0.4, "#a4a4a4"], [0.75, "#5e5e5e"], [1, "#262626"]]);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry((R + 1) * 2, (R + 1) * 2), T(basic(16777215, { map: floorTex2, fog: false }), 9061746, 13607500));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = FLOOR + 0.03;
+    group.add(floor);
+    const ceilTex = radial([[0, "#cfcfcf"], [0.3, "#8a8a8a"], [1, "#2c2c2c"]]);
+    const ceil = new THREE.Mesh(new THREE.PlaneGeometry((R + 1) * 2, (R + 1) * 2), T(basic(16777215, { map: ceilTex, fog: false }), 8012912, 13081162));
+    ceil.rotation.x = Math.PI / 2;
+    ceil.position.y = TOP;
+    group.add(ceil);
+    [[5, 0.07, 0.85], [9.5, 0.07, 0.55]].forEach(([r, w, o]) => {
+      const ring = new THREE.Mesh(new THREE.RingGeometry(r, r + w, 128), basic(16769968, { side: THREE.DoubleSide, transparent: true, opacity: o, fog: false }));
+      ring.rotation.x = Math.PI / 2;
+      ring.position.y = TOP - 0.05;
+      const halo = new THREE.Mesh(new THREE.RingGeometry(r - 0.5, r + 0.6, 128), glow(null, 16763274, 0.1, { side: THREE.DoubleSide }));
+      halo.rotation.x = Math.PI / 2;
+      halo.position.y = TOP - 0.06;
+      group.add(ring, halo);
+    });
+    const strips = [];
+    const strip = (y, gray, gold) => {
+      const m = T(basic(gray, { fog: false }), gray, gold);
+      const t = new THREE.Mesh(new THREE.TorusGeometry(R - 0.15, 0.03, 6, 160), m);
+      t.rotation.x = Math.PI / 2;
+      t.position.y = y;
+      const hm = glow(vertical([[0, "#000"], [0.5, "#fff"], [1, "#000"]]), gray, 0.2, { side: THREE.BackSide });
+      const h = new THREE.Mesh(new THREE.CylinderGeometry(R - 0.2, R - 0.2, 1.1, 96, 1, true), hm);
+      h.position.y = y;
+      group.add(t, h);
+      strips.push(hm);
+    };
+    strip(FLOOR + 0.25, 16736168, 16762980);
+    strip(4.9, 16758891, 16767370);
+    const beamMap = vertical([[0, "#fff"], [0.65, "#555"], [1, "#000"]]);
+    const beams = [], motes = [];
+    vit.forEach((v, i) => {
+      const col = new THREE.Color(CHARACTER_COLORS[v.id] || "#e0b25a");
+      const warm = col.clone().lerp(new THREE.Color(16769712), 0.45);
+      const [bx, bz] = [v.bx, v.bz];
+      const bm = glow(beamMap, warm, 0.1, { side: THREE.DoubleSide });
+      const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 1.5, TOP - FLOOR - 1.2, 28, 1, true), bm);
+      beam.position.set(bx, (TOP - 1.2 + FLOOR) / 2 + 0.1, bz);
+      const pool3 = new THREE.Mesh(new THREE.PlaneGeometry(5.2, 5.2), glow(soft, col, 0.5));
+      pool3.rotation.x = -Math.PI / 2;
+      pool3.position.set(bx, FLOOR + 0.06, bz);
+      const a = Math.atan2(bx, -bz), [hx, hz] = polar(a, R - 3);
+      const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: soft, color: col, transparent: true, opacity: 0.22, blending: ADD, depthWrite: false, fog: false }));
+      halo.scale.setScalar(8);
+      halo.position.set(hx, 0.5, hz);
+      group.add(beam, pool3, halo);
+      beams.push(bm);
+      for (let j = 0; j < 8; j++) motes.push({ bx, bz, ang: Math.random() * 6.28, rf: Math.random(), y: FLOOR + Math.random() * 9, sp: 0.08 + Math.random() * 0.12, ph: Math.random() * 6.28 });
+    });
+    const mp = new Float32Array(motes.length * 3);
+    const moteGeo = new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(mp, 3));
+    const moteMat = new THREE.PointsMaterial({ size: 0.11, map: soft, color: 16773324, transparent: true, opacity: 0.8, blending: ADD, depthWrite: false, fog: false });
+    const moteObj = new THREE.Points(moteGeo, moteMat);
+    moteObj.frustumCulled = false;
+    group.add(moteObj);
+    const placeMotes = (t, dt) => motes.forEach((m, k) => {
+      m.y += dt * m.sp;
+      if (m.y > TOP - 1.3) m.y = FLOOR + 0.2;
+      const rr = (0.22 + 1.28 * ((TOP - 1.2 - m.y) / (TOP - FLOOR - 1.2))) * m.rf * 0.9;
+      const a = m.ang + Math.sin(t * 0.3 + m.ph) * 0.6;
+      mp[k * 3] = m.bx + Math.cos(a) * rr;
+      mp[k * 3 + 1] = m.y;
+      mp[k * 3 + 2] = m.bz + Math.sin(a) * rr;
+    });
+    placeMotes(0, 0);
+    const bulbs = [[], []], lineMat = new THREE.LineBasicMaterial({ color: 16767392, transparent: true, opacity: 0.35, fog: false });
+    for (let k = 0; k < 5; k++) {
+      const a0 = (38 + k * 72) * Math.PI / 180, span = 56 * Math.PI / 180, pts = [];
+      for (let s = 0; s <= 48; s++) {
+        const u = s / 48, [x, z] = polar(a0 + span * u, R - 0.6);
+        pts.push(new THREE.Vector3(x, 7.1 - 1.5 * (1 - Math.pow(2 * u - 1, 2)), z));
+      }
+      group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat));
+      for (let b = 0; b <= 12; b++) bulbs[b % 2].push(pts[Math.round(b / 12 * 48)]);
+    }
+    const bulbMats = bulbs.map((list) => {
+      const m = new THREE.PointsMaterial({ size: 0.5, map: soft, color: 16765066, transparent: true, opacity: 1, blending: ADD, depthWrite: false, fog: false });
+      group.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(list), m));
+      const bloom = new THREE.PointsMaterial({ size: 1.7, map: soft, color: 16758896, transparent: true, opacity: 0.13, blending: ADD, depthWrite: false, fog: false });
+      group.add(new THREE.Points(new THREE.BufferGeometry().setFromPoints(list), bloom));
+      return m;
+    });
+    const SIGN_Y = 2.4, [sx, sz0] = polar(Math.PI / 6, R - 0.25), sz = sz0;
+    const signHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: soft, color: 16732062, transparent: true, opacity: 0.3, blending: ADD, depthWrite: false, fog: false }));
+    signHalo.scale.setScalar(6.5);
+    signHalo.position.set(sx, SIGN_Y, sz + 0.2);
+    const signMat = new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, fog: false });
+    new THREE.TextureLoader().load("assets/imgs/IMGs_Trasmedia/florIcono.png", (t) => {
+      signMat.map = t;
+      signMat.opacity = 0.95;
+      signMat.needsUpdate = true;
+    });
+    const sign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.5), signMat);
+    sign.position.set(sx, SIGN_Y, sz + 0.1);
+    sign.rotation.y = -Math.PI / 6;
+    group.add(signHalo, sign);
+    function animate2(t, dt) {
+      if (RM) return;
+      const pulse = 0.8 + 0.2 * Math.sin(t * 1.3);
+      strips.forEach((m) => {
+        m.opacity = 0.2 * pulse;
+      });
+      bulbMats[0].opacity = 0.75 + 0.25 * Math.sin(t * 2.1);
+      bulbMats[1].opacity = 0.75 + 0.25 * Math.sin(t * 2.1 + Math.PI);
+      beams.forEach((m, i) => {
+        m.opacity = 0.1 + 0.02 * Math.sin(t * 0.7 + i * 1.3);
+      });
+      signHalo.material.opacity = 0.26 + 0.06 * Math.sin(t * 1.7);
+      placeMotes(t, dt);
+      moteGeo.attributes.position.needsUpdate = true;
+    }
+    return { animate: animate2 };
+  }
+
   // js/world/gallery.js
   function buildTesseract(edge) {
     const cube = (s) => new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(s, s, s)), edge);
@@ -550,7 +821,7 @@
   function fillEmpty(v) {
     v.inner.add(new THREE.Mesh(new THREE.SphereGeometry(0.25, 12, 10), basic(8947848, { transparent: true, opacity: 0.18 })));
   }
-  var FILL = { nyxa: fillNyxa, tala: fillTala, volt: fillVolt };
+  var FILL = { nyxa: fillNyxa, tala: fillTala, volt: fillVolt, ...SKIN };
   function buildShowcase(id, i, edge, skin) {
     const a = i * Math.PI / 3, g = new THREE.Group();
     const bx = Math.sin(a) * 8, bz = -Math.cos(a) * 8;
@@ -584,14 +855,361 @@
       group.add(m);
     });
     const vit = [], glass = [];
-    [["nyxa"], [null, "virena"], ["tala"], [null, "lyra"], ["volt"], [null, "kael"]].forEach(([id, skin], i) => {
+    [["nyxa"], ["virena"], ["tala"], ["lyra"], ["volt"], ["kael"]].forEach(([id, skin], i) => {
       const v = buildShowcase(id, i, edge, skin);
       group.add(v.g);
       vit.push(v);
       glass.push(v.glass);
     });
+    const ambience = buildAmbience(group, vit);
     const decor = group.children.filter((c) => !vit.some((v) => v.g === c));
-    return { group, tess, vit, glass, decor };
+    return { group, tess, vit, glass, decor, ambient: ambience.animate };
+  }
+
+  // js/world/coreAmbience.js
+  var R2 = 14;
+  var FLOOR2 = -2;
+  var ADD2 = THREE.AdditiveBlending;
+  var polar2 = (a, r) => [Math.sin(a) * r, -Math.cos(a) * r];
+  var deg = (d) => d * Math.PI / 180;
+  function tex2(w, h, draw) {
+    const c = document.createElement("canvas");
+    c.width = w;
+    c.height = h;
+    draw(c.getContext("2d"), w, h);
+    const t = new THREE.CanvasTexture(c);
+    t.anisotropy = 4;
+    return t;
+  }
+  var radial2 = (stops) => tex2(256, 256, (g, w, h) => {
+    const r = g.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2);
+    stops.forEach(([o, col]) => r.addColorStop(o, col));
+    g.fillStyle = r;
+    g.fillRect(0, 0, w, h);
+  });
+  var vertical2 = (stops) => tex2(8, 128, (g, w, h) => {
+    const l = g.createLinearGradient(0, 0, 0, h);
+    stops.forEach(([o, col]) => l.addColorStop(o, col));
+    g.fillStyle = l;
+    g.fillRect(0, 0, w, h);
+  });
+  var glow2 = (map, color, opacity, extra) => new THREE.MeshBasicMaterial(Object.assign({
+    map,
+    color,
+    opacity,
+    transparent: true,
+    blending: ADD2,
+    depthWrite: false,
+    fog: false
+  }, extra));
+  var flat = (map, opacity, extra) => new THREE.MeshBasicMaterial(Object.assign({
+    map,
+    opacity,
+    transparent: true,
+    depthWrite: false,
+    fog: false
+  }, extra));
+  var domeTex = () => tex2(1024, 512, (g, w, h) => {
+    const v = g.createLinearGradient(0, 0, 0, h);
+    v.addColorStop(0, "rgba(24,6,34,.92)");
+    v.addColorStop(0.3, "rgba(40,12,48,.45)");
+    v.addColorStop(0.5, "rgba(60,20,50,0)");
+    v.addColorStop(0.72, "rgba(40,12,48,.35)");
+    v.addColorStop(1, "rgba(24,6,34,.9)");
+    g.fillStyle = v;
+    g.fillRect(0, 0, w, h);
+    const rib = g.createLinearGradient(0, 0, 0, h * 0.5);
+    rib.addColorStop(0, "rgba(255,224,160,.26)");
+    rib.addColorStop(1, "rgba(255,224,160,0)");
+    g.strokeStyle = rib;
+    g.lineWidth = 2;
+    for (let i = 0; i < 24; i++) {
+      const x = i * w / 24;
+      g.beginPath();
+      g.moveTo(x, 0);
+      g.lineTo(x, h * 0.5);
+      g.stroke();
+    }
+    g.strokeStyle = "rgba(255,224,160,.10)";
+    [0.2, 0.34].forEach((f) => {
+      g.beginPath();
+      g.moveTo(0, h * f);
+      g.lineTo(w, h * f);
+      g.stroke();
+    });
+  });
+  var rosetteTex = () => tex2(1024, 1024, (g, w) => {
+    const c = w / 2, lead = "rgba(40,12,48,.55)";
+    g.translate(c, c);
+    g.strokeStyle = lead;
+    [[500, 9], [468, 4], [300, 4], [150, 4]].forEach(([r, lw]) => {
+      g.lineWidth = lw;
+      g.beginPath();
+      g.arc(0, 0, r, 0, 6.2832);
+      g.stroke();
+    });
+    const petal = (r0, r1, wd, fill) => {
+      g.beginPath();
+      g.moveTo(0, -r0);
+      g.bezierCurveTo(wd, -r0 - (r1 - r0) * 0.35, wd, -r0 - (r1 - r0) * 0.75, 0, -r1);
+      g.bezierCurveTo(-wd, -r0 - (r1 - r0) * 0.75, -wd, -r0 - (r1 - r0) * 0.35, 0, -r0);
+      g.fillStyle = fill;
+      g.fill();
+      g.strokeStyle = lead;
+      g.lineWidth = 5;
+      g.stroke();
+    };
+    for (let i = 0; i < 10; i++) {
+      g.save();
+      g.rotate(i * Math.PI / 5);
+      petal(60, 440, 95, "rgba(255,226,150,.30)");
+      g.restore();
+    }
+    for (let i = 0; i < 5; i++) {
+      g.save();
+      g.rotate(i * Math.PI * 2 / 5 + Math.PI / 5);
+      petal(30, 215, 62, "rgba(255,244,214,.40)");
+      g.restore();
+    }
+    g.fillStyle = "rgba(255,246,220,.7)";
+    g.beginPath();
+    g.arc(0, 0, 36, 0, 6.2832);
+    g.fill();
+    g.strokeStyle = "rgba(40,12,48,.4)";
+    g.lineWidth = 3;
+    for (let i = 0; i < 40; i++) {
+      g.save();
+      g.rotate(i * Math.PI / 20);
+      g.beginPath();
+      g.moveTo(0, -450);
+      g.lineTo(0, -498);
+      g.stroke();
+      g.restore();
+    }
+  });
+  var bigPetalTex = () => tex2(256, 512, (g, w, h) => {
+    const path = () => {
+      g.beginPath();
+      g.moveTo(w / 2, 6);
+      g.bezierCurveTo(w * 0.98, h * 0.3, w * 0.98, h * 0.78, w / 2, h - 6);
+      g.bezierCurveTo(w * 0.02, h * 0.78, w * 0.02, h * 0.3, w / 2, 6);
+    };
+    const f = g.createLinearGradient(0, 0, 0, h);
+    f.addColorStop(0, "rgba(70,22,70,.10)");
+    f.addColorStop(0.55, "rgba(40,12,48,.5)");
+    f.addColorStop(1, "rgba(24,6,34,.9)");
+    path();
+    g.fillStyle = f;
+    g.fill();
+    const e = g.createLinearGradient(0, 0, 0, h);
+    e.addColorStop(0, "rgba(255,224,160,.65)");
+    e.addColorStop(1, "rgba(255,224,160,.12)");
+    g.strokeStyle = e;
+    g.lineWidth = 4;
+    g.stroke();
+    g.strokeStyle = "rgba(255,224,160,.18)";
+    g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(w / 2, 24);
+    g.lineTo(w / 2, h - 24);
+    g.stroke();
+  });
+  var floorTex = () => tex2(1024, 1024, (g, w) => {
+    const c = w / 2, s = w / (R2 * 2 - 0.4);
+    const r = g.createRadialGradient(c, c, 0, c, c, c);
+    r.addColorStop(0, "rgba(255,232,170,.6)");
+    r.addColorStop(0.25, "rgba(255,214,130,.28)");
+    r.addColorStop(0.6, "rgba(40,12,48,.12)");
+    r.addColorStop(1, "rgba(24,6,34,.8)");
+    g.fillStyle = r;
+    g.fillRect(0, 0, w, w);
+    g.translate(c, c);
+    g.strokeStyle = "rgba(255,240,200,.5)";
+    g.lineWidth = 3;
+    g.fillStyle = "rgba(255,246,220,.07)";
+    for (let i = 0; i < 5; i++) {
+      g.save();
+      g.rotate(i * Math.PI * 2 / 5);
+      g.beginPath();
+      g.moveTo(0, 0);
+      g.bezierCurveTo(1.5 * s, -1.2 * s, 1.5 * s, -3 * s, 0, -3.4 * s);
+      g.bezierCurveTo(-1.5 * s, -3 * s, -1.5 * s, -1.2 * s, 0, 0);
+      g.fill();
+      g.stroke();
+      g.restore();
+    }
+    g.lineWidth = 2;
+    g.strokeStyle = "rgba(255,240,200,.28)";
+    for (let i = 0; i < 60; i++) {
+      g.save();
+      g.rotate(i * Math.PI / 30);
+      g.beginPath();
+      g.moveTo(0, -4.3 * s);
+      g.lineTo(0, -(i % 5 ? 4.6 : 5) * s);
+      g.stroke();
+      g.restore();
+    }
+  });
+  var fallingPetalTex = () => tex2(64, 64, (g) => {
+    g.translate(32, 32);
+    g.rotate(-0.6);
+    const f = g.createRadialGradient(0, -4, 2, 0, 0, 24);
+    f.addColorStop(0, "rgba(255,252,240,1)");
+    f.addColorStop(1, "rgba(255,236,196,.9)");
+    g.fillStyle = f;
+    g.beginPath();
+    g.ellipse(0, 0, 11, 22, 0, 0, 6.2832);
+    g.fill();
+  });
+  function buildCoreAmbience(group) {
+    const soft = radial2([[0, "#fff"], [0.35, "#aaa"], [1, "#000"]]);
+    const cream = new THREE.Color(16773312);
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(R2 - 0.3, 48, 24), flat(domeTex(), 1, { side: THREE.BackSide }));
+    dome.renderOrder = -5;
+    group.add(dome);
+    const rosette = new THREE.Mesh(new THREE.PlaneGeometry(11.5, 11.5), flat(rosetteTex(), 0.6));
+    rosette.position.set(0, 1.2, -12.2);
+    rosette.renderOrder = -4;
+    group.add(rosette);
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(R2 - 0.2, 96), flat(floorTex(), 1));
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = FLOOR2 - 0.02;
+    floor.renderOrder = -4;
+    group.add(floor);
+    const petalMap = bigPetalTex();
+    const ring = (r, from, to, step, w, h2, cy, opacity, order) => {
+      const g = new THREE.Group();
+      for (let a = from; a <= to; a += step) {
+        const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h2), flat(petalMap, opacity, { side: THREE.DoubleSide }));
+        const [x, z] = polar2(deg(a), r);
+        m.position.set(x, cy, z);
+        m.rotation.y = -deg(a);
+        m.renderOrder = order;
+        g.add(m);
+      }
+      group.add(g);
+      return g;
+    };
+    const farPetals = ring(12.4, -120, 120, 20, 4.6, 11, 3.4, 0.5, -3);
+    const nearPetals = ring(10, -100, 100, 25, 3.4, 8, 2, 0.75, -2);
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: soft, color: 16769696, transparent: true, opacity: 0.34, blending: ADD2, depthWrite: false, fog: false }));
+    halo.position.set(0, 0.3, -2.2);
+    halo.scale.setScalar(11);
+    const saelHalo = new THREE.Sprite(new THREE.SpriteMaterial({ map: soft, color: cream, transparent: true, opacity: 0.22, blending: ADD2, depthWrite: false, fog: false }));
+    saelHalo.position.set(0, 0.5, -5.4);
+    saelHalo.scale.set(4.2, 6, 1);
+    group.add(halo, saelHalo);
+    const shaft = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.5, 2.8, 14, 40, 1, true),
+      glow2(vertical2([[0, "#fff"], [0.7, "#777"], [1, "#000"]]), 16770736, 0.09, { side: THREE.DoubleSide })
+    );
+    shaft.position.y = 5;
+    group.add(shaft);
+    const echoes = [0, 1, 2].map((i) => {
+      const m = new THREE.Mesh(
+        new THREE.RingGeometry(0.97, 1, 128),
+        new THREE.MeshBasicMaterial({ color: 16773312, side: THREE.DoubleSide, transparent: true, opacity: 0, depthWrite: false, fog: false })
+      );
+      m.rotation.x = -Math.PI / 2;
+      m.position.y = FLOOR2 + 0.02;
+      group.add(m);
+      return { m, p: i / 3 };
+    });
+    const seeds = IDS.map((id, i) => {
+      const col = new THREE.Color(CHARACTER_COLORS[id] || "#e0b25a");
+      const a0 = deg(-75 + i * 30);
+      const core = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), new THREE.MeshBasicMaterial({ color: col.clone().lerp(new THREE.Color(16777215), 0.35), fog: false }));
+      const halo2 = new THREE.Sprite(new THREE.SpriteMaterial({ map: soft, color: col, transparent: true, opacity: 0.3, blending: ADD2, depthWrite: false, fog: false }));
+      halo2.scale.setScalar(1.9);
+      const pool3 = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 2.4), glow2(soft, col, 0.22));
+      pool3.rotation.x = -Math.PI / 2;
+      group.add(core, halo2, pool3);
+      return { a0, core, halo2, pool: pool3, i };
+    });
+    const lineMat = new THREE.LineBasicMaterial({ color: 16769968, transparent: true, opacity: 0.28, fog: false });
+    const strandPts = [], bulbs = [[], []];
+    for (let i = 0; i < 11; i++) {
+      const a = deg(-85 + i * 17), r = 6.5 + i * 37 % 5 * 0.7, [x, z] = polar2(a, r);
+      const yb = 2.2 + i * 53 % 7 * 0.55;
+      strandPts.push(new THREE.Vector3(x, 10, z), new THREE.Vector3(x, yb, z));
+      bulbs[i % 2].push(new THREE.Vector3(x, yb, z));
+    }
+    group.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(strandPts), lineMat));
+    const bulbMats = bulbs.map((list) => {
+      const geo = new THREE.BufferGeometry().setFromPoints(list);
+      const m = new THREE.PointsMaterial({ size: 0.55, map: soft, color: 16765066, transparent: true, opacity: 1, blending: ADD2, depthWrite: false, fog: false });
+      const bloom = new THREE.PointsMaterial({ size: 1.9, map: soft, color: 16758896, transparent: true, opacity: 0.14, blending: ADD2, depthWrite: false, fog: false });
+      group.add(new THREE.Points(geo, m), new THREE.Points(geo, bloom));
+      return m;
+    });
+    const NP = 70, NM = 90;
+    const petals = Array.from({ length: NP }, () => ({ x: (Math.random() - 0.5) * 18, y: FLOOR2 + Math.random() * 10, z: -10 + Math.random() * 13, sp: 0.12 + Math.random() * 0.2, ph: Math.random() * 6.28 }));
+    const motes = Array.from({ length: NM }, () => ({ x: (Math.random() - 0.5) * 20, y: FLOOR2 + Math.random() * 10, z: -11 + Math.random() * 14, sp: 0.05 + Math.random() * 0.1, ph: Math.random() * 6.28 }));
+    const pp = new Float32Array(NP * 3), mp = new Float32Array(NM * 3);
+    const petalGeo = new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(pp, 3));
+    const moteGeo = new THREE.BufferGeometry().setAttribute("position", new THREE.BufferAttribute(mp, 3));
+    const petalPts = new THREE.Points(petalGeo, new THREE.PointsMaterial({ size: 0.3, map: fallingPetalTex(), color: 16773584, transparent: true, opacity: 0.8, depthWrite: false, fog: false }));
+    const motePts = new THREE.Points(moteGeo, new THREE.PointsMaterial({ size: 0.1, map: soft, color: 16773324, transparent: true, opacity: 0.8, blending: ADD2, depthWrite: false, fog: false }));
+    petalPts.frustumCulled = motePts.frustumCulled = false;
+    group.add(petalPts, motePts);
+    const place = (t, dt, k2) => {
+      petals.forEach((p, i) => {
+        p.y -= dt * p.sp * (1 - 2.4 * k2);
+        if (p.y < FLOOR2 + 0.1) p.y = 8;
+        else if (p.y > 8.2) p.y = FLOOR2 + 0.2;
+        pp[i * 3] = p.x + Math.sin(t * 0.5 + p.ph) * 0.8;
+        pp[i * 3 + 1] = p.y;
+        pp[i * 3 + 2] = p.z + Math.cos(t * 0.4 + p.ph) * 0.6;
+      });
+      motes.forEach((m, i) => {
+        m.y += dt * m.sp * (1 + 2 * k2);
+        if (m.y > 8.5) m.y = FLOOR2 + 0.2;
+        mp[i * 3] = m.x + Math.sin(t * 0.3 + m.ph) * 0.5;
+        mp[i * 3 + 1] = m.y;
+        mp[i * 3 + 2] = m.z;
+      });
+      petalGeo.attributes.position.needsUpdate = true;
+      moteGeo.attributes.position.needsUpdate = true;
+    };
+    place(0, 0, 0);
+    seeds.forEach((s) => {
+      const [x, z] = polar2(s.a0, 5.8);
+      s.core.position.set(x, -0.35, z);
+      s.halo2.position.copy(s.core.position);
+      s.pool.position.set(x, FLOOR2 + 0.03, z);
+    });
+    let k = 0, h = 0;
+    function animate2(t, dt, hover) {
+      if (RM) return;
+      const finale = S.p === 3 && S.step === 2;
+      k += ((finale ? 1 : 0) - k) * Math.min(1, dt * 0.8);
+      h += ((hover ? 1 : 0) - h) * Math.min(1, dt * 4);
+      halo.material.opacity = 0.34 + 0.05 * Math.sin(t * 1.2) + 0.22 * k + 0.1 * h;
+      halo.scale.setScalar(11 + 4 * k + 0.6 * h);
+      saelHalo.material.opacity = 0.2 + 0.05 * Math.sin(t * 0.8);
+      shaft.material.opacity = 0.09 + 0.015 * Math.sin(t * 0.6) + 0.06 * k + 0.03 * h;
+      rosette.rotation.z += dt * 0.015 * (1 + 3 * k);
+      farPetals.rotation.y = Math.sin(t * 0.09) * 0.03;
+      nearPetals.rotation.y = Math.sin(t * 0.11 + 1) * -0.03;
+      echoes.forEach((e) => {
+        e.p = (e.p + dt * (1 + 0.9 * h + 1.2 * k) / 6.5) % 1;
+        e.m.scale.setScalar(0.8 + e.p * 12);
+        e.m.material.opacity = Math.pow(1 - e.p, 1.6) * (0.5 + 0.2 * k);
+      });
+      seeds.forEach((s) => {
+        const [x, z] = polar2(s.a0 + Math.sin(t * 0.12 + s.i) * 0.22, 5.8);
+        const y = -0.35 + Math.sin(t * 0.9 + s.i * 1.1) * 0.14;
+        s.core.position.set(x, y, z);
+        s.halo2.position.set(x, y, z);
+        s.pool.position.set(x, FLOOR2 + 0.03, z);
+        s.halo2.material.opacity = 0.28 + 0.08 * Math.sin(t * 1.4 + s.i) + 0.3 * k;
+        s.pool.material.opacity = 0.22 + 0.2 * k;
+      });
+      bulbMats[0].opacity = 0.75 + 0.25 * Math.sin(t * 2.1);
+      bulbMats[1].opacity = 0.75 + 0.25 * Math.sin(t * 2.1 + Math.PI);
+      place(t, dt, k);
+    }
+    return { animate: animate2 };
   }
 
   // js/world/coreRoom.js
@@ -626,8 +1244,9 @@
     sael.add(body, head);
     sael.position.set(0, -0.2, -5);
     group.add(sael);
+    const ambience = buildCoreAmbience(group);
     const decor = group.children.filter((c) => c !== flower.g && c !== sael);
-    return { group, flower, sael, decor };
+    return { group, flower, sael, decor, ambient: ambience.animate };
   }
 
   // js/world/index.js
@@ -778,7 +1397,7 @@
       cam.position.copy(galPos());
       look.set(cam.position.x + Math.sin(W.yaw) * 10, 0.2 - W.my * 1.5, cam.position.z - Math.cos(W.yaw) * 10);
     } else if (W.free === "core") {
-      cam.position.set(CORE.x + Math.sin(t * 0.2) * 1.2, 0.5, CORE.z + 6);
+      cam.position.set(CORE.x + Math.sin(t * 0.2) * 1.2 + W.mx * 0.5, 0.5 - W.my * 0.25, CORE.z + 6);
       look.set(CORE.x, 0.2, CORE.z);
     }
   }
@@ -874,7 +1493,9 @@
     gallery.tess.rotation.x = t * 0.05;
     gallery.tess.rotation.y = t * 0.07;
     animateShowcases(dt, t, S.glitch);
+    gallery.ambient(t, dt);
     coreRoom.sael.position.y = -0.2 + Math.sin(t * 0.6) * 0.1;
+    if (S.p === 3) coreRoom.ambient(t, dt, S.step === 0 && W.hov);
     updateFlowerImage();
     if (W.visible) renderer.render(scene, cam);
     cam.position.x = px;
@@ -1300,7 +1921,9 @@
     S.run = {
       culprit: pick(IDS),
       q: pick(MYST),
-      order: Math.random() < 0.5 ? shuffle(IDS) : null,
+      /* Primer ciclo: los primeros ORDER_FIXED resonantes en orden fijo (historia); los demás, libres.
+         Ciclos siguientes: como antes (orden aleatorio parcial o libre). */
+      order: S.cycle === 0 ? IDS.slice(0, ORDER_FIXED) : Math.random() < 0.5 ? shuffle(IDS).slice(0, ORDER_FIXED) : null,
       shift: pick([0.84, 0.94, 1, 1.12, 1.26]),
       secret: pick([1, 3, 5]),
       secretFound: false,
@@ -1322,13 +1945,13 @@
     $("#jb").textContent = "Pistas (" + S.clues.length + ")";
     const header = '<p class="m"><span>Cuaderno del caso</span><button id="jx" style="padding:2px 8px">Cerrar</button></p><p>' + r.q + "</p>";
     const order = r.order ? '<p class="m" style="display:block">Orden de la carta: ' + r.order.map((i) => RES[i].epi.toLowerCase()).join(" \u2192 ") + "</p>" : "";
-    const clues = S.clues.length ? S.clues.map((c) => '<p style="margin:6px 0">' + c + "</p>").join("") : '<p class="m" style="display:block">Sin pistas todav\xEDa. Libera a los resonantes y busca bajo las vitrinas sin resonante.</p>';
+    const clues = S.clues.length ? S.clues.map((c) => '<p style="margin:6px 0">' + c + "</p>").join("") : '<p class="m" style="display:block">Sin pistas todav\xEDa. Libera a los resonantes para reunir sus testimonios.</p>';
     $("#journal").innerHTML = header + order + clues;
     $("#jx").addEventListener("click", () => show("#journal", false));
   }
 
   // js/flow/dossier.js
-  var exploreHint = () => say(`Resonantes liberados: ${S.freed.size}/3 \xB7 abre cada vitrina y escucha su historia completa \xB7 gira con los bordes, \u2190 \u2192 o los botones`);
+  var exploreHint = () => say(`Resonantes liberados: ${S.freed.size}/${IDS.length} \xB7 abre cada vitrina y escucha su historia completa \xB7 gira con los bordes, \u2190 \u2192 o los botones`);
   var durOf = (id) => Aud.buf[id] ? Aud.buf[id].duration : RES[id].dur;
   function openEmptyShowcase(u) {
     const r = S.run;
@@ -1387,9 +2010,9 @@
     $("#dx").textContent = "Cerrar";
     $("#dp").style.visibility = "";
     $("#dbar").disabled = true;
-    S.moodT = 0.2 + 0.12 * S.freed.size;
+    S.moodT = 0.2 + 0.36 * S.freed.size / IDS.length;
     exploreHint();
-    if (S.freed.size === 3) {
+    if (S.freed.size === IDS.length) {
       $("#adv").textContent = "Seguir el pasillo hacia el n\xFAcleo";
       show("#adv");
     }
@@ -1463,7 +2086,7 @@
     S.dv = null;
     W.freeVit(id);
     Aud.chime();
-    S.moodT = 0.2 + 0.12 * S.freed.size;
+    S.moodT = 0.2 + 0.36 * S.freed.size / IDS.length;
     const damaged = S.lost.has(id);
     const testimony = damaged ? "el registro est\xE1 da\xF1ado y solo se entiende ruido." : CLUES[id][S.run.culprit];
     addClue(RES[id].name + ": \xAB" + testimony + "\xBB");
@@ -1506,7 +2129,10 @@
     $("#lt0").textContent = OPEN[S.cycle % OPEN.length];
     const r = S.run, epi = (i) => RES[i].epi.toLowerCase();
     let t = "Una pregunta te espera: " + r.q;
-    if (r.order) t += " Libera primero a " + epi(r.order[0]) + ", despu\xE9s a " + epi(r.order[1]) + " y al final a " + epi(r.order[2]) + ".";
+    if (r.order) {
+      t += " Libera primero, en este orden: " + r.order.map(epi).join(" \u2192 ") + ".";
+      if (r.order.length < IDS.length) t += " Los dem\xE1s, en el orden que prefieras.";
+    }
     if (S.lost.size) t += " Cuidado: " + [...S.lost].map((i) => RES[i].name).join(" y ") + " qued\xF3 da\xF1ado tras tu \xFAltima visita.";
     $("#lt3").textContent = t;
   }

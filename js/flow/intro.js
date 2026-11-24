@@ -1,7 +1,7 @@
 /* VISTA 1 (Detonante): la flor, la carta y el cruce de la puerta. */
 import { $ } from '../utils.js';
 import { S } from '../state.js';
-import { RES, OPEN } from '../data.js';
+import { IDS, RES, OPEN } from '../data.js';
 import { Aud } from '../audio/index.js';
 import { W } from '../world/index.js';
 import { say, show, setPhase } from './ui.js';
@@ -17,7 +17,10 @@ export function letterText() {
 
   const r = S.run, epi = i => RES[i].epi.toLowerCase();
   let t = 'Una pregunta te espera: ' + r.q;
-  if (r.order) t += ' Libera primero a ' + epi(r.order[0]) + ', después a ' + epi(r.order[1]) + ' y al final a ' + epi(r.order[2]) + '.';
+  if (r.order) {
+    t += ' Libera primero, en este orden: ' + r.order.map(epi).join(' → ') + '.';
+    if (r.order.length < IDS.length) t += ' Los demás, en el orden que prefieras.';
+  }
   if (S.lost.size) t += ' Cuidado: ' + [...S.lost].map(i => RES[i].name).join(' y ') + ' quedó dañado tras tu última visita.';
   $('#lt3').textContent = t;
 }

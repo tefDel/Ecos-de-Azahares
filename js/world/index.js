@@ -163,7 +163,7 @@ function updateCamera(dt, t) {
     cam.position.copy(galPos());
     look.set(cam.position.x + Math.sin(W.yaw) * 10, .2 - W.my * 1.5, cam.position.z - Math.cos(W.yaw) * 10);
   } else if (W.free === 'core') {
-    cam.position.set(CORE.x + Math.sin(t * .2) * 1.2, .5, CORE.z + 6);
+    cam.position.set(CORE.x + Math.sin(t * .2) * 1.2 + W.mx * .5, .5 - W.my * .25, CORE.z + 6);
     look.set(CORE.x, .2, CORE.z);
   }
 }
@@ -271,7 +271,9 @@ function update(dt, t) {
   animateDoors(dt);
   gallery.tess.rotation.x = t * .05; gallery.tess.rotation.y = t * .07;
   animateShowcases(dt, t, S.glitch);
+  gallery.ambient(t, dt);
   coreRoom.sael.position.y = -.2 + Math.sin(t * .6) * .1;
+  if (S.p === 3) coreRoom.ambient(t, dt, S.step === 0 && W.hov);
 
   updateFlowerImage();
   if (W.visible) renderer.render(scene, cam); // fuera de pantalla no se dibuja

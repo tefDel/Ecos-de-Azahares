@@ -1,15 +1,15 @@
-/* VISTA 2 (Teseracto): vitrinas y expedientes. Hay que abrir y escuchar los 3.
+/* VISTA 2 (Teseracto): vitrinas y expedientes. Hay que abrir y escuchar los 6.
    Podcast: la liberación exige escuchar la historia completa (el progreso se conserva si pausas o cierras). */
 import { $, fmt } from '../utils.js';
 import { S } from '../state.js';
-import { RES, CLUES, CHARACTER_COLORS } from '../data.js';
+import { IDS, RES, CLUES, CHARACTER_COLORS } from '../data.js';
 import { Aud } from '../audio/index.js';
 import { W } from '../world/index.js';
 import { say, show } from './ui.js';
 import { addClue } from './run.js';
 
 export const exploreHint = () =>
-  say(`Resonantes liberados: ${S.freed.size}/3 · abre cada vitrina y escucha su historia completa · gira con los bordes, ← → o los botones`);
+  say(`Resonantes liberados: ${S.freed.size}/${IDS.length} · abre cada vitrina y escucha su historia completa · gira con los bordes, ← → o los botones`);
 
 /* Duración que hay que escuchar: la del audio real, o la de demostración */
 export const durOf = id => Aud.buf[id] ? Aud.buf[id].duration : RES[id].dur;
@@ -71,9 +71,9 @@ export function closeDoss() {
   $('#dx').textContent = 'Cerrar';
   $('#dp').style.visibility = '';
   $('#dbar').disabled = true;
-  S.moodT = .2 + .12 * S.freed.size;
+  S.moodT = .2 + .36 * S.freed.size / IDS.length;
   exploreHint();
-  if (S.freed.size === 3) {
+  if (S.freed.size === IDS.length) {
     $('#adv').textContent = 'Seguir el pasillo hacia el núcleo';
     show('#adv');
   }
@@ -154,7 +154,7 @@ export function liberate(id) {
   if (S.dv) S.dv.stop();
   S.dv = null;
   W.freeVit(id); Aud.chime();
-  S.moodT = .2 + .12 * S.freed.size;
+  S.moodT = .2 + .36 * S.freed.size / IDS.length;
 
   const damaged = S.lost.has(id);
   const testimony = damaged ? 'el registro está dañado y solo se entiende ruido.' : CLUES[id][S.run.culprit];

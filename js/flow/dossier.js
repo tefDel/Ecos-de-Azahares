@@ -7,6 +7,8 @@ import { Aud } from '../audio/index.js';
 import { W } from '../world/index.js';
 import { say, show } from './ui.js';
 import { addClue } from './run.js';
+import { audioReady } from './studio.js';
+import { CONFIG } from '../config.js';
 
 export const exploreHint = () =>
   say(`Resonantes liberados: ${S.freed.size}/${IDS.length} · abre cada vitrina y escucha su historia completa · gira con los bordes, ← → o los botones`);
@@ -79,15 +81,80 @@ export function closeDoss() {
   }
 }
 
-/* Inicia (o reanuda) la voz del expediente desde donde se quedó */
-export function startVoice() {
-  const id = S.dossier;
-  if (S.dv) S.dv.stop();
-  S.dv = Aud.voice(id, {
-    vol: .6, orbit: true, buf: Aud.buf[id], offset: S.heard[id], shift: S.run.shift,
-    corr: () => S.lost.has(id) ? .4 : 0
+/* Analizador de mentira para la onda cuando la voz suena por <audio> (sin Web Audio) */
+function softWave(el) {
+  return {
+    fftSize: 256,
+    getByteTimeDomainData(d) {
+      const t = performance.now() / 1000, amp = el.paused || el.muted || !el.volume ? 0 : 30 + Math.sin(t * 2.3) * 14;
+      for (let i = 0; i < d.length; i++) d[i] = 128 + amp * Math.sin(i * .21 + t * 9) * Math.sin(i * .043 + t * 1.7);
+    }
+  };
+}
+
+/* Respaldo: reproducir la voz real con un <audio> (p. ej. al abrir el HTML como archivo,
+   donde el navegador no deja leer el audio para Web Audio). Resuelve cuando ya suena. */
+function mediaVoice(id, url, offset) {
+  const el = new Audio(url);
+  el.preload = 'auto';
+  let timer = 0, stopped = false, gain = .9;
+  // sigue al deslizador de volumen del juego y al botón de silencio
+  const apply = () => { el.volume = Math.max(0, Math.min(1, gain * Aud.level())); };
+  apply();
+  const ctrl = {
+    an: softWave(el),
+    vol(v) { gain = v; apply(); },
+    stop() { stopped = true; clearInterval(timer); el.pause(); el.removeAttribute('src'); el.load(); }
+  };
+  return new Promise((ok, no) => {
+    el.addEventListener('loadedmetadata', () => {
+      if (Number.isFinite(el.duration)) RES[id].dur = el.duration;
+      el.currentTime = Math.min(offset || 0, Math.max(0, el.duration - .25));
+    }, { once: true });
+    el.addEventListener('playing', () => ok(ctrl), { once: true });
+    el.addEventListener('error', () => no(el.error), { once: true });
+    el.play().catch(no);
+    // registro dañado: cortes como en la versión con Web Audio
+    timer = setInterval(() => {
+      if (stopped) return;
+      apply();
+      el.muted = S.lost.has(id) && Math.random() < .34;
+    }, 80);
   });
-  $('#dp').textContent = 'Pausar';
+}
+
+/* Inicia (o reanuda) la voz del expediente desde donde se quedó.
+   Siempre intenta el audio real del personaje: si aún se está descargando,
+   espera; si Web Audio no puede leerlo, lo reproduce con <audio>; solo si el
+   archivo falta por completo usa la voz sintetizada. */
+let voiceReq = 0;
+export function startVoice() {
+  const id = S.dossier, req = ++voiceReq;
+  if (S.dv) S.dv.stop();
+  S.dv = null;
+  const go = buf => {
+    if (req !== voiceReq || S.dossier !== id || !S.playing) return;
+    S.dv = Aud.voice(id, {
+      vol: .6, orbit: true, buf, offset: S.heard[id], shift: S.run.shift,
+      corr: () => S.lost.has(id) ? .4 : 0
+    });
+    $('#dp').textContent = 'Pausar';
+    updDoss();
+  };
+  if (Aud.buf[id]) { go(Aud.buf[id]); return; }
+
+  $('#dp').textContent = 'Cargando voz…';
+  audioReady(id).then(buf => {
+    if (buf) return go(buf);
+    const url = CONFIG.audio[id];
+    if (!url) return go(null);
+    return mediaVoice(id, url, S.heard[id]).then(v => {
+      if (req !== voiceReq || S.dossier !== id || !S.playing) { v.stop(); return; }
+      S.dv = v;
+      $('#dp').textContent = 'Pausar';
+      updDoss();
+    }).catch(e => { console.warn('No se pudo reproducir la voz de', id, e); go(null); });
+  });
 }
 
 /* Botón Pausar / Reanudar */

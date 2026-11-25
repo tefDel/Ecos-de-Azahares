@@ -274,12 +274,15 @@ body.playing.ingame #game-volume-control {
     transform: translateY(0)
 }
 
-/* ---- Juego: horizontal, indicador AL LADO del icono, panel hacia abajo ---- */
+/* ---- Juego: horizontal. El deslizador sale en la MISMA fila que el icono
+   y el porcentaje (a su izquierda, misma altura), por encima de todo ---- */
 #game-volume-control {
-    z-index: 1
+    z-index: 30
 }
 
 .volume-horizontal .volume-head {
+    position: relative;
+    z-index: 1;
     padding: 3px 4px 3px 3px;
     gap: 2px
 }
@@ -289,24 +292,27 @@ body.playing.ingame #game-volume-control {
 }
 
 .volume-horizontal .volume-panel {
-    top: calc(100% + 8px);
-    right: 0;
+    z-index: 2;
+    top: 0;
+    bottom: 0;
+    right: calc(100% + 8px);
     width: var(--vol-game-w);
-    height: 46px;
-    padding: 0 20px;
-    transform: translateY(-8px)
+    height: auto;
+    padding: 0 18px;
+    transform: translateX(10px)
 }
 
+/* puente invisible hacia la cabeza, a la derecha */
 .volume-horizontal .volume-panel::after {
-    left: 0;
-    right: 0;
-    bottom: 100%;
-    height: 10px
+    top: 0;
+    bottom: 0;
+    left: 100%;
+    width: 10px
 }
 
 .volume-horizontal:hover .volume-panel,
 .volume-horizontal.open .volume-panel {
-    transform: translateY(0)
+    transform: translateX(0)
 }
 
 /* ---- Deslizador ---- */
@@ -460,8 +466,7 @@ body.playing.ingame #game-volume-control {
     }
 
     .volume-horizontal .volume-panel {
-        height: 44px;
-        padding: 0 18px
+        padding: 0 14px
     }
 
     .volume-control input[type=range] {

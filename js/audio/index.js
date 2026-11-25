@@ -24,6 +24,9 @@ export const Aud = {
     syncMasterVolume();
   },
 
+  /* Volumen efectivo del juego (0 si está silenciado): para audios fuera de Web Audio */
+  level() { return muted ? 0 : volume; },
+
   /* Decodifica un audio subido y lo guarda (se pueden subir varios por clave) */
   async load(k, data) {
     init();

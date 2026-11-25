@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ecos",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-c", "import http.server as h\nclass H(h.SimpleHTTPRequestHandler):\n    extensions_map = {**h.SimpleHTTPRequestHandler.extensions_map, '.js': 'text/javascript'}\n    def end_headers(self):\n        self.send_header('Cache-Control', 'no-store')\n        super().end_headers()\nh.test(HandlerClass=H, port=8011, bind='127.0.0.1')"],
+      "port": 8011
+    }
+  ]
+}

@@ -415,6 +415,8 @@ export function initSite() {
   $('#nav .logo').title = 'Volver a la portada';
   $('#nav .logo').addEventListener('click', e => {
     e.preventDefault();
+    /* El punto del logotipo guarda una nota: abrirla sin recargar la página */
+    if (e.target.closest('[data-note]')) return;
     history.replaceState(null, '', location.pathname);
     scrollTo(0, 0);
     location.reload();

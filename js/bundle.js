@@ -1878,6 +1878,9 @@
       volume = Math.max(0, Math.min(1, Number(value)));
       syncMasterVolume();
     },
+    level() {
+      return muted ? 0 : volume;
+    },
     /* Decodifica un audio subido y lo guarda (se pueden subir varios por clave) */
     async load(k, data) {
       init2();
@@ -2017,18 +2020,92 @@
       show("#adv");
     }
   }
-  function startVoice() {
-    const id = S.dossier;
-    if (S.dv) S.dv.stop();
-    S.dv = Aud.voice(id, {
-      vol: 0.6,
-      orbit: true,
-      buf: Aud.buf[id],
-      offset: S.heard[id],
-      shift: S.run.shift,
-      corr: () => S.lost.has(id) ? 0.4 : 0
+  function softWave(el) {
+    return {
+      fftSize: 256,
+      getByteTimeDomainData(d) {
+        const t = performance.now() / 1e3, amp = el.paused || el.muted || !el.volume ? 0 : 30 + Math.sin(t * 2.3) * 14;
+        for (let i = 0; i < d.length; i++) d[i] = 128 + amp * Math.sin(i * 0.21 + t * 9) * Math.sin(i * 0.043 + t * 1.7);
+      }
+    };
+  }
+  function mediaVoice(id, url, offset) {
+    const el = new Audio(url);
+    el.preload = "auto";
+    let timer = 0, stopped = false, gain = 0.9;
+    const apply = () => {
+      el.volume = Math.max(0, Math.min(1, gain * Aud.level()));
+    };
+    apply();
+    const ctrl = {
+      an: softWave(el),
+      vol(v) {
+        gain = v;
+        apply();
+      },
+      stop() {
+        stopped = true;
+        clearInterval(timer);
+        el.pause();
+        el.removeAttribute("src");
+        el.load();
+      }
+    };
+    return new Promise((ok, no) => {
+      el.addEventListener("loadedmetadata", () => {
+        if (Number.isFinite(el.duration)) RES[id].dur = el.duration;
+        el.currentTime = Math.min(offset || 0, Math.max(0, el.duration - 0.25));
+      }, { once: true });
+      el.addEventListener("playing", () => ok(ctrl), { once: true });
+      el.addEventListener("error", () => no(el.error), { once: true });
+      el.play().catch(no);
+      timer = setInterval(() => {
+        if (stopped) return;
+        apply();
+        el.muted = S.lost.has(id) && Math.random() < 0.34;
+      }, 80);
     });
-    $("#dp").textContent = "Pausar";
+  }
+  var voiceReq = 0;
+  function startVoice() {
+    const id = S.dossier, req = ++voiceReq;
+    if (S.dv) S.dv.stop();
+    S.dv = null;
+    const go = (buf2) => {
+      if (req !== voiceReq || S.dossier !== id || !S.playing) return;
+      S.dv = Aud.voice(id, {
+        vol: 0.6,
+        orbit: true,
+        buf: buf2,
+        offset: S.heard[id],
+        shift: S.run.shift,
+        corr: () => S.lost.has(id) ? 0.4 : 0
+      });
+      $("#dp").textContent = "Pausar";
+      updDoss();
+    };
+    if (Aud.buf[id]) {
+      go(Aud.buf[id]);
+      return;
+    }
+    $("#dp").textContent = "Cargando voz…";
+    audioReady(id).then((buf2) => {
+      if (buf2) return go(buf2);
+      const url = CONFIG.audio[id];
+      if (!url) return go(null);
+      return mediaVoice(id, url, S.heard[id]).then((v) => {
+        if (req !== voiceReq || S.dossier !== id || !S.playing) {
+          v.stop();
+          return;
+        }
+        S.dv = v;
+        $("#dp").textContent = "Pausar";
+        updDoss();
+      }).catch((e) => {
+        console.warn("No se pudo reproducir la voz de", id, e);
+        go(null);
+      });
+    });
   }
   function togglePlayback() {
     if (!S.dossier) return;
@@ -2097,25 +2174,57 @@
   }
 
   // js/flow/studio.js
-  async function loadSlot(type, key, data) {
-    if (type === "a") {
-      await Aud.load(key, data);
-      if (RES[key]) RES[key].dur = Aud.buf[key].duration;
-    } else {
-      await new Promise((ok, no) => new THREE.GLTFLoader().parse(data, "", (g) => {
-        W.setEnv(key, g.scene);
-        ok();
-      }, no));
-    }
+  var rawAudio = {};
+  var readyAudio = {};
+  function fetchBuf(url, tries = 3) {
+    return fetch(url).then((r) => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.arrayBuffer();
+    }).catch((e) => tries > 1 ? new Promise((ok) => setTimeout(ok, 700)).then(() => fetchBuf(url, tries - 1)) : Promise.reject(e));
+  }
+  function prefetchAudio(keys) {
+    keys.forEach((k) => {
+      const u = CONFIG.audio[k];
+      if (u && !rawAudio[k]) rawAudio[k] = fetchBuf(u).catch((e) => {
+        console.warn("No se pudo descargar", u, e);
+        return null;
+      });
+    });
+  }
+  var earlyAudio = () => setTimeout(() => prefetchAudio(IDS), 1200);
+  if (document.readyState === "complete") earlyAudio();
+  else addEventListener("load", earlyAudio, { once: true });
+  function audioReady(k) {
+    return readyAudio[k] || Promise.resolve(Aud.buf[k] || null);
+  }
+  function decodeAudio(k) {
+    if (readyAudio[k]) return readyAudio[k];
+    prefetchAudio([k]);
+    readyAudio[k] = (rawAudio[k] || Promise.resolve(null)).then(async (data) => {
+      if (!data) return null;
+      if (Aud.buf[k]) return Aud.buf[k];
+      const b = await Aud.load(k, data);
+      if (RES[k]) RES[k].dur = b.duration;
+      return b;
+    }).catch((e) => {
+      console.warn("No se pudo decodificar", CONFIG.audio[k], e);
+      return null;
+    });
+    return readyAudio[k];
   }
   async function loadConfig() {
-    const jobs = [
-      ...Object.entries(CONFIG.audio).map(([k, u]) => ["a", k, u]),
-      ...Object.entries(CONFIG.models).map(([k, u]) => ["m", k, u])
-    ].filter((j) => j[2]);
-    for (const [t, k, u] of jobs) {
+    const keys = Object.keys(CONFIG.audio).filter((k) => CONFIG.audio[k]);
+    keys.sort((a, b) => (IDS.includes(b) ? 1 : 0) - (IDS.includes(a) ? 1 : 0));
+    prefetchAudio(keys);
+    await Promise.all(keys.map(decodeAudio));
+    for (const [k, u] of Object.entries(CONFIG.models)) {
+      if (!u) continue;
       try {
-        await loadSlot(t, k, await (await fetch(u)).arrayBuffer());
+        const data = await (await fetch(u)).arrayBuffer();
+        await new Promise((ok, no) => new THREE.GLTFLoader().parse(data, "", (g) => {
+          W.setEnv(k, g.scene);
+          ok();
+        }, no));
       } catch (e) {
         console.warn("No se pudo cargar", u);
       }
@@ -3330,6 +3439,7 @@ body.memoria .cc .cf{animation:mmCard 4.5s ease-in-out infinite}
     $("#nav .logo").title = "Volver a la portada";
     $("#nav .logo").addEventListener("click", (e) => {
       e.preventDefault();
+      if (e.target.closest("[data-note]")) return;
       history.replaceState(null, "", location.pathname);
       scrollTo(0, 0);
       location.reload();
